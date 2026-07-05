@@ -30,7 +30,7 @@ export default function RealtorPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <RealtorHeader userName={userName} />
+      <RealtorHeader userName={userName} roleId={role?.id} />
       <RealtorHero />
 
       {/* Homes for you */}
@@ -89,7 +89,7 @@ export default function RealtorPage({
         <div className="flex flex-col items-center justify-between gap-6 overflow-hidden rounded-2xl bg-realtor-500 px-8 py-10 text-center sm:flex-row sm:text-left">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              Tải ứng dụng realtor.com®
+              Tải ứng dụng Q-BROKER
             </h2>
             <p className="mt-2 max-w-lg text-realtor-50/90">
               Tìm nhà mọi lúc mọi nơi, nhận thông báo tức thì khi có tin mới và
