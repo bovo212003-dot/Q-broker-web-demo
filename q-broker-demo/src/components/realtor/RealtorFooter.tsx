@@ -4,20 +4,16 @@ import { RealtorLogo } from "./RealtorLogo";
 
 const COLUMNS: { title: string; links: string[] }[] = [
   {
-    title: "Mua",
-    links: ["Nhà đang bán", "Nhà thanh lý", "Dự án mới", "Nhà mở bán", "Vừa bán gần đây"],
+    title: "Đào tạo",
+    links: ["Khóa học môi giới", "Luyện thi chứng chỉ", "Chuyên đề pháp lý", "Webinar & hội thảo", "Tài liệu miễn phí"],
   },
   {
-    title: "Thuê",
-    links: ["Căn hộ cho thuê", "Nhà nguyên căn", "Tất cả tin cho thuê", "Tính tiền thuê", "Công cụ cho chủ nhà"],
+    title: "Chia sẻ giỏ hàng",
+    links: ["Giỏ hàng chung", "Đăng sản phẩm", "Hợp tác phân phối", "Chính sách hoa hồng", "Quản lý giỏ hàng"],
   },
   {
-    title: "Bán",
-    links: ["Bảng điều khiển Nhà của tôi", "Ước tính giá nhà", "Đăng bán nhà", "Tìm môi giới", "Hướng dẫn người bán"],
-  },
-  {
-    title: "Vay mua nhà",
-    links: ["Duyệt trước hồ sơ", "Lãi suất vay", "Lãi suất tái cấp vốn", "Tính khả năng chi trả", "Cẩm nang vay"],
+    title: "Cần thuê - Mua",
+    links: ["Đăng nhu cầu thuê", "Đăng nhu cầu mua", "Tìm nhà cho thuê", "Kết nối môi giới", "Định giá tài sản"],
   },
   {
     title: "Công ty",
@@ -29,7 +25,7 @@ export function RealtorFooter() {
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-4">
           {COLUMNS.map((col) => (
             <div key={col.title}>
               <h3 className="text-sm font-bold text-realtor-ink">{col.title}</h3>

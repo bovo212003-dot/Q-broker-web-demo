@@ -3,7 +3,8 @@ import { Icon } from "@/components/ui/Icon";
 import { RealtorHeader } from "@/components/realtor/RealtorHeader";
 import { RealtorHero } from "@/components/realtor/RealtorHero";
 import { RealtorFooter } from "@/components/realtor/RealtorFooter";
-import { PropertyCard } from "@/components/realtor/PropertyCard";
+import { RealtorListings } from "@/components/realtor/RealtorListings";
+import { AffiliateBanner } from "@/components/realtor/AffiliateBanner";
 import { LISTINGS, POPULAR_CITIES } from "@/data/realtorListings";
 import { ROLES } from "@/config/roles";
 import { RoleId } from "@/types";
@@ -33,56 +34,15 @@ export default function RealtorPage({
       <RealtorHeader userName={userName} roleId={role?.id} />
       <RealtorHero />
 
-      {/* Homes for you */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-realtor-ink">
-              Bất động sản cho bạn
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Dựa trên các tin bạn vừa xem gần đây
-            </p>
-          </div>
-          <a
-            href="#"
-            className="hidden items-center gap-1 text-sm font-semibold text-realtor-500 hover:text-realtor-600 sm:inline-flex"
-          >
-            Xem thêm
-            <Icon name="ArrowRight" className="h-4 w-4" />
-          </a>
-        </div>
+      {/* Sản phẩm + bộ lọc theo khu vực */}
+      <RealtorListings listings={LISTINGS} regions={POPULAR_CITIES} />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {LISTINGS.map((l) => (
-            <PropertyCard key={l.id} listing={l} />
-          ))}
-        </div>
-      </section>
-
-      {/* Explore homes theo thành phố */}
-      <section className="border-y border-slate-100 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-          <h2 className="text-2xl font-bold text-realtor-ink">
-            Khám phá bất động sản theo khu vực
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Các tỉnh thành phổ biến để mua, thuê và bán
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {POPULAR_CITIES.map((city) => (
-              <a
-                key={city}
-                href="#"
-                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-realtor-200 hover:text-realtor-500"
-              >
-                Nhà tại {city}
-                <Icon name="ChevronRight" className="h-4 w-4 text-slate-400" />
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Banner chương trình đối tác affiliate (giữ ?role= khi điều hướng) */}
+      <AffiliateBanner
+        href={
+          role ? `/realtor/affiliate?role=${role.id}` : "/realtor/affiliate"
+        }
+      />
 
       {/* CTA tải app */}
       <section className="mx-auto max-w-7xl px-4 py-14 lg:px-8">

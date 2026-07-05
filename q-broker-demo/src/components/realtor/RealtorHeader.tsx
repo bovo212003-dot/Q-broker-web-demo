@@ -14,9 +14,9 @@ const NAV = [
   { label: "Đào tạo", href: "#" },
   { label: "Chia sẻ giỏ hàng", href: "#" },
   { label: "Cần thuê - Mua", href: "#" },
-  { label: "Live stream đấu giá", href: "#" },
-  { label: "Afilate", href: "#" },
-  { label: "Tin tức", href: "#" },
+  { label: "Live stream đấu giá", href: "/realtor/livestream" },
+  { label: "Afilate", href: "/realtor/affiliate" },
+  { label: "Tin tức", href: "/realtor/tin-tuc" },
 ];
 
 // Các mục trong "Thêm ...".
@@ -36,6 +36,13 @@ const MORE: MoreItem[] = [
   { label: "Khách hàng (CRM)", href: "#", icon: "Users", roles: ["broker"] },
 ];
 
+// Menu tài khoản (bấm vào tên/avatar). "Đăng xuất" xử lý riêng bên dưới.
+const ACCOUNT = [
+  { label: "Hồ sơ cá nhân", icon: "UserRound" },
+  { label: "Ví", icon: "Wallet" },
+  { label: "Cài đặt", icon: "Settings" },
+];
+
 // userName: tên hiển thị của người đã đăng nhập (hiện tạm là tên role,
 // sau này thay bằng tên thật). Nếu không truyền -> hiện nút "Đăng nhập"
 // như cũ (dùng cho khách vãng lai).
@@ -48,11 +55,17 @@ export function RealtorHeader({
 }) {
   const [open, setOpen] = useState(false); // menu mobile
   const [moreOpen, setMoreOpen] = useState(false); // dropdown "Thêm ..."
+  const [userOpen, setUserOpen] = useState(false); // menu tài khoản
 
   // Lọc mục "Thêm ..." theo role hiện tại (không có role -> chỉ mục dùng chung).
   const moreItems = MORE.filter(
     (m) => !m.roles || (roleId ? m.roles.includes(roleId) : false)
   );
+
+  // Link nội bộ (bắt đầu bằng "/") giữ lại ?role=... để không "mất đăng nhập"
+  // khi chuyển trang trong demo.
+  const withRole = (href: string) =>
+    href.startsWith("/") && roleId ? `${href}?role=${roleId}` : href;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
@@ -67,7 +80,7 @@ export function RealtorHeader({
           {NAV.map((item) => (
             <a
               key={item.label}
-              href={item.href}
+              href={withRole(item.href)}
               className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
             >
               {item.label}
@@ -134,13 +147,52 @@ export function RealtorHeader({
           )}
 
           {userName ? (
-            // Đã đăng nhập -> hiện tên (role) + avatar chữ cái đầu
-            <span className="hidden items-center gap-2 rounded-full border border-slate-300 px-2 py-1 pr-4 text-sm font-semibold text-slate-800 sm:inline-flex">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">
-                {userName.charAt(0).toUpperCase()}
-              </span>
-              {userName}
-            </span>
+            // Đã đăng nhập -> nút tên (role) + avatar, bấm ra menu tài khoản
+            <div className="relative hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setUserOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-full border border-slate-300 py-1 pl-1 pr-3 text-sm font-semibold text-slate-800 hover:border-slate-400"
+                aria-haspopup="menu"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">
+                  {userName.charAt(0).toUpperCase()}
+                </span>
+                {userName}
+                <Icon
+                  name="ChevronDown"
+                  className={`h-4 w-4 transition-transform ${
+                    userOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {userOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                  {ACCOUNT.map((item) => (
+                    <a
+                      key={item.label}
+                      href="#"
+                      onClick={() => setUserOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-realtor-500"
+                    >
+                      <Icon name={item.icon} className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </a>
+                  ))}
+                  <div className="my-1 border-t border-slate-100" />
+                  {/* Đăng xuất -> quay về trang chọn role */}
+                  <Link
+                    href="/"
+                    onClick={() => setUserOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                  >
+                    <Icon name="LogOut" className="h-4 w-4 shrink-0" />
+                    Đăng xuất
+                  </Link>
+                </div>
+              )}
+            </div>
           ) : (
             // Khách vãng lai -> nút đăng nhập như cũ
             <a
@@ -168,7 +220,7 @@ export function RealtorHeader({
           {[...NAV, ...moreItems].map((item) => (
             <a
               key={item.label}
-              href={item.href}
+              href={withRole(item.href)}
               className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               {item.label}

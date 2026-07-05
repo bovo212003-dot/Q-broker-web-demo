@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Listing, formatVnd } from "@/data/realtorListings";
+import { PropertyModal } from "./PropertyModal";
 
 // Thẻ tin BĐS theo phong cách Realtor.com:
 // ảnh (nút lưu tim + nhãn góc), giá đậm, dòng beds/baths/sqft, địa chỉ, môi giới.
+// Bấm vào thẻ -> mở popup chi tiết ngay trên trang (không đổi trang).
 
 const TAG_TONE: Record<NonNullable<Listing["tagTone"]>, string> = {
   new: "bg-realtor-500 text-white",
@@ -15,9 +17,13 @@ const TAG_TONE: Record<NonNullable<Listing["tagTone"]>, string> = {
 
 export function PropertyCard({ listing }: { listing: Listing }) {
   const [saved, setSaved] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
 
   return (
-    <article className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <article
+      onClick={() => setOpenDetail(true)}
+      className="group cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+    >
       {/* Ảnh */}
       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -38,7 +44,11 @@ export function PropertyCard({ listing }: { listing: Listing }) {
           </span>
         )}
         <button
-          onClick={() => setSaved((v) => !v)}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSaved((v) => !v);
+          }}
           className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white"
           aria-label={saved ? "Bỏ lưu" : "Lưu tin"}
         >
@@ -81,6 +91,11 @@ export function PropertyCard({ listing }: { listing: Listing }) {
           {listing.broker}
         </p>
       </div>
+
+      {/* Popup chi tiết */}
+      {openDetail && (
+        <PropertyModal listing={listing} onClose={() => setOpenDetail(false)} />
+      )}
     </article>
   );
 }
