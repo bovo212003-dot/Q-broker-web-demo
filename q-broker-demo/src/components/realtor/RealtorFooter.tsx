@@ -53,8 +53,7 @@ export function RealtorFooter() {
         <div className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <RealtorLogo />
           <p className="text-xs text-slate-400">
-            © {new Date().getFullYear()} Bản demo giao diện — không liên kết với
-            realtor.com. Dùng cho mục đích minh hoạ Q-Broker.
+            Website được phát triển bởi công ty AUTOMATION LAND Việt Nam
           </p>
           <div className="flex gap-3">
             <a href="#" className="text-xs text-slate-500 hover:text-realtor-500">

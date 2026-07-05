@@ -9,13 +9,14 @@ import { RealtorLogo } from "./RealtorLogo";
 // Sticky, nền trắng, đổ bóng nhẹ; menu chính ẩn trên mobile (hamburger).
 
 const NAV = [
-  { label: "Mua", href: "#" },
-  { label: "Thuê", href: "#" },
-  { label: "Bán", href: "#" },
-  { label: "Vay mua nhà", href: "#" },
-  { label: "Tìm môi giới", href: "#" },
+  { label: "Đào tạo", href: "#" },
+  { label: "Chia sẻ giỏ hàng", href: "#" },
+  { label: "Cần thuê - Mua", href: "#" },
+  { label: "Live stream đấu giá", href: "#" },
+  { label: "Afilate", href: "#" },
   { label: "Nhà của tôi", href: "#" },
   { label: "Tin tức", href: "#" },
+  { label: "Thêm ...", href: "#" },
 ];
 
 // userName: tên hiển thị của người đã đăng nhập (hiện tạm là tên role,
@@ -28,7 +29,7 @@ export function RealtorHeader({ userName }: { userName?: string }) {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:px-8">
         {/* Logo -> quay lại landing Q-Broker */}
-        <Link href="/" aria-label="realtor.com home">
+        <Link href="/" aria-label="Q-Broker home">
           <RealtorLogo />
         </Link>
 
@@ -47,12 +48,6 @@ export function RealtorHeader({ userName }: { userName?: string }) {
 
         {/* Bên phải */}
         <div className="flex items-center gap-3">
-          <a
-            href="#"
-            className="hidden text-sm font-semibold text-slate-700 hover:text-realtor-500 sm:inline"
-          >
-            Quảng cáo
-          </a>
           {userName ? (
             // Đã đăng nhập -> hiện tên (role) + avatar chữ cái đầu
             <span className="hidden items-center gap-2 rounded-full border border-slate-300 px-2 py-1 pr-4 text-sm font-semibold text-slate-800 sm:inline-flex">
