@@ -4,7 +4,8 @@ import { formatNumber } from "@/lib/utils";
 
 // Hero chào mừng đầu tab Trang chủ — nền gradient navy Automation Land,
 // khối trang trí bay lơ lửng (animate-float) tạo cảm giác trẻ trung.
-export function TrainingHero() {
+// name: tên hiển thị lấy theo role hiện tại (giống header). Không có -> "bạn".
+export function TrainingHero({ name }: { name?: string }) {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-al-700 via-al-600 to-al-500 px-6 py-8 text-white shadow-lg sm:px-10 sm:py-10">
       {/* Đốm trang trí */}
@@ -22,7 +23,7 @@ export function TrainingHero() {
           Trung tâm đào tạo Q-Broker
         </p>
         <h1 className="mt-4 text-3xl font-bold sm:text-4xl">
-          Chào, {TRAINEE.name} 👋
+          Chào, {name ?? "bạn"} 👋
         </h1>
         <p className="mt-2 text-base text-white/80">
           Hôm nay bạn muốn học gì? Chọn một chuyên đề hoặc luyện đề ngay bên dưới.

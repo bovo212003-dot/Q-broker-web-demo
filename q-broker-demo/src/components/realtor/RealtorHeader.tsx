@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { RoleId } from "@/types";
+import { withRole } from "@/lib/role";
 import { RealtorLogo } from "./RealtorLogo";
 
 // Thanh điều hướng trên cùng của Q-Broker.
@@ -74,7 +75,7 @@ export function RealtorHeader({
               return (
                 <Link
                   key={item.label}
-                  href={item.href}
+                  href={withRole(item.href, roleId)}
                   className={
                     "text-sm font-semibold transition-colors " +
                     (active
@@ -197,7 +198,7 @@ export function RealtorHeader({
             return internal ? (
               <Link
                 key={item.label}
-                href={item.href}
+                href={withRole(item.href, roleId)}
                 onClick={() => setOpen(false)}
                 className={cls}
               >

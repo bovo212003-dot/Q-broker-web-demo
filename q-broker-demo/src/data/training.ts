@@ -1,8 +1,8 @@
 // =============================================================
 // DỮ LIỆU MODULE ĐÀO TẠO  (/realtor/dao-tao)
 // -------------------------------------------------------------
-// Tái hiện nội dung 5 tab của Q-Broker mobile app lên web:
-// Trang chủ · Chuyên đề · Trắc nghiệm · Tự luận · Tài khoản.
+// Tái hiện nội dung các tab của Q-Broker mobile app lên web:
+// Trang chủ · Chuyên đề · Trắc nghiệm · Tự luận.
 // Toàn bộ mock tập trung tại đây — sau này thay bằng API, giữ nguyên shape.
 // Ảnh dùng Unsplash (img thường) cho nhẹ, không cần cấu hình next/image.
 // =============================================================
@@ -22,9 +22,10 @@ export const TRAINEE = {
 
 // ---- Dòng thông báo chạy (marquee) --------------------------
 export const ANNOUNCEMENTS: string[] = [
-  "Lịch thi sát hạch đợt tháng 8 do Sở Xây dựng TP. Hồ Chí Minh công bố — xem chi tiết.",
+  "Thông báo lịch thi của Sở Xây dựng TP. Hồ Chí Minh — xem chi tiết.",
   "Ứng dụng vừa cập nhật ngân hàng câu hỏi mới cho phần Chuyên môn.",
   "Ủng hộ nhóm phát triển ứng dụng để mở khoá thêm nhiều tính năng.",
+  "Liên hệ quảng cáo: 0947 820 427.",
 ];
 
 // ---- Lối tắt nhanh (Quick Actions) --------------------------
@@ -40,7 +41,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { label: "Đánh dấu", icon: "Bookmark", href: "/realtor/dao-tao/trac-nghiem", tone: "sky" },
   { label: "Bài học", icon: "BookOpen", href: "/realtor/dao-tao/chuyen-de", tone: "pink" },
   { label: "Phiếu đăng ký", icon: "FileText", href: "/realtor/dao-tao", tone: "slate" },
-  { label: "Gói VIP", icon: "Crown", href: "/realtor/dao-tao/tai-khoan", tone: "flame" },
+  { label: "Gói VIP", icon: "Crown", href: "/realtor/dao-tao", tone: "flame" },
   { label: "Lịch sử", icon: "History", href: "/realtor/dao-tao/trac-nghiem", tone: "amber" },
 ];
 
@@ -89,87 +90,57 @@ export const PROMO_SLIDES: PromoSlide[] = [
 ];
 
 // ---- Khoá học (Khám phá khoá học) ---------------------------
-export type CourseProvider = "GRESA" | "TREBS";
+// Các tập giá trị dùng cho cả thẻ khoá học lẫn bộ lọc trong modal.
+export const COURSE_PROVIDERS = ["GRESA", "TREBS"] as const;
+export const COURSE_FEES = ["Miễn phí", "Trả phí"] as const;
+export const COURSE_LEVELS = [
+  "Cơ bản",
+  "Trung cấp",
+  "Nâng cao",
+  "Chuyên nghiệp",
+  "Hội thảo",
+] as const;
+export const COURSE_FORMATS = ["Trực tuyến", "Trực tiếp", "Kết hợp"] as const;
+export const COURSE_LANGUAGES = ["Tiếng Việt", "Tiếng Anh", "Tiếng Thái"] as const;
+
+export type CourseProvider = (typeof COURSE_PROVIDERS)[number];
+export type CourseFee = (typeof COURSE_FEES)[number];
+export type CourseLevel = (typeof COURSE_LEVELS)[number];
+export type CourseFormat = (typeof COURSE_FORMATS)[number];
+export type CourseLanguage = (typeof COURSE_LANGUAGES)[number];
 
 export interface Course {
   id: string;
   title: string;
-  level: "Cơ bản" | "Nâng cao";
-  language: string;
   provider: CourseProvider;
-  price: "FREE" | "Liên hệ";
+  fee: CourseFee;
+  level: CourseLevel;
+  format: CourseFormat;
+  language: CourseLanguage;
   image: string;
   lessons: number;
   hours: number;
 }
 
 export const COURSES: Course[] = [
-  {
-    id: "c1",
-    title: "Khoá học chứng chỉ môi giới",
-    level: "Nâng cao",
-    language: "Tiếng Việt",
-    provider: "GRESA",
-    price: "Liên hệ",
-    image: img("photo-1521791136064-7986c2920216"),
-    lessons: 24,
-    hours: 32,
-  },
-  {
-    id: "c2",
-    title: "Khoá học môi giới dự án",
-    level: "Nâng cao",
-    language: "Tiếng Việt",
-    provider: "GRESA",
-    price: "Liên hệ",
-    image: img("photo-1486406146926-c627a92ad1ab"),
-    lessons: 18,
-    hours: 24,
-  },
-  {
-    id: "c3",
-    title: "Kỹ năng đàm phán & chốt giao dịch",
-    level: "Nâng cao",
-    language: "Tiếng Việt",
-    provider: "GRESA",
-    price: "Liên hệ",
-    image: img("photo-1552664730-d307ca884978"),
-    lessons: 12,
-    hours: 16,
-  },
-  {
-    id: "c4",
-    title: "Định giá bất động sản thực chiến",
-    level: "Nâng cao",
-    language: "Tiếng Việt",
-    provider: "TREBS",
-    price: "Liên hệ",
-    image: img("photo-1554224155-6726b3ff858f"),
-    lessons: 15,
-    hours: 20,
-  },
-  {
-    id: "c5",
-    title: "Pháp lý dự án cho nhà môi giới",
-    level: "Cơ bản",
-    language: "Tiếng Việt",
-    provider: "TREBS",
-    price: "FREE",
-    image: img("photo-1450101499163-c8848c66ca85"),
-    lessons: 10,
-    hours: 12,
-  },
-  {
-    id: "c6",
-    title: "Marketing bất động sản thời đại số",
-    level: "Cơ bản",
-    language: "Tiếng Việt",
-    provider: "TREBS",
-    price: "FREE",
-    image: img("photo-1460925895917-afdab827c52f"),
-    lessons: 9,
-    hours: 10,
-  },
+  // --- GRESA (9 khoá) ---
+  { id: "c1", title: "Khoá học chứng chỉ môi giới", provider: "GRESA", fee: "Trả phí", level: "Nâng cao", format: "Kết hợp", language: "Tiếng Việt", image: img("photo-1521791136064-7986c2920216"), lessons: 24, hours: 32 },
+  { id: "c2", title: "Khoá học môi giới dự án", provider: "GRESA", fee: "Trả phí", level: "Nâng cao", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1486406146926-c627a92ad1ab"), lessons: 18, hours: 24 },
+  { id: "c3", title: "Kỹ năng đàm phán & chốt giao dịch", provider: "GRESA", fee: "Trả phí", level: "Chuyên nghiệp", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1552664730-d307ca884978"), lessons: 12, hours: 16 },
+  { id: "c4", title: "Khoá học môi giới kiều bào", provider: "GRESA", fee: "Trả phí", level: "Cơ bản", format: "Trực tuyến", language: "Tiếng Anh", image: img("photo-1477959858617-67f85cf4f1df"), lessons: 10, hours: 14 },
+  { id: "c5", title: "Khoá học marketing bất động sản", provider: "GRESA", fee: "Trả phí", level: "Trung cấp", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1460925895917-afdab827c52f"), lessons: 14, hours: 18 },
+  { id: "c6", title: "Khoá học môi giới nhà phố", provider: "GRESA", fee: "Trả phí", level: "Cơ bản", format: "Trực tiếp", language: "Tiếng Việt", image: img("photo-1570129477492-45c003edd2be"), lessons: 9, hours: 12 },
+  { id: "c7", title: "Khoá học môi giới quốc tế", provider: "GRESA", fee: "Trả phí", level: "Nâng cao", format: "Trực tuyến", language: "Tiếng Anh", image: img("photo-1512453979798-5ea266f8880c"), lessons: 16, hours: 22 },
+  { id: "c8", title: "Khoá học quản lý sàn giao dịch", provider: "GRESA", fee: "Trả phí", level: "Chuyên nghiệp", format: "Kết hợp", language: "Tiếng Việt", image: img("photo-1497366216548-37526070297c"), lessons: 20, hours: 28 },
+  { id: "c9", title: "Hội thảo: Xu hướng thị trường BĐS 2026", provider: "GRESA", fee: "Miễn phí", level: "Hội thảo", format: "Trực tiếp", language: "Tiếng Việt", image: img("photo-1517245386807-bb43f82c33c4"), lessons: 3, hours: 4 },
+  // --- TREBS (7 khoá) ---
+  { id: "c10", title: "Ứng dụng AI vào bất động sản", provider: "TREBS", fee: "Miễn phí", level: "Cơ bản", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1518770660439-4636190af475"), lessons: 8, hours: 10 },
+  { id: "c11", title: "Pháp lý dự án cho nhà môi giới", provider: "TREBS", fee: "Miễn phí", level: "Cơ bản", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1450101499163-c8848c66ca85"), lessons: 10, hours: 12 },
+  { id: "c12", title: "Định giá bất động sản thực chiến", provider: "TREBS", fee: "Trả phí", level: "Nâng cao", format: "Kết hợp", language: "Tiếng Việt", image: img("photo-1554224155-6726b3ff858f"), lessons: 15, hours: 20 },
+  { id: "c13", title: "Đầu tư bất động sản cho người mới", provider: "TREBS", fee: "Miễn phí", level: "Trung cấp", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1560518883-ce09059eeffa"), lessons: 12, hours: 14 },
+  { id: "c14", title: "Quản trị rủi ro pháp lý giao dịch", provider: "TREBS", fee: "Trả phí", level: "Chuyên nghiệp", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1591696205602-2f950c417cb9"), lessons: 11, hours: 15 },
+  { id: "c15", title: "Phân tích thị trường & dữ liệu BĐS", provider: "TREBS", fee: "Trả phí", level: "Trung cấp", format: "Kết hợp", language: "Tiếng Anh", image: img("photo-1454165804606-c3d57bc86b40"), lessons: 13, hours: 18 },
+  { id: "c16", title: "Kỹ năng livestream bán bất động sản", provider: "TREBS", fee: "Miễn phí", level: "Cơ bản", format: "Trực tuyến", language: "Tiếng Việt", image: img("photo-1524178232363-1fb2b075b655"), lessons: 7, hours: 9 },
 ];
 
 // ---- 16 chuyên đề chuẩn (tab Chuyên đề) ---------------------
@@ -259,20 +230,4 @@ export const ESSAY_QUESTIONS: EssayQuestion[] = [
   { id: 6, group: "Kiến thức chuyên môn", prompt: "Phân tích các phương pháp định giá bất động sản. Áp dụng một phương pháp để định giá một sản phẩm cụ thể mà anh/chị biết.", keywords: ["định giá", "phương pháp so sánh"] },
   { id: 7, group: "Kiến thức chuyên môn", prompt: "Trình bày vai trò của sàn giao dịch bất động sản trong việc bảo đảm tính minh bạch của thị trường. Liên hệ cơ chế xác thực sản phẩm.", keywords: ["sàn giao dịch", "minh bạch", "xác thực"] },
   { id: 8, group: "Kiến thức chuyên môn", prompt: "Phân tích tác động của chuyển đổi số đến hoạt động môi giới bất động sản. Đề xuất giải pháp ứng dụng công nghệ nâng cao hiệu quả môi giới.", keywords: ["chuyển đổi số", "công nghệ"] },
-];
-
-// ---- Tài khoản (tab Tài khoản) ------------------------------
-export interface AccountItem {
-  label: string;
-  icon: string;
-  desc?: string;
-}
-
-export const ACCOUNT_MENU: AccountItem[] = [
-  { label: "Ngôn ngữ", icon: "Globe", desc: "Tiếng Việt" },
-  { label: "Điều khoản sử dụng", icon: "FileText" },
-  { label: "Chăm sóc khách hàng", icon: "Headphones" },
-  { label: "Mời bạn bè", icon: "Users" },
-  { label: "Đóng góp ý kiến", icon: "Lightbulb" },
-  { label: "Hướng dẫn nhanh", icon: "PlayCircle" },
 ];

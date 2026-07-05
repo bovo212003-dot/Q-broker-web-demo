@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
+import { withRole } from "@/lib/role";
+import { RoleId } from "@/types";
 
 // Thanh điều hướng phụ của module Đào tạo — bản web hoá của bottom-nav mobile.
 // Sticky ngay dưới header realtor; cuộn ngang được trên mobile.
@@ -13,10 +15,9 @@ const TABS = [
   { label: "Chuyên đề", href: "/realtor/dao-tao/chuyen-de", icon: "BookOpen" },
   { label: "Trắc nghiệm", href: "/realtor/dao-tao/trac-nghiem", icon: "PencilLine" },
   { label: "Tự luận", href: "/realtor/dao-tao/tu-luan", icon: "FileText" },
-  { label: "Tài khoản", href: "/realtor/dao-tao/tai-khoan", icon: "User" },
 ];
 
-export function TrainingTabNav() {
+export function TrainingTabNav({ roleId }: { roleId?: RoleId }) {
   const pathname = usePathname();
 
   return (
@@ -29,7 +30,7 @@ export function TrainingTabNav() {
           return (
             <Link
               key={tab.href}
-              href={tab.href}
+              href={withRole(tab.href, roleId)}
               className={cn(
                 "group relative flex shrink-0 items-center gap-2 px-4 py-3.5 text-sm font-semibold transition-colors",
                 active
