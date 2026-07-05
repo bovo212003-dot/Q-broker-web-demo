@@ -35,7 +35,7 @@ export default function HomePage() {
             return (
               <Link
                 key={role.id}
-                href={role.basePath}
+                href={`/realtor?role=${role.id}`}
                 className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
               >
                 {/* Vạch màu nhấn của role */}
