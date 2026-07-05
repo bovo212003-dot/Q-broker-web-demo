@@ -30,7 +30,7 @@ export default function RealtorPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <RealtorHeader userName={userName} />
+      <RealtorHeader userName={userName} roleId={role?.id} />
       <RealtorHero />
 
       {/* Homes for you */}
