@@ -18,19 +18,24 @@ import { cn } from "@/lib/utils";
 // BƯỚC 1 — Form đăng nhu cầu Mua / Thuê.
 // Trường theo requirement: loại giao dịch, loại BĐS, khu vực, ngân sách,
 // diện tích, số phòng, tiêu chí đặc biệt, ghi chú.
+// initial: dữ liệu đã nhập trước đó (khi bấm "Quay lại" từ bước sau).
 export function DemandForm({
+  initial,
   onSubmit,
 }: {
+  initial?: DemandDraft;
   onSubmit: (draft: DemandDraft) => void;
 }) {
-  const [type, setType] = useState<TransactionType>("Mua");
-  const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
-  const [area, setArea] = useState("");
-  const [budget, setBudget] = useState("");
-  const [size, setSize] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [criteria, setCriteria] = useState<string[]>([]);
-  const [note, setNote] = useState("");
+  const [type, setType] = useState<TransactionType>(initial?.type ?? "Mua");
+  const [propertyType, setPropertyType] = useState<PropertyType | null>(
+    initial?.propertyType ?? null
+  );
+  const [area, setArea] = useState(initial?.area ?? "");
+  const [budget, setBudget] = useState(initial?.budget ?? "");
+  const [size, setSize] = useState(initial?.size ?? "");
+  const [bedrooms, setBedrooms] = useState(initial?.bedrooms ?? "");
+  const [criteria, setCriteria] = useState<string[]>(initial?.criteria ?? []);
+  const [note, setNote] = useState(initial?.note ?? "");
 
   const valid = propertyType !== null && area !== "" && budget !== "";
 
