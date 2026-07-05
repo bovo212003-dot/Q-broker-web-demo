@@ -14,14 +14,14 @@ const config: Config = {
           700: "#0f766e",
           900: "#134e4a",
         },
-        // Màu thương hiệu Realtor.com (dùng cho trang clone /realtor)
+        // Màu thương hiệu Q-Broker (dùng cho trang clone /realtor)
         realtor: {
-          50: "#fef2f2",
-          100: "#fee2e2",
-          200: "#fecaca",
-          500: "#d92228", // đỏ chủ đạo Realtor
-          600: "#c01a1f",
-          700: "#a11419",
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          500: "#2563eb", // xanh chủ đạo, trùng màu logo Q-Broker
+          600: "#1d4ed8",
+          700: "#1e40af",
           ink: "#0c0f24", // xanh navy đậm cho văn bản
         },
         // Màu nhấn riêng cho từng role (dùng để phân biệt giao diện demo)
