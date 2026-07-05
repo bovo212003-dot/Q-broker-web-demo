@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { RealtorLogo } from "./RealtorLogo";
 
 // Thanh điều hướng trên cùng của clone Realtor.com.
 // Sticky, nền trắng, đổ bóng nhẹ; menu chính ẩn trên mobile (hamburger).
+// Mục có href thật (bắt đầu bằng "/") là route nội bộ -> render <Link>.
 
 const NAV = [
   { label: "Mua", href: "#" },
   { label: "Thuê", href: "#" },
   { label: "Bán", href: "#" },
   { label: "Vay mua nhà", href: "#" },
+  { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Tìm môi giới", href: "#" },
   { label: "Nhà của tôi", href: "#" },
   { label: "Tin tức", href: "#" },
@@ -23,6 +26,7 @@ const NAV = [
 // như cũ (dùng cho khách vãng lai).
 export function RealtorHeader({ userName }: { userName?: string }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
@@ -34,15 +38,35 @@ export function RealtorHeader({ userName }: { userName?: string }) {
 
         {/* Menu chính (desktop) */}
         <nav className="hidden items-center gap-6 lg:flex">
-          {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item) => {
+            const internal = item.href.startsWith("/");
+            const active = internal && pathname.startsWith(item.href);
+            if (internal) {
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={
+                    "text-sm font-semibold transition-colors " +
+                    (active
+                      ? "text-al-600"
+                      : "text-slate-700 hover:text-al-600")
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            }
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Bên phải */}
@@ -84,15 +108,27 @@ export function RealtorHeader({ userName }: { userName?: string }) {
       {/* Menu mobile */}
       {open && (
         <nav className="border-t border-slate-100 bg-white px-4 py-3 lg:hidden">
-          {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item) => {
+            const internal = item.href.startsWith("/");
+            const active = internal && pathname.startsWith(item.href);
+            const cls =
+              "block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-slate-50 " +
+              (active ? "bg-al-50 text-al-600" : "text-slate-700");
+            return internal ? (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={cls}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <a key={item.label} href={item.href} className={cls}>
+                {item.label}
+              </a>
+            );
+          })}
           {userName ? (
             <span className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-center text-sm font-semibold text-slate-800">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">

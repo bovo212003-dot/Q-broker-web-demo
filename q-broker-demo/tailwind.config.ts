@@ -33,9 +33,66 @@ const config: Config = {
           bank: "#d97706", // amber   - Ngân hàng
           admin: "#e11d48", // rose    - Admin
         },
+        // Màu thương hiệu Automation Land (dùng cho module Đào tạo /realtor/dao-tao)
+        // Lấy theo logo: xanh "AUTOMATION" (500) -> navy "LAND" (700), gear xám.
+        al: {
+          50: "#eef4fb",
+          100: "#d7e6f5",
+          200: "#b0cbe9",
+          300: "#7ea9d8",
+          400: "#4f86c6",
+          500: "#2f6db4", // xanh AUTOMATION — primary
+          600: "#255893",
+          700: "#1c3e70", // navy LAND — dùng cho tiêu đề/nền đậm
+          800: "#172f54",
+          900: "#122544",
+          gear: "#8a939c", // xám bánh răng
+        },
+        // Màu cam highlight (nhấn CTA, badge, chỉ báo active)
+        flame: {
+          50: "#fff5ed",
+          100: "#ffe6d3",
+          400: "#ff9142",
+          500: "#f97316", // cam chủ đạo highlight
+          600: "#e25c00",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+      },
+      keyframes: {
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "pop-in": {
+          "0%": { opacity: "0", transform: "scale(.96)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        float: {
+          "0%,100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+      },
+      animation: {
+        "fade-up": "fade-up .5s ease-out both",
+        "fade-in": "fade-in .5s ease-out both",
+        "pop-in": "pop-in .4s ease-out both",
+        marquee: "marquee 24s linear infinite",
+        float: "float 4s ease-in-out infinite",
+        shimmer: "shimmer 2.2s linear infinite",
       },
     },
   },
