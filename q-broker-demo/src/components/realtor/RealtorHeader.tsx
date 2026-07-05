@@ -16,7 +16,7 @@ import { RealtorLogo } from "./RealtorLogo";
 const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Chia sẻ giỏ hàng", href: "#" },
-  { label: "Cần thuê - Mua", href: "#" },
+  { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
   { label: "Live stream đấu giá", href: "#" },
   { label: "Afilate", href: "#" },
   { label: "Tin tức", href: "#" },
