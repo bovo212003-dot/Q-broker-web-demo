@@ -1,19 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { RoleId } from "@/types";
+import { withRole } from "@/lib/role";
 import { RealtorLogo } from "./RealtorLogo";
 
 // Thanh điều hướng trên cùng của Q-Broker.
 // Sticky, nền trắng, đổ bóng nhẹ; menu chính ẩn trên mobile (hamburger).
+// Mục có href thật (bắt đầu bằng "/") là route nội bộ -> render <Link>.
 
 // Menu chính -> dùng chung cho MỌI role.
 const NAV = [
-  { label: "Đào tạo", href: "#" },
+  { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Chia sẻ giỏ hàng", href: "#" },
-  { label: "Cần thuê - Mua", href: "#" },
+  { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
   { label: "Live stream đấu giá", href: "/realtor/livestream" },
   { label: "Afilate", href: "/realtor/affiliate" },
   { label: "Tin tức", href: "/realtor/tin-tuc" },
@@ -56,16 +59,12 @@ export function RealtorHeader({
   const [open, setOpen] = useState(false); // menu mobile
   const [moreOpen, setMoreOpen] = useState(false); // dropdown "Thêm ..."
   const [userOpen, setUserOpen] = useState(false); // menu tài khoản
+  const pathname = usePathname();
 
   // Lọc mục "Thêm ..." theo role hiện tại (không có role -> chỉ mục dùng chung).
   const moreItems = MORE.filter(
     (m) => !m.roles || (roleId ? m.roles.includes(roleId) : false)
   );
-
-  // Link nội bộ (bắt đầu bằng "/") giữ lại ?role=... để không "mất đăng nhập"
-  // khi chuyển trang trong demo.
-  const withRole = (href: string) =>
-    href.startsWith("/") && roleId ? `${href}?role=${roleId}` : href;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
@@ -77,15 +76,35 @@ export function RealtorHeader({
 
         {/* Menu chính (desktop) */}
         <nav className="hidden items-center gap-6 lg:flex">
-          {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={withRole(item.href)}
-              className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item) => {
+            const internal = item.href.startsWith("/");
+            const active = internal && pathname.startsWith(item.href);
+            if (internal) {
+              return (
+                <Link
+                  key={item.label}
+                  href={withRole(item.href, roleId)}
+                  className={
+                    "text-sm font-semibold transition-colors " +
+                    (active
+                      ? "text-realtor-600"
+                      : "text-slate-700 hover:text-realtor-500")
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            }
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
+              >
+                {item.label}
+              </a>
+            );
+          })}
 
           {/* "Thêm ..." + dropdown (chỉ tắt khi bấm lại nút hoặc chọn 1 mục) */}
           <div className="relative">
@@ -217,15 +236,27 @@ export function RealtorHeader({
       {/* Menu mobile */}
       {open && (
         <nav className="border-t border-slate-100 bg-white px-4 py-3 lg:hidden">
-          {[...NAV, ...moreItems].map((item) => (
-            <a
-              key={item.label}
-              href={withRole(item.href)}
-              className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              {item.label}
-            </a>
-          ))}
+          {[...NAV, ...moreItems].map((item) => {
+            const internal = item.href.startsWith("/");
+            const active = internal && pathname.startsWith(item.href);
+            const cls =
+              "block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-slate-50 " +
+              (active ? "bg-realtor-50 text-realtor-600" : "text-slate-700");
+            return internal ? (
+              <Link
+                key={item.label}
+                href={withRole(item.href, roleId)}
+                onClick={() => setOpen(false)}
+                className={cls}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <a key={item.label} href={item.href} className={cls}>
+                {item.label}
+              </a>
+            );
+          })}
           {userName ? (
             <span className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-center text-sm font-semibold text-slate-800">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">
