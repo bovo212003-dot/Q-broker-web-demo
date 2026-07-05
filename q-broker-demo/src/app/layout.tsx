@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AiChatWidget } from "@/components/realtor/AiChatWidget";
 
 export const metadata: Metadata = {
   title: "Q-Broker — Hệ sinh thái BĐS toàn diện (Demo)",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        {/* Chatbot AI nổi, hiển thị ở mọi trang, kéo-thả được */}
+        <AiChatWidget />
+      </body>
     </html>
   );
 }

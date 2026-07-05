@@ -1,5 +1,5 @@
 // Logo Q-Broker: huy hiệu tròn gradient tím→xanh có chữ "Q",
-// kèm chữ "Q-BROKER" và dòng phụ "TRUST COMMUNITY".
+// kèm chữ "BROKER" và dòng phụ "TRUST COMMUNITY".
 // light=true: dùng cho nền tối (chữ trắng).
 export function RealtorLogo({
   className = "",
@@ -45,7 +45,7 @@ export function RealtorLogo({
             light ? "text-white" : "text-slate-900"
           }`}
         >
-          Q-BROKER
+          BROKER
         </span>
         <span
           className={`mt-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] ${
