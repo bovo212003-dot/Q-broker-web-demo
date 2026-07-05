@@ -55,6 +55,17 @@ export function CanThueMuaView({
     setLiked([]);
   };
 
+  // Nút "Quay lại": lùi về bước liền trước trong luồng.
+  const back = () => {
+    if (step === "form") setStep("landing");
+    else if (step === "auction") setStep("form"); // form giữ lại dữ liệu qua `draft`
+    else if (step === "swipe") setStep("auction");
+    else if (step === "match") {
+      setSwipeKey((k) => k + 1); // quẹt lại từ đầu
+      setStep("swipe");
+    }
+  };
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
       {/* Nhắc nhở khi xem bằng role không phải khách hàng */}
@@ -73,9 +84,20 @@ export function CanThueMuaView({
         <Landing onStart={() => setStep("form")} />
       ) : (
         <>
-          <Stepper current={STEP_INDEX[step]} />
+          {/* Nút quay lại + thanh bước */}
+          <div className="relative mx-auto max-w-5xl">
+            <button
+              onClick={back}
+              className="mb-4 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:border-al-300 hover:text-al-600 lg:absolute lg:left-0 lg:top-0 lg:mb-0"
+            >
+              <Icon name="ArrowLeft" className="h-4 w-4" />
+              Quay lại
+            </button>
+            <Stepper current={STEP_INDEX[step]} />
+          </div>
           {step === "form" && (
             <DemandForm
+              initial={draft ?? undefined}
               onSubmit={(d) => {
                 setDraft(d);
                 setStep("auction");
@@ -217,11 +239,11 @@ function Landing({ onStart }: { onStart: () => void }) {
           <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-5xl">
             Cần thuê hay mua nhà?
             <br />
-            <span className="text-flame-400">Để môi giới giỏi tự tìm đến bạn.</span>
+            <span className="text-flame-400"> Hãy để môi giới tiềm năng tự tìm đến bạn.</span>
           </h1>
           <p className="mt-4 max-w-xl text-base text-white/80">
             Đăng nhu cầu một lần duy nhất. Hệ thống mở phiên đấu giá 30 phút,
-            bạn quẹt chọn như Tinder, AI ghép nối đúng{" "}
+             AI ghép nối đúng{" "}
             <b className="text-white">một môi giới phù hợp nhất</b> — không spam,
             không bị gọi dồn dập.
           </p>
@@ -257,23 +279,44 @@ function Landing({ onStart }: { onStart: () => void }) {
           <Icon name="Route" className="h-5 w-5 text-flame-500" />
           Hoạt động như thế nào?
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {HOW_IT_WORKS.map((s, i) => (
-            <div
-              key={s.title}
-              style={{ animationDelay: `${i * 80}ms` }}
-              className="group relative animate-fade-up rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-al-200 hover:shadow-md"
-            >
-              <span className="absolute right-4 top-4 font-mono text-3xl font-black text-slate-100 transition-colors group-hover:text-flame-100">
-                {i + 1}
-              </span>
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-al-50 text-al-600 transition-transform group-hover:scale-110">
-                <Icon name={s.icon} className="h-6 w-6" />
-              </span>
-              <h3 className="mt-3 font-bold text-slate-800">{s.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{s.desc}</p>
-            </div>
-          ))}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_IT_WORKS.map((s, i) => {
+            const last = i === HOW_IT_WORKS.length - 1;
+            return (
+              <div
+                key={s.title}
+                style={{ animationDelay: `${i * 80}ms` }}
+                className="group relative animate-fade-up rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-al-200 hover:shadow-md"
+              >
+                {/* Số thứ tự — chìm nhẹ, hover vào thẻ thì nổi rõ lên */}
+                <span className="absolute right-4 top-4 font-mono text-3xl font-black text-slate-100 transition-all duration-300 group-hover:scale-110 group-hover:text-flame-500">
+                  {i + 1}
+                </span>
+
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-al-50 text-al-600 transition-transform group-hover:scale-110">
+                  <Icon name={s.icon} className="h-6 w-6" />
+                </span>
+                <h3 className="mt-3 font-bold text-slate-800">{s.title}</h3>
+                <p className="mt-1 text-sm text-slate-500">{s.desc}</p>
+
+                {/* Mũi tên nối bước tiếp theo — chìm, không ô tròn */}
+                {!last && (
+                  <>
+                    {/* Desktop (4 cột): mũi tên ngang giữa hai ô */}
+                    <Icon
+                      name="ChevronRight"
+                      className="absolute -right-5 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-slate-300 lg:block"
+                    />
+                    {/* Mobile (1 cột): mũi tên dọc giữa hai ô */}
+                    <Icon
+                      name="ChevronDown"
+                      className="absolute -bottom-5 left-1/2 h-5 w-5 -translate-x-1/2 text-slate-300 sm:hidden"
+                    />
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
