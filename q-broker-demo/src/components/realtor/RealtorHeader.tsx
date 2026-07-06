@@ -15,7 +15,7 @@ import { RealtorLogo } from "./RealtorLogo";
 // Menu chính -> dùng chung cho MỌI role.
 const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
-  { label: "Chia sẻ giỏ hàng", href: "#" },
+  { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
   { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
   { label: "Live stream đấu giá", href: "#" },
   { label: "Afilate", href: "#" },
