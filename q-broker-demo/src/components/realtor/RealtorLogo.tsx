@@ -9,11 +9,11 @@ export function RealtorLogo({
   light?: boolean;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+    <span className={`inline-flex items-center gap-3 ${className}`}>
       {/* Huy hiệu tròn có chữ Q */}
       <svg
         viewBox="0 0 40 40"
-        className="h-9 w-9 shrink-0"
+        className="h-12 w-12 shrink-0"
         role="img"
         aria-label="Q-Broker"
       >
@@ -41,14 +41,14 @@ export function RealtorLogo({
       {/* Chữ Q-BROKER + dòng phụ */}
       <span className="flex flex-col leading-none">
         <span
-          className={`text-lg font-extrabold tracking-tight ${
+          className={`text-2xl font-extrabold tracking-tight ${
             light ? "text-white" : "text-slate-900"
           }`}
         >
           BROKER
         </span>
         <span
-          className={`mt-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] ${
+          className={`mt-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] ${
             light ? "text-white/70" : "text-slate-400"
           }`}
         >

@@ -118,8 +118,13 @@ export function AiChatWidget() {
         >
           {/* Header */}
           <div className="flex items-center gap-3 bg-gradient-to-r from-brand-700 to-brand-500 px-4 py-3 text-white">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
-              <Icon name="Bot" className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-white/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/bot-avatar.png"
+                alt="Trợ lý AI"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">Trợ lý AI</p>
@@ -187,20 +192,17 @@ export function AiChatWidget() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         style={{ width: SIZE, height: SIZE }}
-        className="relative flex touch-none select-none items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 shadow-xl ring-4 ring-white/60 transition-transform hover:scale-105 active:scale-95"
+        className="relative flex touch-none select-none items-center justify-center overflow-hidden rounded-full bg-white shadow-xl ring-4 ring-white/60 transition-transform hover:scale-105 active:scale-95"
         aria-label="Mở chat AI AUTOMATION LAND"
         title="Chat với AI AUTOMATION LAND"
       >
-        {/* Bánh răng xoay chậm làm nền (màu xám) */}
-        <Icon
-          name="Cog"
-          className="pointer-events-none absolute inset-0 m-auto h-full w-full p-0.5 text-slate-400/60"
-          style={{ animation: "spin 8s linear infinite" }}
+        {/* Logo AI (ảnh của bạn) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/bot-avatar.png"
+          alt="Trợ lý AI AUTOMATION LAND"
+          className="pointer-events-none h-full w-full object-cover"
         />
-        {/* Chữ ở giữa (màu xanh dương) */}
-        <span className="pointer-events-none relative px-1 text-center text-[0.45rem] font-extrabold uppercase leading-[1.1] tracking-tight text-blue-600">
-          Automation Land
-        </span>
         {/* Chấm báo "online" */}
         <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
       </button>

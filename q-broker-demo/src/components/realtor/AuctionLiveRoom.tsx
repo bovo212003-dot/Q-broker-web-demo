@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { formatVnd } from "@/data/realtorListings";
@@ -15,10 +16,11 @@ import {
 import { LegalModal } from "./LegalModal";
 
 // =============================================================
-// PHÒNG LIVESTREAM ĐẤU GIÁ — phong cách TikTok Live + bảng điện cafef
+// PHÒNG LIVE STREAM — phong cách TikTok Live
 // - Trái: khung video (badge LIVE, người xem, chat nổi, tim bay)
-// - Phải: bảng diễn biến giá (giá loé xanh khi nhảy, đếm ngược,
-//   lịch sử trả giá) + khung trò chuyện
+// - Phải: khung trò chuyện trực tiếp (full chiều cao cột)
+// - Nút búa (Gavel) trên video: dẫn sang Sàn đấu giá
+//   (/realtor/dau-gia?lot=...) của đúng sản phẩm đang phát.
 // - Mô phỏng realtime bằng interval phía client; trạng thái ban đầu
 //   cố định (INITIAL_*) để SSR không lệch hydration.
 // =============================================================
@@ -302,9 +304,7 @@ export function AuctionLiveRoom() {
     setMsgInput("");
   };
 
-  const pctChange = ((board.price - lot.startPrice) / lot.startPrice) * 100;
   const winner = board.bids[0];
-  const urgent = board.countdown <= 10 && board.phase === "bidding";
 
   return (
     <section className="bg-slate-950">
@@ -383,9 +383,9 @@ export function AuctionLiveRoom() {
               ))}
             </div>
 
-            {/* Dưới phải: nút thả tim + tim bay */}
-            <div className="absolute bottom-3 right-3">
-              <div className="pointer-events-none absolute bottom-10 right-0 h-64 w-20">
+            {/* Dưới phải: nút búa đấu giá + nút thả tim + tim bay */}
+            <div className="absolute bottom-3 right-3 flex flex-col items-center gap-2">
+              <div className="pointer-events-none absolute bottom-24 right-0 h-64 w-20">
                 {hearts.map((h) => (
                   <span
                     key={h.id}
@@ -401,6 +401,18 @@ export function AuctionLiveRoom() {
                   </span>
                 ))}
               </div>
+              {/* Nút búa: sang sàn đấu giá của sản phẩm đang phát */}
+              <Link
+                href={`/realtor/dau-gia?lot=${lot.id}`}
+                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-amber-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-amber-400 active:scale-95"
+                aria-label="Tham gia đấu giá trực tiếp"
+                title="Tham gia đấu giá"
+              >
+                {board.phase === "bidding" && (
+                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-ping rounded-full bg-rose-500" />
+                )}
+                <Icon name="Gavel" className="h-5 w-5" />
+              </Link>
               <button
                 type="button"
                 onClick={sendHeart}
@@ -468,6 +480,13 @@ export function AuctionLiveRoom() {
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
+                <Link
+                  href={`/realtor/dau-gia?lot=${lot.id}`}
+                  className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-400"
+                >
+                  <Icon name="Gavel" className="h-3.5 w-3.5" />
+                  Đấu giá
+                </Link>
                 <button
                   type="button"
                   onClick={handleShare}
@@ -541,125 +560,12 @@ export function AuctionLiveRoom() {
             )}
           </div>
 
-        {/* ===== CỘT PHẢI: DIỄN BIẾN + TRÒ CHUYỆN (cạnh video) =====
-            Gộp chung một cột flex cao bằng video: bảng diễn biến giữ chiều cao
-            tự nhiên, khung chat lấp phần còn lại -> chat luôn hiện cạnh video,
-            không phải cuộn trang xuống mới trò chuyện được. */}
+        {/* ===== CỘT PHẢI: TRÒ CHUYỆN TRỰC TIẾP (cạnh video) =====
+            Cột flex cao bằng video + card thông tin: khung chat lấp toàn bộ
+            -> chat luôn hiện cạnh video, không phải cuộn trang xuống.
+            Bảng đấu giá chuyển vào popup mở bằng nút búa trên video. */}
         <div className="order-2 flex flex-col gap-4 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2">
-          {/* --- Bảng diễn biến (điện tử) --- */}
-          <div className="shrink-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
-              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300">
-                <Icon name="Activity" className="h-4 w-4 text-emerald-400" />
-                Diễn biến đấu giá
-              </p>
-              <span
-                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-xs font-bold ${
-                  urgent
-                    ? "animate-pulse bg-rose-500/20 text-rose-400"
-                    : "bg-slate-800 text-emerald-400"
-                }`}
-              >
-                <Icon name="Timer" className="h-3.5 w-3.5" />
-                00:{String(board.countdown).padStart(2, "0")}
-              </span>
-            </div>
-
-            {/* Giá hiện tại — loé xanh mỗi lần nhảy giá */}
-            <div className="px-4 py-4 text-center">
-              <p className="text-[11px] uppercase tracking-widest text-slate-500">
-                Giá cao nhất hiện tại
-              </p>
-              <p
-                key={board.price}
-                className="animate-price-flash mt-1 font-mono text-3xl font-extrabold tracking-tight text-white"
-              >
-                {fullVnd(board.price)}
-              </p>
-              <p className="mt-1 flex items-center justify-center gap-2 text-sm">
-                <span className="font-bold text-emerald-400">
-                  ▲ +{pctChange.toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%
-                </span>
-                <span className="text-slate-500">so với khởi điểm</span>
-                <span className="font-semibold text-amber-400">
-                  {formatVnd(board.price)}
-                </span>
-              </p>
-            </div>
-
-            {/* Khởi điểm / bước giá / lượt trả */}
-            <div className="grid grid-cols-3 divide-x divide-slate-800 border-y border-slate-800 text-center">
-              {[
-                { label: "Khởi điểm", value: formatVnd(lot.startPrice), tone: "text-amber-400" },
-                { label: "Bước giá", value: formatVnd(lot.step), tone: "text-sky-400" },
-                { label: "Lượt trả", value: `${board.bids.length}`, tone: "text-emerald-400" },
-              ].map((s) => (
-                <div key={s.label} className="px-2 py-2.5">
-                  <p className="text-[10px] uppercase tracking-wide text-slate-500">
-                    {s.label}
-                  </p>
-                  <p className={`mt-0.5 font-mono text-sm font-bold ${s.tone}`}>
-                    {s.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Nút trả giá nhanh */}
-            <div className="grid grid-cols-3 gap-2 px-4 py-3">
-              {[1, 2, 5].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  disabled={board.phase !== "bidding"}
-                  onClick={() => placeBid("Bạn", m, true)}
-                  className={`rounded-lg py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                    m === 1
-                      ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                      : "border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
-                  }`}
-                >
-                  +{m} bước
-                  <span className="mt-0.5 block font-mono text-[10px] font-semibold opacity-80">
-                    +{formatVnd(lot.step * m)}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* Lịch sử trả giá */}
-            <div className="max-h-44 overflow-y-auto border-t border-slate-800">
-              {board.bids.map((b, i) => (
-                <div
-                  key={b.id}
-                  className={`flex items-center justify-between gap-2 px-4 py-2 text-xs ${
-                    i === 0 ? "animate-slide-in bg-emerald-500/10" : ""
-                  } ${b.mine ? "bg-sky-500/10" : ""}`}
-                >
-                  <span className="w-14 shrink-0 font-mono text-slate-500">
-                    {b.time}
-                  </span>
-                  <span
-                    className={`min-w-0 flex-1 truncate font-semibold ${
-                      b.mine ? "text-sky-400" : "text-slate-300"
-                    }`}
-                  >
-                    {b.mine ? "Bạn" : b.name}
-                  </span>
-                  {b.delta > 0 && (
-                    <span className="shrink-0 text-emerald-400">
-                      +{b.delta} bước
-                    </span>
-                  )}
-                  <span className="shrink-0 font-mono font-bold text-white">
-                    {formatVnd(b.price)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* --- Trò chuyện trực tiếp: lấp phần còn lại của cột phải --- */}
+          {/* --- Trò chuyện trực tiếp: lấp toàn bộ cột phải --- */}
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
             <p className="flex shrink-0 items-center gap-2 border-b border-slate-800 px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-300">
               <Icon name="MessageCircle" className="h-4 w-4 text-sky-400" />
@@ -726,7 +632,7 @@ export function AuctionLiveRoom() {
       {shareToast && (
         <div className="animate-toast fixed bottom-20 left-1/2 z-[80] flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-2xl ring-1 ring-white/10">
           <Icon name="Check" className="h-4 w-4 text-emerald-400" />
-          Đã sao chép link phiên livestream đấu giá
+          Đã sao chép link phiên livestream
         </div>
       )}
 
