@@ -17,6 +17,7 @@ const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
   { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
+  { label: "Tuyển dụng", href: "/realtor/tuyen-dung" },
   { label: "Live stream", href: "/realtor/livestream" },
   { label: "Sàn đấu giá", href: "/realtor/dau-gia" },
   { label: "Afilate", href: "/realtor/affiliate" },
