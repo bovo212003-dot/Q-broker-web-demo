@@ -3,27 +3,26 @@ import { Icon } from "@/components/ui/Icon";
 import { RealtorHeader } from "@/components/realtor/RealtorHeader";
 import { RealtorFooter } from "@/components/realtor/RealtorFooter";
 import { AuctionTicker } from "@/components/realtor/AuctionTicker";
-import { AuctionLiveRoom } from "@/components/realtor/AuctionLiveRoom";
-import { UpcomingAuctions } from "@/components/realtor/UpcomingAuctions";
+import { AuctionExchange } from "@/components/realtor/AuctionExchange";
 import { ROLES } from "@/config/roles";
 import { RoleId } from "@/types";
 
 // =============================================================
-// TRANG LIVE STREAM  (route: /realtor/livestream)
-// Phong cách TikTok Live (video + chat + tim bay). Khi muốn đấu giá,
-// người xem bấm nút búa (Gavel) trên video để mở bảng đấu giá
-// trực tiếp của sản phẩm đang phát.
-// Dùng chung header/footer với trang /realtor.
+// SÀN ĐẤU GIÁ  (route: /realtor/dau-gia)
+// Bảng điện kiểu cafef/HOSE: mỗi lô BĐS là một "mã", giá nhảy
+// realtime, có biểu đồ diễn biến + panel đặt lệnh.
+// Nút búa ở trang livestream dẫn sang đây kèm ?lot=<id> để chọn
+// sẵn đúng lô đang phát.
 // =============================================================
 
 export const metadata = {
-  title: "Live stream | Q-Broker",
+  title: "Sàn đấu giá | Q-Broker",
 };
 
-export default function LivestreamPage({
+export default function DauGiaPage({
   searchParams,
 }: {
-  searchParams: { role?: string };
+  searchParams: { role?: string; lot?: string };
 }) {
   // Giữ cơ chế role như trang /realtor: ?role=... -> hiện tên ở header.
   const roleId = searchParams.role as RoleId | undefined;
@@ -33,12 +32,9 @@ export default function LivestreamPage({
     <div className="min-h-screen bg-white">
       <RealtorHeader userName={role?.name} roleId={role?.id} />
 
-      {/* Sân khấu tối: ticker giá + phòng livestream */}
+      {/* Sân khấu tối: ticker giá + bảng điện sàn đấu giá */}
       <AuctionTicker />
-      <AuctionLiveRoom />
-
-      {/* Phiên sắp diễn ra (nền sáng) */}
-      <UpcomingAuctions />
+      <AuctionExchange initialLotId={searchParams.lot} />
 
       <RealtorFooter />
 

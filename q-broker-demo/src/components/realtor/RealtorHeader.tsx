@@ -17,7 +17,8 @@ const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
   { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
-  { label: "Live stream đấu giá", href: "/realtor/livestream" },
+  { label: "Live stream", href: "/realtor/livestream" },
+  { label: "Sàn đấu giá", href: "/realtor/dau-gia" },
   { label: "Afilate", href: "/realtor/affiliate" },
   { label: "Tin tức", href: "/realtor/tin-tuc" },
 ];
@@ -66,11 +67,14 @@ export function RealtorHeader({
     (m) => !m.roles || (roleId ? m.roles.includes(roleId) : false)
   );
 
+  // Bấm logo -> về trang chủ site /realtor, giữ ngữ cảnh role qua ?role=...
+  const homeHref = withRole("/realtor", roleId);
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 pl-4 pr-2 lg:pl-8 lg:pr-4">
         {/* Logo -> quay lại landing Q-Broker */}
-        <Link href="/" aria-label="Q-Broker home">
+        <Link href={homeHref} aria-label="Q-Broker home">
           <RealtorLogo />
         </Link>
 

@@ -23,6 +23,8 @@ export interface LegalInfo {
 
 export interface AuctionLot {
   id: string;
+  /** Mã lô kiểu mã chứng khoán, hiện trên bảng điện sàn đấu giá (VIN-P5...) */
+  code: string;
   title: string;
   address: string;
   city: string;
@@ -65,6 +67,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   // ---- Hàng chờ phát LIVE (phiên hiện tại + 2 lô kế tiếp) ----
   {
     id: "a1",
+    code: "VIN-P5",
     title: "Căn hộ 3PN Vinhomes Central Park, Toà Park 5",
     address: "208 Nguyễn Hữu Cảnh, Phường 22",
     city: "Bình Thạnh, TP.HCM",
@@ -106,6 +109,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   },
   {
     id: "a2",
+    code: "TDIEN41",
     title: "Nhà phố Thảo Điền 1 trệt 2 lầu, Đường 41",
     address: "Khu compound Thảo Điền",
     city: "TP. Thủ Đức, TP.HCM",
@@ -147,6 +151,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   },
   {
     id: "a3",
+    code: "ECO-AB",
     title: "Biệt thự Ecopark Aqua Bay view hồ",
     address: "Khu Aqua Bay, Ecopark",
     city: "Văn Giang, Hưng Yên",
@@ -190,6 +195,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   // ---- Sắp diễn ra ----
   {
     id: "a4",
+    code: "LM81-68",
     title: "Penthouse Landmark 81, Tầng 68",
     address: "720A Điện Biên Phủ",
     city: "Bình Thạnh, TP.HCM",
@@ -207,6 +213,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   },
   {
     id: "a5",
+    code: "VPEARL",
     title: "Căn hộ biển Vinpearl Beachfront Trần Phú",
     address: "78 Trần Phú",
     city: "Nha Trang, Khánh Hoà",
@@ -224,6 +231,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   },
   {
     id: "a6",
+    code: "HTRAM",
     title: "Biệt thự ven biển Hồ Tràm, bể bơi riêng",
     address: "Ven biển Xuyên Mộc",
     city: "Bà Rịa - Vũng Tàu",
@@ -241,6 +249,7 @@ export const AUCTION_LOTS: AuctionLot[] = [
   },
   {
     id: "a7",
+    code: "SAILT",
     title: "Nhà phố thương mại The Sailing Tower",
     address: "Thủ Dầu Một",
     city: "Bình Dương",
@@ -287,6 +296,64 @@ export const BIDDER_NAMES = [
   "Bùi K. L***",
   "Hoàng M. T***",
 ];
+
+// =============================================================
+// SÀN ĐẤU GIÁ (/realtor/dau-gia) — trạng thái khởi tạo cho bảng điện.
+// Cố định để SSR không lệch hydration; mô phỏng realtime chạy sau mount.
+// =============================================================
+
+/** Một điểm giá trên biểu đồ diễn biến (trục x = giờ, trục y = giá) */
+export interface PricePoint {
+  time: string; // "14:02"
+  price: number;
+}
+
+/** Trạng thái khởi tạo của một lô đang LIVE trên sàn */
+export interface InitialMarket {
+  bids: AuctionBid[]; // mới nhất đứng đầu
+  history: PricePoint[]; // cũ -> mới (vẽ biểu đồ)
+}
+
+export const INITIAL_MARKETS: Record<string, InitialMarket> = {
+  a1: {
+    bids: INITIAL_BIDS,
+    history: [
+      { time: "14:00", price: 4_200_000_000 },
+      { time: "14:00", price: 4_250_000_000 },
+      { time: "14:01", price: 4_300_000_000 },
+      { time: "14:01", price: 4_350_000_000 },
+      { time: "14:02", price: 4_400_000_000 },
+    ],
+  },
+  a2: {
+    bids: [
+      { id: 13, name: "Đặng H. P***", price: 12_800_000_000, delta: 1, time: "14:03:05" },
+      { id: 12, name: "Bùi K. L***", price: 12_700_000_000, delta: 1, time: "14:02:10" },
+      { id: 11, name: "Hoàng M. T***", price: 12_600_000_000, delta: 1, time: "14:01:24" },
+      { id: 10, name: "Giá khởi điểm", price: 12_500_000_000, delta: 0, time: "14:00:00" },
+    ],
+    history: [
+      { time: "14:00", price: 12_500_000_000 },
+      { time: "14:01", price: 12_600_000_000 },
+      { time: "14:02", price: 12_700_000_000 },
+      { time: "14:03", price: 12_800_000_000 },
+    ],
+  },
+  a3: {
+    bids: [
+      { id: 23, name: "Võ N. S***", price: 7_950_000_000, delta: 1, time: "14:02:52" },
+      { id: 22, name: "Lê T. M***", price: 7_900_000_000, delta: 1, time: "14:01:47" },
+      { id: 21, name: "Trần V. H***", price: 7_850_000_000, delta: 1, time: "14:00:58" },
+      { id: 20, name: "Giá khởi điểm", price: 7_800_000_000, delta: 0, time: "14:00:00" },
+    ],
+    history: [
+      { time: "14:00", price: 7_800_000_000 },
+      { time: "14:00", price: 7_850_000_000 },
+      { time: "14:01", price: 7_900_000_000 },
+      { time: "14:02", price: 7_950_000_000 },
+    ],
+  },
+};
 
 export const CHAT_POOL: { name: string; text: string }[] = [
   { name: "Minh Trần", text: "Căn này cho thuê chắc cũng 25tr/tháng 👍" },
