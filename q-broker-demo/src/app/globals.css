@@ -16,3 +16,132 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
 }
+
+/* ==== Hiệu ứng cho trang livestream đấu giá (/realtor/livestream) ==== */
+
+/* Tim bay lên kiểu TikTok Live */
+@keyframes float-heart {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-260px) translateX(var(--drift, 0px)) scale(1.15);
+  }
+}
+.animate-float-heart {
+  animation: float-heart 2.6s ease-out forwards;
+}
+
+/* Dải giá chạy ngang kiểu bảng điện cafef */
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-ticker {
+  animation: ticker-scroll 32s linear infinite;
+}
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Giá vừa nhảy -> loé xanh rồi trở về trắng */
+@keyframes price-flash {
+  0% {
+    color: #4ade80;
+    text-shadow: 0 0 20px rgba(74, 222, 128, 0.85);
+  }
+  100% {
+    color: #ffffff;
+    text-shadow: none;
+  }
+}
+.animate-price-flash {
+  animation: price-flash 1s ease-out;
+}
+
+/* Dòng trả giá / chat mới trượt vào */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Thẻ chúc mừng bật lên khi chốt giá */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-pop-in {
+  animation: pop-in 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+/* Confetti rơi khi chúc mừng người trúng đấu giá */
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-10vh) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+.animate-confetti {
+  animation: confetti-fall linear forwards;
+}
+
+/* Toast "đã sao chép" trượt lên rồi mờ dần */
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  15%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+.animate-toast {
+  animation: toast-in 2.4s ease-in-out forwards;
+}
+
+/* Thanh tiến trình của hero slider tin tức (chạy hết 1 nhịp slide) */
+@keyframes news-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
