@@ -5,8 +5,10 @@ import {
   AFFILIATE_LEADERBOARD,
   AFFILIATE_STEPS,
   AFFILIATE_TIERS,
+  BROKER_FEE_TERMS,
   COMMISSION_PRODUCTS,
   MARKETING_ASSETS,
+  MONEY_FLOW_STEPS,
 } from "@/data/affiliate";
 
 // =============================================================
@@ -31,14 +33,15 @@ export function AffiliateHero() {
           Q-Broker Affiliate
         </p>
         <h1 className="mx-auto mt-3 max-w-3xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
-          Giới thiệu bất động sản,
-          <br className="hidden sm:block" /> nhận tới{" "}
-          <span className="text-amber-300">30% hoa hồng</span> mỗi giao dịch
+          Giới thiệu bất động sản, nhận tới{" "}
+          <span className="text-amber-300">60% phí giới thiệu</span>
+          <br className="hidden sm:block" /> mỗi giao dịch chốt
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-sm text-realtor-50/90 sm:text-base">
-          Mô hình pay-at-closing chuẩn quốc tế: chia sẻ link, hệ thống theo dõi
-          realtime, tiền chỉ về khi giao dịch chốt thành công — minh bạch như
-          Zillow Flex, hào phóng hơn với cookie 30 ngày.
+          Mô hình pay-at-closing chuẩn quốc tế: khi môi giới chốt deal từ mạng
+          lưới, họ trả Q-Broker phí giới thiệu — bạn nhận tới 60% khoản đó.
+          Khách của bạn không mất thêm đồng nào. Minh bạch như Zillow Flex, cookie
+          ghi nhận 30 ngày.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <AffiliateSignupButton
@@ -56,7 +59,7 @@ export function AffiliateHero() {
 
         <dl className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-4">
           {[
-            { value: "30%", label: "hoa hồng tối đa / giao dịch" },
+            { value: "60%", label: "phí giới thiệu chia cho đối tác" },
             { value: "30 ngày", label: "cookie ghi nhận khách" },
             { value: "12 tháng", label: "hoa hồng lặp lại gói hội viên" },
           ].map((s) => (
@@ -106,6 +109,107 @@ export function AffiliateSteps() {
   );
 }
 
+/** "Ai trả tiền cho bạn?" — dòng tiền 3 bước, trả lời thắc mắc lớn nhất */
+export function AffiliateMoneyFlow() {
+  return (
+    <section className="bg-realtor-ink">
+      <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">
+            Ai trả tiền cho bạn?
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-300">
+            Câu hỏi quan trọng nhất — và câu trả lời rất đơn giản: Q-Broker trả,
+            trích từ phí môi giới có sẵn. Khách của bạn không mất thêm đồng nào.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {MONEY_FLOW_STEPS.map((s, i) => (
+            <div key={s.who} className="relative rounded-2xl bg-white/5 p-6 ring-1 ring-white/10">
+              {/* Mũi tên nối các bước trên desktop */}
+              {i < MONEY_FLOW_STEPS.length - 1 && (
+                <Icon
+                  name="ArrowRight"
+                  className="absolute -right-4 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-realtor-200/60 lg:block"
+                />
+              )}
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-realtor-500/20 text-realtor-200">
+                <Icon name={s.icon} className="h-5 w-5" />
+              </span>
+              <p className="mt-4 text-xs font-bold uppercase tracking-wide text-realtor-200">
+                {s.who}
+              </p>
+              <p className="mt-1.5 text-sm font-semibold leading-snug text-white">
+                {s.action}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-400">{s.note}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mx-auto mt-6 flex max-w-2xl items-start justify-center gap-2 text-center text-xs text-slate-400">
+          <Icon name="ShieldCheck" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+          Chương trình một cấp, không phí tham gia, không doanh số bắt buộc —
+          toàn bộ cơ chế nằm trong Điều khoản bạn đã đồng ý khi vào trang.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/** Cam kết phía môi giới — vì sao hoa hồng affiliate được đảm bảo */
+export function AffiliateBrokerCommitment() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+      <div className="text-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+          <Icon name="ShieldCheck" className="h-3.5 w-3.5" />
+          Hoa hồng của bạn được đảm bảo
+        </span>
+        <h2 className="mt-3 text-2xl font-bold text-realtor-ink sm:text-3xl">
+          Cam kết phía môi giới
+        </h2>
+        <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+          Bạn được trả hoa hồng vì môi giới bị ràng buộc phải trả phí giới thiệu
+          cho Q-Broker. Rủi ro thu phí là của nền tảng, không phải của bạn — dưới
+          đây là các điều khoản khép kín dòng tiền.
+        </p>
+      </div>
+      <div className="mt-8 grid gap-5 sm:grid-cols-2">
+        {BROKER_FEE_TERMS.map((s) => (
+          <div
+            key={s.title}
+            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
+            <h3 className="flex items-center gap-2.5 text-sm font-bold text-realtor-ink">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-realtor-50 text-realtor-500">
+                <Icon name={s.icon} className="h-5 w-5" />
+              </span>
+              {s.title}
+            </h3>
+            <ul className="mt-4 space-y-2.5">
+              {s.points.map((p) => (
+                <li key={p} className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-600">
+                  <Icon
+                    name="Check"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500"
+                  />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p className="mx-auto mt-6 flex max-w-2xl items-start justify-center gap-2 text-center text-xs text-slate-500">
+        <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-realtor-500" />
+        Môi giới xác nhận đồng ý các điều khoản này khi nhận khách trên nền tảng.
+        Phí giới thiệu được trích tự động qua ví ký quỹ trước khi giải ngân cho
+        môi giới.
+      </p>
+    </section>
+  );
+}
+
 /** 3 hạng đối tác Đồng / Bạc / Vàng */
 export function AffiliateTiers() {
   return (
@@ -138,9 +242,9 @@ export function AffiliateTiers() {
               <h3 className="text-lg font-bold text-realtor-ink">{t.name}</h3>
               <p className="mt-0.5 text-xs text-slate-500">{t.condition}</p>
               <p className="mt-4 text-3xl font-extrabold text-realtor-500">
-                {t.dealRate}%
+                {t.platformShareRate}%
                 <span className="ml-1 text-sm font-semibold text-slate-500">
-                  phí môi giới / giao dịch
+                  phí giới thiệu / giao dịch
                 </span>
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-600">

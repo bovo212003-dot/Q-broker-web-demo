@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import {
   BROKERAGE_FEE_RATE,
   MEMBERSHIP_PRICE,
+  PLATFORM_FEE_RATE,
   tierForQuarterDeals,
 } from "@/data/affiliate";
 
@@ -65,9 +66,15 @@ export function AffiliateCalculator() {
   // Hạng xét theo QUÝ -> quy đổi từ số giao dịch mỗi tháng.
   const tier = tierForQuarterDeals(deals * 3);
 
-  // Hoa hồng giao dịch: giá trị × 2% phí môi giới × tỷ lệ theo hạng.
+  // Hoa hồng giao dịch: giá trị × 2% HH môi giới × 25% phí giới thiệu ×
+  // tỷ lệ affiliate được chia theo hạng.
   const dealIncome =
-    deals * avgValue * 1_000_000_000 * BROKERAGE_FEE_RATE * (tier.dealRate / 100);
+    deals *
+    avgValue *
+    1_000_000_000 *
+    BROKERAGE_FEE_RATE *
+    PLATFORM_FEE_RATE *
+    (tier.platformShareRate / 100);
   // Hoa hồng gói hội viên (tháng đầu; gói lặp lại 12 tháng nên thực tế cao hơn).
   const memberIncome = members * MEMBERSHIP_PRICE * (tier.recurringRate / 100);
   const monthly = dealIncome + memberIncome;
@@ -123,7 +130,7 @@ export function AffiliateCalculator() {
         <div className="bg-gradient-to-br from-realtor-700 to-realtor-500 p-6 text-white lg:p-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
             <Icon name="Award" className="h-3.5 w-3.5 text-amber-300" />
-            {tier.name} — {tier.dealRate}% / giao dịch
+            {tier.name} — {tier.platformShareRate}% phí giới thiệu
           </span>
 
           <p className="mt-5 text-xs uppercase tracking-widest text-realtor-100">
@@ -136,7 +143,7 @@ export function AffiliateCalculator() {
           <dl className="mt-6 space-y-3 border-t border-white/20 pt-5 text-sm">
             <div className="flex items-center justify-between gap-2">
               <dt className="text-realtor-50/85">
-                Hoa hồng giao dịch ({tier.dealRate}% phí môi giới)
+                Hoa hồng giao dịch ({tier.platformShareRate}% phí giới thiệu)
               </dt>
               <dd className="font-mono font-bold">{vnd(dealIncome)}</dd>
             </div>
@@ -156,8 +163,9 @@ export function AffiliateCalculator() {
 
           <p className="mt-4 flex items-start gap-1.5 text-xs text-realtor-50/70">
             <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            Ước tính minh hoạ theo phí môi giới 2%. Hoa hồng gói hội viên lặp lại
-            tới 12 tháng nên thu nhập thực tế thường cao hơn.
+            Ước tính minh hoạ: HH môi giới 2% → môi giới trả Q-Broker 25% phí
+            giới thiệu → bạn nhận phần theo hạng. Gói hội viên lặp lại tới 12
+            tháng nên thu nhập thực tế thường cao hơn.
           </p>
         </div>
       </div>

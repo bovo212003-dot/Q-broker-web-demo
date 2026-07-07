@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { withRole } from "@/lib/role";
+import { RoleId } from "@/types";
 import { formatVnd } from "@/data/realtorListings";
 import {
   AUCTION_LOTS,
@@ -69,6 +72,10 @@ const timeStr = () =>
 const fullVnd = (v: number) => `${v.toLocaleString("vi-VN")} đ`;
 
 export function AuctionLiveRoom() {
+  // Giữ ngữ cảnh role khi điều hướng sang sàn đấu giá (?role=...).
+  const roleId = (useSearchParams().get("role") ?? undefined) as
+    | RoleId
+    | undefined;
   const [lotIdx, setLotIdx] = useState(0);
   const lot = LIVE_QUEUE[lotIdx];
 
@@ -403,7 +410,7 @@ export function AuctionLiveRoom() {
               </div>
               {/* Nút búa: sang sàn đấu giá của sản phẩm đang phát */}
               <Link
-                href={`/realtor/dau-gia?lot=${lot.id}`}
+                href={withRole(`/realtor/dau-gia?lot=${lot.id}`, roleId)}
                 className="relative flex h-11 w-11 items-center justify-center rounded-full bg-amber-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-amber-400 active:scale-95"
                 aria-label="Tham gia đấu giá trực tiếp"
                 title="Tham gia đấu giá"
@@ -481,7 +488,7 @@ export function AuctionLiveRoom() {
               </div>
               <div className="flex shrink-0 gap-2">
                 <Link
-                  href={`/realtor/dau-gia?lot=${lot.id}`}
+                  href={withRole(`/realtor/dau-gia?lot=${lot.id}`, roleId)}
                   className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-400"
                 >
                   <Icon name="Gavel" className="h-3.5 w-3.5" />

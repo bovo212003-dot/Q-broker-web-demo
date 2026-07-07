@@ -4,6 +4,7 @@ import { RealtorHeader } from "@/components/realtor/RealtorHeader";
 import { RealtorHero } from "@/components/realtor/RealtorHero";
 import { RealtorFooter } from "@/components/realtor/RealtorFooter";
 import { RealtorListings } from "@/components/realtor/RealtorListings";
+import { PromoCarousel } from "@/components/training/PromoCarousel";
 import { AffiliateBanner } from "@/components/realtor/AffiliateBanner";
 import { LISTINGS, POPULAR_CITIES } from "@/data/realtorListings";
 import { ROLES } from "@/config/roles";
@@ -28,14 +29,50 @@ export default function RealtorPage({
   const role =
     roleId && roleId !== "guest" ? ROLES[roleId] : undefined;
   const userName = role?.name; // sau này thay bằng tên thật của người dùng
+  const daoTaoHref = role
+    ? `/realtor/dao-tao?role=${role.id}`
+    : "/realtor/dao-tao";
 
   return (
     <div className="min-h-screen bg-white">
       <RealtorHeader userName={userName} roleId={role?.id} />
       <RealtorHero />
 
-      {/* Sản phẩm + bộ lọc theo khu vực */}
-      <RealtorListings listings={LISTINGS} regions={POPULAR_CITIES} />
+      {/* Nổi bật module Đào tạo (đặt TRÊN sản phẩm): banner luân chuyển + nút
+          liên kết sang trang đào tạo của Q-Broker (giữ ?role= khi điều hướng) */}
+      <section className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
+        <div className="mb-6 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold text-realtor-ink">
+              Đào tạo &amp; chứng chỉ môi giới
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Luyện thi chứng chỉ hành nghề, nâng cấp kỹ năng cùng Q-Broker
+            </p>
+          </div>
+          <Link
+            href={daoTaoHref}
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-realtor-500 hover:text-realtor-600"
+          >
+            Xem tất cả khoá học
+            <Icon name="ArrowRight" className="h-4 w-4" />
+          </Link>
+        </div>
+        {/* Nút "Ứng tuyển ngay" / "Bắt đầu học" trong banner sẽ nhảy sang Đào tạo */}
+        <PromoCarousel ctaHref={daoTaoHref} />
+      </section>
+
+      {/* Sản phẩm từ Chia sẻ giỏ hàng + bộ lọc khu vực (giữ ?role= qua CTA) */}
+      <RealtorListings
+        listings={LISTINGS}
+        regions={POPULAR_CITIES}
+        demandHref={
+          role
+            ? `/realtor/can-thue-mua?role=${role.id}`
+            : "/realtor/can-thue-mua"
+        }
+        auctionHref={role ? `/realtor/dau-gia?role=${role.id}` : "/realtor/dau-gia"}
+      />
 
       {/* Banner chương trình đối tác affiliate (giữ ?role= khi điều hướng) */}
       <AffiliateBanner
