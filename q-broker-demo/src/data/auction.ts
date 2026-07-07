@@ -231,8 +231,15 @@ export function matchScore(b: AuctionBroker): number {
   return Math.round(s);
 }
 
-// ---- Tin nhu cầu đã đăng của tôi (mock) ---------------------
-export type RequestStatus = "Đang đấu giá" | "Đã ghép nối" | "Hoàn thành";
+// ---- Tin nhu cầu đã đăng của tôi ----------------------------
+// "Chờ kết nối": tin đang treo trên bảng tin chờ — môi giới chủ động
+// đăng ký tham gia, KHÔNG giới hạn thời gian. Tin chỉ kết thúc khi
+// khách bắt đầu chọn môi giới hoặc tự đóng tin.
+export type RequestStatus =
+  | "Chờ kết nối"
+  | "Đã ghép nối"
+  | "Hoàn thành"
+  | "Đã đóng";
 
 export interface MyRequest {
   id: string;
@@ -243,6 +250,28 @@ export interface MyRequest {
   status: RequestStatus;
   createdAt: string;
   brokerName?: string; // môi giới đã ghép (nếu có)
+  joined?: number; // số môi giới đã đăng ký tham gia tin
+  draft?: DemandDraft; // nhu cầu gốc — để mở lại trang chờ
+}
+
+/** Tin do khách tự đăng trong phiên demo — lưu localStorage để tin
+ *  "Chờ kết nối" vẫn treo khi rời trang / tải lại. */
+export type StoredRequest = MyRequest & { draft: DemandDraft; joined: number };
+
+const STORAGE_KEY = "qb-my-requests";
+
+export function loadMyRequests(): StoredRequest[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function saveMyRequests(list: StoredRequest[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
 export const MY_REQUESTS: MyRequest[] = [
@@ -262,8 +291,18 @@ export const MY_REQUESTS: MyRequest[] = [
     type: "Thuê",
     area: "Quận 1, TP.HCM",
     budget: "25 - 50 triệu/th",
-    status: "Đang đấu giá",
+    status: "Chờ kết nối",
     createdAt: "2026-07-05",
+    joined: 3,
+    draft: {
+      type: "Thuê",
+      propertyType: "Văn phòng",
+      area: "Quận 1, TP.HCM",
+      budget: "25 - 50 triệu/th",
+      size: "80",
+      criteria: ["Gần Metro"],
+      note: "",
+    },
   },
   {
     id: "r3",
@@ -274,5 +313,119 @@ export const MY_REQUESTS: MyRequest[] = [
     status: "Hoàn thành",
     createdAt: "2026-06-18",
     brokerName: "Hoàng Văn Khang",
+  },
+];
+
+// =============================================================
+// PHÍA MÔI GIỚI — BẢNG TIN NHU CẦU KHÁCH HÀNG
+// Môi giới xem nhiều tin đang mở cùng lúc, lọc theo khu vực đảm nhiệm,
+// "Nhận tư vấn" để xếp hàng đợi khách matching rồi mới trao đổi.
+// =============================================================
+
+// Ảnh minh hoạ tin đăng theo loại BĐS (đính kèm trong chat & thẻ tin).
+export const PROPERTY_THUMB: Record<PropertyType, string> = {
+  "Căn hộ": "photo-1522708323590-d24dbb6b0267",
+  "Nhà riêng": "photo-1568605114967-8130f3a36994",
+  "Nhà phố": "photo-1512917774080-9991f1c4c750",
+  "Biệt thự": "photo-1613490493576-7fde63acd811",
+  "Đất nền": "photo-1500382017468-9049fed747ef",
+  "Văn phòng": "photo-1497366216548-37526070297c",
+  "Mặt bằng": "photo-1497366811353-6870744d04b2",
+};
+
+export const propertyThumb = (t: PropertyType, w = 200) =>
+  img(PROPERTY_THUMB[t] ?? PROPERTY_THUMB["Căn hộ"], w);
+
+/** Hồ sơ môi giới đang đăng nhập (mock) — để lọc tin theo khu vực đảm nhiệm. */
+export const BROKER_ME = {
+  name: "Trần Minh Quân",
+  avatar: img("photo-1560250097-0b93528c311a", 200),
+  areas: ["Quận 7, TP.HCM", "Bình Thạnh, TP.HCM"] as string[],
+  specialties: ["Căn hộ", "Nhà phố"] as PropertyType[],
+};
+
+export type DemandStatus = "Đang mở" | "Đã đóng";
+
+/** Tin nhu cầu công khai của khách — hiển thị trên bảng tin phía môi giới. */
+export interface OpenDemand {
+  id: string;
+  customer: string; // tên khách (rút gọn)
+  avatar: string;
+  type: TransactionType;
+  propertyType: PropertyType;
+  area: string;
+  budget: string;
+  size?: string;
+  bedrooms?: string;
+  criteria: string[];
+  note: string;
+  createdAt: string;
+  status: DemandStatus;
+  registered: number; // số môi giới đã nhận tư vấn (đang xếp hàng)
+}
+
+export const OPEN_DEMANDS: OpenDemand[] = [
+  {
+    id: "d1", customer: "Chị Ngọc A.", avatar: img("photo-1544005313-94ddf0286df2", 200),
+    type: "Mua", propertyType: "Căn hộ", area: "Quận 7, TP.HCM", budget: "2 - 4 tỷ",
+    size: "70", bedrooms: "2", criteria: ["Có sổ hồng", "Nội thất đầy đủ", "Gần trường học"],
+    note: "Gia đình trẻ có 1 bé, ưu tiên khu dân cư an ninh, gần trường tiểu học quốc tế.",
+    createdAt: "2026-07-06", status: "Đang mở", registered: 4,
+  },
+  {
+    id: "d2", customer: "Anh Hải P.", avatar: img("photo-1507003211169-0a1dd7228f2d", 200),
+    type: "Thuê", propertyType: "Căn hộ", area: "Quận 7, TP.HCM", budget: "10 - 25 triệu/th",
+    size: "55", bedrooms: "2", criteria: ["Nội thất đầy đủ", "Tầng cao", "Cho nuôi thú cưng"],
+    note: "Cần dọn vào trong tháng, ưu tiên căn view đẹp, có chỗ để xe hơi.",
+    createdAt: "2026-07-06", status: "Đang mở", registered: 2,
+  },
+  {
+    id: "d3", customer: "Chị Mai T.", avatar: img("photo-1573496359142-b8d87734a5a2", 200),
+    type: "Mua", propertyType: "Nhà phố", area: "Bình Thạnh, TP.HCM", budget: "7 - 15 tỷ",
+    size: "90", bedrooms: "4+", criteria: ["Có sổ hồng", "Khu an ninh"],
+    note: "Mua để ở lâu dài, cần nhà hẻm xe hơi, pháp lý rõ ràng.",
+    createdAt: "2026-07-05", status: "Đang mở", registered: 6,
+  },
+  {
+    id: "d4", customer: "Anh Long V.", avatar: img("photo-1633332755192-727a05c4013d", 200),
+    type: "Thuê", propertyType: "Văn phòng", area: "Quận 1, TP.HCM", budget: "25 - 50 triệu/th",
+    size: "120", criteria: ["Gần Metro"],
+    note: "Startup ~20 nhân sự, cần văn phòng hạng B trở lên, chỗ đậu xe máy rộng.",
+    createdAt: "2026-07-05", status: "Đang mở", registered: 3,
+  },
+  {
+    id: "d5", customer: "Chị Hương L.", avatar: img("photo-1580489944761-15a19d654956", 200),
+    type: "Mua", propertyType: "Đất nền", area: "TP. Thủ Đức, TP.HCM", budget: "4 - 7 tỷ",
+    size: "100", criteria: ["Có sổ hồng"],
+    note: "Đầu tư trung hạn, ưu tiên khu quy hoạch rõ ràng, gần trục đường lớn.",
+    createdAt: "2026-07-04", status: "Đang mở", registered: 5,
+  },
+  {
+    id: "d6", customer: "Anh Khoa N.", avatar: img("photo-1472099645785-5658abf4ff4e", 200),
+    type: "Mua", propertyType: "Nhà riêng", area: "Quận 7, TP.HCM", budget: "4 - 7 tỷ",
+    size: "80", bedrooms: "3", criteria: ["Có sổ hồng", "Khu an ninh"],
+    note: "Cần nhà 1 trệt 2 lầu, hẻm ô tô, gần chợ và trường.",
+    createdAt: "2026-07-04", status: "Đang mở", registered: 1,
+  },
+  {
+    id: "d7", customer: "Chị Vân K.", avatar: img("photo-1573497019940-1c28c88b4f3e", 200),
+    type: "Mua", propertyType: "Căn hộ", area: "Cầu Giấy, Hà Nội", budget: "2 - 4 tỷ",
+    size: "65", bedrooms: "2", criteria: ["Gần Metro", "Nội thất đầy đủ"],
+    note: "Vợ chồng trẻ mua căn đầu tiên, ưu tiên dự án bàn giao ngay.",
+    createdAt: "2026-07-03", status: "Đang mở", registered: 3,
+  },
+  {
+    id: "d8", customer: "Anh Tuấn D.", avatar: img("photo-1552374196-c4e7ffc6e126", 200),
+    type: "Mua", propertyType: "Biệt thự", area: "Hải Châu, Đà Nẵng", budget: "7 - 15 tỷ",
+    size: "200", bedrooms: "4+", criteria: ["View sông", "Khu an ninh"],
+    note: "Second home nghỉ dưỡng, ưu tiên biệt thự ven sông/biển.",
+    createdAt: "2026-07-02", status: "Đang mở", registered: 2,
+  },
+  {
+    id: "d9", customer: "Chị Thu H.", avatar: img("photo-1544005313-94ddf0286df2", 200),
+    type: "Thuê", propertyType: "Nhà phố", area: "Quận 7, TP.HCM", budget: "25 - 50 triệu/th",
+    size: "100", bedrooms: "4+", criteria: ["Nội thất đầy đủ"],
+    note: "Thuê làm homestay, cần nhà nguyên căn mặt tiền, đã hoàn tất thuê.",
+    createdAt: "2026-06-28", status: "Đã đóng", registered: 8,
   },
 ];

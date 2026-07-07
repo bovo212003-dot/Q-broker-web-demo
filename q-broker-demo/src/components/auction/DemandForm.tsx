@@ -49,8 +49,8 @@ export function DemandForm({
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <h2 className="text-xl font-bold text-al-700">Nhu cầu của bạn</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Điền một lần duy nhất — hệ thống sẽ mở phiên đấu giá để môi giới phù
-          hợp đăng ký hỗ trợ bạn.
+          Điền một lần duy nhất — tin của bạn sẽ treo trên bảng tin chờ để môi
+          giới phù hợp chủ động đăng ký hỗ trợ bạn.
         </p>
 
         {/* Loại giao dịch */}
@@ -203,8 +203,8 @@ export function DemandForm({
               : "cursor-not-allowed bg-slate-300"
           )}
         >
-          <Icon name="Gavel" className="h-5 w-5" />
-          Mở phiên đấu giá môi giới
+          <Icon name="Radar" className="h-5 w-5" />
+          Đăng tin lên bảng chờ kết nối
         </button>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
           <Icon name="ShieldCheck" className="h-3.5 w-3.5 text-emerald-500" />

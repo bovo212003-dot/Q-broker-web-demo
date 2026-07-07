@@ -136,12 +136,17 @@ function Hero({
 }) {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-al-700 via-al-600 to-al-500 px-6 py-10 text-white shadow-lg sm:px-12">
-      {/* Ảnh nền bên phải (mờ dần vào gradient) */}
+      {/* Ảnh nền phủ toàn khung — gradient chuyển mượt, không còn seam dọc */}
       {image && (
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-3/5 md:block">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-al-700 via-al-600/85 to-al-600/30" />
+          <img
+            src={image}
+            alt=""
+            className="h-full w-full animate-kenburns object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-al-800 via-al-700/90 to-al-600/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-al-800/60 to-transparent" />
         </div>
       )}
       <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-flame-500/30 blur-3xl" />

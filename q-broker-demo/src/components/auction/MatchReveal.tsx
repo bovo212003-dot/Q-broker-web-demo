@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { AuctionBroker, DemandDraft, matchScore } from "@/data/auction";
+import { AuctionBroker, DemandDraft, matchScore, propertyThumb } from "@/data/auction";
 import { cn } from "@/lib/utils";
+import { ChatWidget } from "./ChatWidget";
 
 // BƯỚC 4 — Ghép nối thông minh: chấm Matching Score các môi giới đã chọn,
 // công bố 1 người phù hợp nhất, mở phòng chat & chia sẻ liên hệ (mock).
@@ -21,7 +22,7 @@ export function MatchReveal({
   liked: AuctionBroker[];
   onRetry: () => void;
   onUseAll: () => void;
-  onFinish: () => void;
+  onFinish: (winner?: AuctionBroker) => void;
 }) {
   // Không chọn ai -> mời quẹt lại hoặc để hệ thống tự chọn.
   if (liked.length === 0) {
@@ -66,7 +67,7 @@ function Matching({
 }: {
   draft: DemandDraft;
   liked: AuctionBroker[];
-  onFinish: () => void;
+  onFinish: (winner?: AuctionBroker) => void;
 }) {
   const [filled, setFilled] = useState(false); // chạy animation thanh điểm
   const [revealed, setRevealed] = useState(false);
@@ -158,7 +159,7 @@ function Winner({
 }: {
   draft: DemandDraft;
   winner: AuctionBroker;
-  onFinish: () => void;
+  onFinish: (winner?: AuctionBroker) => void;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -235,12 +236,25 @@ function Winner({
         </div>
       </div>
 
-      {/* Phòng chat demo */}
-      {chatOpen && <ChatRoom draft={draft} broker={winner} />}
+      {/* Phòng chat nổi (góc phải dưới) — đính kèm tin đăng đang trao đổi */}
+      {chatOpen && (
+        <ChatWidget
+          peerName={winner.name}
+          peerAvatar={winner.avatar}
+          post={{
+            thumb: propertyThumb(draft.propertyType),
+            title: `Cần ${draft.type.toLowerCase()} ${draft.propertyType.toLowerCase()} · ${draft.area}`,
+            budget: draft.budget,
+          }}
+          greeting={`Chào anh/chị! Tôi là ${winner.name}. Tôi đã xem tin đăng ${draft.type.toLowerCase()} ${draft.propertyType.toLowerCase()} tại ${draft.area} (ngân sách ${draft.budget}). Tôi có vài sản phẩm rất khớp, anh/chị muốn xem trước hình ảnh hay đặt lịch đi xem trực tiếp ạ?`}
+          autoReply="Dạ vâng, tôi ghi nhận rồi ạ! Trong hôm nay tôi sẽ gửi anh/chị danh sách 3-5 sản phẩm phù hợp kèm pháp lý đầy đủ nhé. 🏡"
+          onClose={() => setChatOpen(false)}
+        />
+      )}
 
       <div className="mt-5 text-center">
         <button
-          onClick={onFinish}
+          onClick={() => onFinish(winner)}
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-al-600"
         >
           <Icon name="RotateCcw" className="h-4 w-4" />
@@ -250,112 +264,6 @@ function Winner({
           Sau khi kết thúc tư vấn, hai bên có thể đánh giá lẫn nhau — điểm uy
           tín & tín nhiệm sẽ được cập nhật.
         </p>
-      </div>
-    </div>
-  );
-}
-
-// -------- Phòng chat (mock) --------
-interface ChatMsg {
-  from: "me" | "broker";
-  text: string;
-}
-
-function ChatRoom({
-  draft,
-  broker,
-}: {
-  draft: DemandDraft;
-  broker: AuctionBroker;
-}) {
-  const [msgs, setMsgs] = useState<ChatMsg[]>([
-    {
-      from: "broker",
-      text: `Chào anh/chị! Tôi là ${broker.name}. Tôi đã xem nhu cầu ${draft.type.toLowerCase()} ${draft.propertyType.toLowerCase()} tại ${draft.area} (ngân sách ${draft.budget}). Tôi có vài sản phẩm rất khớp, anh/chị muốn xem trước hình ảnh hay đặt lịch đi xem trực tiếp ạ?`,
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs]);
-
-  const send = () => {
-    const text = input.trim();
-    if (!text) return;
-    setMsgs((m) => [...m, { from: "me", text }]);
-    setInput("");
-    // Môi giới trả lời tự động (demo)
-    setTimeout(() => {
-      setMsgs((m) => [
-        ...m,
-        {
-          from: "broker",
-          text: "Dạ vâng, tôi ghi nhận rồi ạ! Trong hôm nay tôi sẽ gửi anh/chị danh sách 3-5 sản phẩm phù hợp kèm pháp lý đầy đủ nhé. 🏡",
-        },
-      ]);
-    }, 900);
-  };
-
-  return (
-    <div className="mt-4 animate-pop-in overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
-      {/* Header chat */}
-      <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={broker.avatar}
-          alt={broker.name}
-          className="h-9 w-9 rounded-full object-cover"
-        />
-        <div className="flex-1">
-          <p className="text-sm font-bold text-slate-800">{broker.name}</p>
-          <p className="flex items-center gap-1 text-xs text-emerald-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Đang hoạt động
-          </p>
-        </div>
-        <Icon name="Phone" className="h-4 w-4 text-slate-400" />
-      </div>
-
-      {/* Tin nhắn */}
-      <div className="max-h-64 space-y-3 overflow-y-auto bg-slate-50 p-4">
-        {msgs.map((m, i) => (
-          <div
-            key={i}
-            className={cn("flex", m.from === "me" ? "justify-end" : "justify-start")}
-          >
-            <p
-              className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                m.from === "me"
-                  ? "rounded-br-md bg-al-600 text-white"
-                  : "rounded-bl-md bg-white text-slate-700 shadow-sm"
-              )}
-            >
-              {m.text}
-            </p>
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Ô nhập */}
-      <div className="flex items-center gap-2 border-t border-slate-100 p-3">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Nhập tin nhắn..."
-          className="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
-        />
-        <button
-          onClick={send}
-          aria-label="Gửi"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-flame-500 text-white transition-colors hover:bg-flame-600"
-        >
-          <Icon name="Send" className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );

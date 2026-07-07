@@ -85,6 +85,10 @@ const config: Config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        kenburns: {
+          "0%": { transform: "scale(1) translate(0, 0)" },
+          "100%": { transform: "scale(1.12) translate(-2%, -1%)" },
+        },
       },
       animation: {
         "fade-up": "fade-up .5s ease-out both",
@@ -93,6 +97,7 @@ const config: Config = {
         marquee: "marquee 24s linear infinite",
         float: "float 4s ease-in-out infinite",
         shimmer: "shimmer 2.2s linear infinite",
+        kenburns: "kenburns 18s ease-in-out infinite alternate",
       },
     },
   },
