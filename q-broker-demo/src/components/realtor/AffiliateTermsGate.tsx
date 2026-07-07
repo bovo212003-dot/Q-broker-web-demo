@@ -69,8 +69,8 @@ export function AffiliateTermsGate({
               Điều khoản chương trình Affiliate
             </p>
             <p className="mt-1 text-xs text-realtor-50/90">
-              5 điều, đọc trong 2 phút: cách hoạt động, ai trả tiền, hoa hồng,
-              pháp lý — thuế và quy tắc cấm.
+              6 điều, đọc trong 3 phút: cách hoạt động, ai trả tiền, hoa hồng,
+              cơ chế đảm bảo, pháp lý — thuế và quy tắc cấm.
             </p>
             <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold">
               <Icon name={roleId ? "UserRound" : "Users"} className="h-3 w-3" />

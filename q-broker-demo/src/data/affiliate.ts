@@ -214,7 +214,11 @@ export const AFFILIATE_FAQS: AffiliateFaq[] = [
   },
   {
     q: "Lỡ môi giới không chịu trả phí giới thiệu thì hoa hồng của tôi có mất không?",
-    a: "Không. Rủi ro thu phí là của Q-Broker, không phải của bạn. Hoa hồng giao dịch được giữ ở ví ký quỹ và phí giới thiệu tự động trích trước khi giải ngân cho môi giới, nên tiền của bạn đã được tách sẵn. Môi giới cũng ký cam kết trả phí và chịu chế tài (khoá tài khoản, thu hồi quyền lợi) nếu trốn phí — xem mục \"Cam kết phía môi giới\".",
+    a: "Không. Rủi ro thu phí là của Q-Broker, không phải của bạn. Hoa hồng giao dịch được giữ ở ví ký quỹ và phí giới thiệu tự động trích trước khi giải ngân cho môi giới, nên tiền của bạn đã được tách sẵn. Môi giới còn có điểm uy tín — trả phí đúng hạn mới được ưu tiên nhận khách mới — và chịu chế tài (khoá tài khoản, truy thu) nếu trốn phí — xem mục \"Cam kết phía môi giới\".",
+  },
+  {
+    q: "Môi giới rời Q-Broker hoặc cố tình chốt ngoài nền tảng thì sao?",
+    a: "Nghĩa vụ trả phí gắn với KHÁCH, không gắn với tài khoản: môi giới đã claim khách của bạn thì trong 12 tháng attribution, rời nền tảng hay chốt ngoài luồng vẫn phải trả phí (đã ký điện tử lúc nhận khách). Q-Broker audit định kỳ và yêu cầu hồ sơ chốt deal bắt buộc để phát hiện chốt chui; trường hợp vi phạm bị truy thu kèm bồi thường — mô hình vận hành giống Realtor.com ReadyConnect.",
   },
   {
     q: "Hoa hồng có bị trừ thuế không? Pháp lý thế nào?",
@@ -242,31 +246,51 @@ export const BROKER_FEE_TERMS: BrokerTermsSection[] = [
     title: "1. Nghĩa vụ trả phí giới thiệu",
     points: [
       "Khi nhận khách hoặc deal từ mạng lưới Q-Broker (bao gồm khách do đối tác affiliate giới thiệu) và chốt thành công, môi giới có nghĩa vụ trả Q-Broker phí giới thiệu bằng 25% hoa hồng môi giới của giao dịch đó.",
-      "Nghĩa vụ áp dụng cho mọi giao dịch có nguồn khách được hệ thống ghi nhận thuộc mạng lưới Q-Broker trong vòng 12 tháng kể từ ngày khách được giới thiệu (cửa sổ attribution).",
-      "Môi giới xác nhận đồng ý điều khoản này ngay khi nhận/claim khách trên nền tảng — mỗi khách gắn một mã nguồn (attribution ID) để đối soát.",
+      "Nghĩa vụ được XÁC LẬP TẠI THỜI ĐIỂM NHẬN KHÁCH, không phải lúc chốt deal: thao tác nhận/claim khách trên app đồng thời là ký hợp đồng giới thiệu điện tử cho đúng khách đó — mỗi khách gắn một mã nguồn (attribution ID) để đối soát (mô hình Realtor.com ReadyConnect).",
+      "Nghĩa vụ áp dụng cho mọi giao dịch có nguồn khách thuộc mạng lưới Q-Broker trong vòng 12 tháng kể từ ngày giới thiệu (cửa sổ attribution).",
+      "Nghĩa vụ GẮN VỚI KHÁCH, không gắn với tài khoản: môi giới rời nền tảng hoặc chuyển sang sàn khác vẫn phải trả phí cho các khách đã claim còn trong cửa sổ attribution.",
     ],
   },
   {
     icon: "Landmark",
     title: "2. Cơ chế thu & đảm bảo",
     points: [
-      "Giao dịch thanh toán qua Q-Broker: hoa hồng được giữ ở VÍ KÝ QUỸ, phí giới thiệu tự động trích trước khi giải ngân phần còn lại cho môi giới — không cần môi giới chủ động chuyển tiền.",
+      "Giao dịch thanh toán qua Q-Broker: hoa hồng được giữ ở VÍ KÝ QUỸ, phí giới thiệu tự động trích trước khi giải ngân phần còn lại cho môi giới — môi giới không bao giờ cầm khoản phí này rồi mới trả, nên không thể 'quên'.",
       "Giao dịch ngoài luồng nền tảng: môi giới phải báo cáo và thanh toán phí giới thiệu trong vòng 7 ngày sau công chứng; Q-Broker xuất biên nhận/hoá đơn.",
       "Cả hai bên xem chung log giao dịch và trạng thái phí trên dashboard — minh bạch, không đối soát thủ công.",
     ],
   },
   {
-    icon: "ShieldAlert",
-    title: "3. Chế tài khi vi phạm",
+    icon: "ClipboardCheck",
+    title: "3. Nghĩa vụ báo cáo & hồ sơ chốt deal",
     points: [
-      "Chậm trả: tính phí chậm theo hợp đồng và tạm ngừng phân bổ khách mới cho tới khi tất toán.",
-      "Trốn phí (nhận khách từ mạng lưới rồi chốt ngoài luồng, che giấu giao dịch): khoá tài khoản môi giới, thu hồi toàn bộ quyền lợi và truy thu phí kèm bồi thường theo hợp đồng.",
+      "Môi giới phải cập nhật trạng thái từng khách đã claim (đang tư vấn, đi xem, đặt cọc, công chứng, huỷ) tối thiểu 7 ngày/lần — khách bỏ bê quá hạn bị thu hồi và phân bổ lại cho môi giới khác.",
+      "Khi chốt giao dịch, môi giới nộp hồ sơ chốt deal (hợp đồng đặt cọc/công chứng, xác nhận hoa hồng) trên nền tảng — đây là căn cứ duy nhất để tính phí giới thiệu và đối soát hoa hồng cho đối tác affiliate.",
+      "Q-Broker audit định kỳ: đối chiếu trạng thái khai báo với log attribution và dữ liệu giao dịch; khách đã claim mà 'biến mất' rồi xuất hiện trong giao dịch ngoài luồng sẽ bị coi là chốt chui.",
+    ],
+  },
+  {
+    icon: "Gauge",
+    title: "4. Điểm uy tín & ưu tiên phân bổ khách",
+    points: [
+      "Mỗi môi giới có ĐIỂM UY TÍN (broker score) tính từ: tốc độ nhận khách, tỷ lệ cập nhật trạng thái đúng hạn, tỷ lệ chốt và lịch sử trả phí đầy đủ.",
+      "Điểm cao được ưu tiên nhận khách chất lượng TRƯỚC các môi giới khác trong khu vực — trả phí đúng hạn chính là cách nhận nhiều khách hơn, không phải khoản mất đi.",
+      "Điểm thấp bị xếp cuối hàng chờ phân bổ; chậm trả phí hoặc khai báo gian trạng thái trừ điểm trực tiếp và hiển thị cảnh báo trên hồ sơ.",
+      "Cơ chế mô phỏng lead score của Realtor.com ReadyConnect: nguồn khách tiếp theo là động lực để môi giới TỰ NGUYỆN tuân thủ, thay vì chỉ dựa vào chế tài.",
+    ],
+  },
+  {
+    icon: "ShieldAlert",
+    title: "5. Chế tài khi vi phạm",
+    points: [
+      "Chậm trả: tính phí chậm theo hợp đồng, trừ điểm uy tín và tạm ngừng phân bổ khách mới cho tới khi tất toán.",
+      "Trốn phí (nhận khách từ mạng lưới rồi chốt ngoài luồng, che giấu giao dịch, khai gian trạng thái): khoá tài khoản môi giới, thu hồi toàn bộ quyền lợi và truy thu phí kèm bồi thường theo hợp đồng.",
       "Tái phạm: chấm dứt hợp tác và đưa vào danh sách hạn chế của Q-Broker.",
     ],
   },
   {
     icon: "Scale",
-    title: "4. Minh bạch & tranh chấp",
+    title: "6. Minh bạch & tranh chấp",
     points: [
       "Nếu môi giới cho rằng khách KHÔNG đến từ mạng lưới Q-Broker, có quyền khiếu nại kèm bằng chứng trong 7 ngày; Q-Broker đối chiếu log attribution để phân xử.",
       "Áp dụng pay-at-closing: không có giao dịch chốt thì không phát sinh phí giới thiệu — môi giới không bị thu phí oan.",
@@ -288,7 +312,7 @@ export interface AffiliateTermsSection {
 }
 
 /** Tăng version khi sửa nội dung — người dùng sẽ phải đồng ý lại */
-export const AFFILIATE_TERMS_VERSION = "2026-07-v1";
+export const AFFILIATE_TERMS_VERSION = "2026-07-v2";
 
 export const AFFILIATE_TERMS_SECTIONS: AffiliateTermsSection[] = [
   {
@@ -319,13 +343,25 @@ export const AFFILIATE_TERMS_SECTIONS: AffiliateTermsSection[] = [
       "Mua bán/cho thuê: nhận 40 – 60% phí giới thiệu theo hạng đối tác (tương đương ~10 – 15% hoa hồng môi giới), CHỈ khi giao dịch chốt thành công (pay-at-closing — mô hình Zillow Flex, Realtor.com ReadyConnect).",
       "Đấu giá: 5.000.000 đ cố định mỗi lô chốt. Gói hội viên: 15 – 25% giá gói, lặp lại tối đa 12 tháng khi khách còn duy trì gói.",
       "Hoa hồng được đối soát khi giao dịch hoàn tất công chứng/thanh toán VÀ Q-Broker đã thu được phí giới thiệu từ môi giới, sau đó chuyển vào ví Q-Broker ngày 15 hàng tháng. Rút về ngân hàng bất kỳ lúc nào, tối thiểu 500.000 đ.",
+      "Căn cứ đối soát là HỒ SƠ CHỐT DEAL môi giới bắt buộc nộp trên nền tảng (hợp đồng đặt cọc/công chứng, xác nhận hoa hồng) — không dựa vào lời khai một phía.",
       "Q-Broker chịu trách nhiệm thu phí giới thiệu từ môi giới; bạn không phải làm việc trực tiếp với môi giới về khoản này.",
       "Giao dịch bị huỷ, hoàn tiền hoặc khách bỏ gói giữa chừng: phần hoa hồng tương ứng bị thu hồi hoặc trừ vào kỳ thanh toán kế tiếp.",
     ],
   },
   {
+    icon: "ShieldCheck",
+    title: "4. Hoa hồng của bạn được đảm bảo thế nào?",
+    points: [
+      "Nghĩa vụ trả phí của môi giới được ký ĐIỆN TỬ ngay khi họ nhận/claim khách của bạn — trước khi deal chốt, không phải đòi sau. Mỗi khách gắn một mã nguồn (attribution ID).",
+      "Tiền được tách TRƯỚC khi đến tay môi giới: hoa hồng giao dịch giữ ở ví ký quỹ, phí giới thiệu tự động trích rồi mới giải ngân phần còn lại — môi giới không thể 'cầm rồi quên trả'.",
+      "Cửa sổ ghi nhận phía môi giới là 12 THÁNG (dài hơn cookie 30 ngày của bạn) và đi theo khách: môi giới rời nền tảng vẫn phải trả phí cho khách đã nhận.",
+      "Môi giới có ĐIỂM UY TÍN: trả phí đúng hạn, cập nhật trạng thái đầy đủ thì được ưu tiên nhận khách tốt trước — họ có động lực kinh tế để tuân thủ, không chỉ vì bị phạt.",
+      "Trốn phí bị phát hiện qua audit định kỳ và hồ sơ chốt deal bắt buộc: khoá tài khoản, truy thu kèm bồi thường. Rủi ro thu phí thuộc về Q-Broker — không ảnh hưởng hoa hồng của bạn (xem mục Cam kết phía môi giới).",
+    ],
+  },
+  {
     icon: "Scale",
-    title: "4. Pháp lý & thuế",
+    title: "5. Pháp lý & thuế",
     points: [
       "Quan hệ giữa bạn và Q-Broker là HỢP TÁC KINH DOANH theo hợp đồng cộng tác viên điện tử — không phải quan hệ lao động, không có lương cứng hay bảo hiểm.",
       "Q-Broker khấu trừ 10% thuế thu nhập cá nhân tại nguồn cho mỗi lần chi trả từ 2.000.000 đ theo pháp luật Việt Nam và cấp chứng từ khấu trừ khi bạn yêu cầu.",
@@ -335,7 +371,7 @@ export const AFFILIATE_TERMS_SECTIONS: AffiliateTermsSection[] = [
   },
   {
     icon: "ShieldAlert",
-    title: "5. Quy tắc cấm & chấm dứt",
+    title: "6. Quy tắc cấm & chấm dứt",
     points: [
       "Cấm: tự giới thiệu chính mình hoặc người nhà để hưởng hoa hồng, spam tin nhắn/email, cam kết lợi nhuận hoặc quảng cáo sai sự thật về bất động sản.",
       "Cấm chạy quảng cáo đấu thầu từ khoá thương hiệu \"Q-Broker\" và giả mạo là nhân viên chính thức của Q-Broker.",
