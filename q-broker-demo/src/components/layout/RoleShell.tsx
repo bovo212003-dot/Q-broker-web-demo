@@ -98,24 +98,24 @@ export function RoleShell({
       {/* Cột nội dung */}
       <div className="flex flex-1 flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur lg:px-8">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
             <button
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+              className="shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
               onClick={() => setOpen(true)}
               aria-label="Mở menu"
             >
               <Icon name="Menu" className="h-5 w-5" />
             </button>
             <span
-              className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+              className="max-w-full truncate whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold text-white"
               style={{ backgroundColor: role.color }}
             >
               {role.name}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
               <Icon name="Bell" className="h-5 w-5" />
             </button>
