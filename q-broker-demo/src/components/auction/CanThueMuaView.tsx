@@ -6,28 +6,35 @@ import { RoleId } from "@/types";
 import {
   AUCTION_BROKERS,
   AuctionBroker,
-  DemandDraft,
   MY_REQUESTS,
+  MyRequest,
   RequestStatus,
+  StoredRequest,
+  loadMyRequests,
+  saveMyRequests,
 } from "@/data/auction";
 import { cn } from "@/lib/utils";
 import { DemandForm } from "./DemandForm";
-import { AuctionLive } from "./AuctionLive";
+import { WaitingRoom } from "./WaitingRoom";
 import { BrokerSwipe } from "./BrokerSwipe";
 import { MatchReveal } from "./MatchReveal";
+import { BrokerBoard } from "./BrokerBoard";
 
 // =============================================================
 // TRANG CẦN THUÊ - MUA (trải nghiệm dành cho KHÁCH HÀNG)
-// Luồng: Landing -> Đăng nhu cầu -> Phiên đấu giá -> Quẹt chọn -> Ghép nối.
-// Giao diện dành cho Môi giới sẽ được xây riêng sau.
+// Luồng: Landing -> Đăng nhu cầu -> Tin treo trên BẢNG TIN CHỜ (môi giới
+// chủ động đăng ký, không giới hạn thời gian) -> Quẹt chọn -> Ghép nối.
+// Tin "Chờ kết nối" được lưu localStorage: rời trang / tải lại vẫn treo,
+// bấm vào tin trong "Nhu cầu đã đăng của tôi" để mở lại trang chờ.
+// Giao diện dành cho Môi giới (đăng ký tham gia tin) sẽ được xây riêng.
 // =============================================================
 
-type Step = "landing" | "form" | "auction" | "swipe" | "match";
+type Step = "landing" | "form" | "waiting" | "swipe" | "match";
 
-const STEP_LABELS = ["Nhu cầu", "Đấu giá", "Chọn môi giới", "Ghép nối"];
+const STEP_LABELS = ["Nhu cầu", "Chờ kết nối", "Chọn môi giới", "Ghép nối"];
 const STEP_INDEX: Record<Exclude<Step, "landing">, number> = {
   form: 0,
-  auction: 1,
+  waiting: 1,
   swipe: 2,
   match: 3,
 };
@@ -39,27 +46,96 @@ export function CanThueMuaView({
   roleId?: RoleId;
   roleName?: string;
 }) {
+  // Môi giới -> bảng tin nhu cầu khách hàng; các role khác -> luồng khách hàng.
+  if (roleId === "broker") return <BrokerBoard />;
+  return <CustomerFlow roleId={roleId} roleName={roleName} />;
+}
+
+function CustomerFlow({
+  roleId,
+  roleName,
+}: {
+  roleId?: RoleId;
+  roleName?: string;
+}) {
   const [step, setStep] = useState<Step>("landing");
-  const [draft, setDraft] = useState<DemandDraft | null>(null);
+  const [myReqs, setMyReqs] = useState<StoredRequest[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null); // tin đang mở
   const [liked, setLiked] = useState<AuctionBroker[]>([]);
   const [swipeKey, setSwipeKey] = useState(0); // đổi key để "quẹt lại" từ đầu
+
+  // Nạp các tin đã đăng từ localStorage (chỉ chạy phía client).
+  useEffect(() => {
+    setMyReqs(loadMyRequests());
+  }, []);
 
   // Mỗi lần đổi bước -> cuộn lên đầu cho gọn.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
+  const active = myReqs.find((r) => r.id === activeId) ?? null;
+
+  // Cập nhật 1 tin + lưu lại localStorage (functional update tránh stale state).
+  const patchReq = (id: string, patch: Partial<StoredRequest>) =>
+    setMyReqs((prev) => {
+      const next = prev.map((r) => (r.id === id ? { ...r, ...patch } : r));
+      saveMyRequests(next);
+      return next;
+    });
+
   const reset = () => {
     setStep("landing");
-    setDraft(null);
+    setActiveId(null);
     setLiked([]);
   };
 
+  // Đăng nhu cầu mới -> tạo tin "Chờ kết nối" treo trên bảng tin.
+  const publish = (d: StoredRequest["draft"]) => {
+    const req: StoredRequest = {
+      id: `req-${Date.now()}`,
+      title: `Cần ${d.type.toLowerCase()} ${d.propertyType.toLowerCase()}`,
+      type: d.type,
+      area: d.area,
+      budget: d.budget,
+      status: "Chờ kết nối",
+      createdAt: new Date().toISOString().slice(0, 10),
+      joined: 0,
+      draft: d,
+    };
+    setMyReqs((prev) => {
+      const next = [req, ...prev];
+      saveMyRequests(next);
+      return next;
+    });
+    setActiveId(req.id);
+    setStep("waiting");
+  };
+
+  // Bấm vào tin "Chờ kết nối" trong danh sách -> mở lại trang chờ.
+  // Tin mock chưa có trong storage sẽ được "nhận nuôi" vào storage trước.
+  const openRequest = (r: MyRequest) => {
+    if (r.status !== "Chờ kết nối" || !r.draft) return;
+    if (!myReqs.some((x) => x.id === r.id)) {
+      const adopted: StoredRequest = { ...r, draft: r.draft, joined: r.joined ?? 0 };
+      setMyReqs((prev) => {
+        const next = [adopted, ...prev];
+        saveMyRequests(next);
+        return next;
+      });
+    }
+    setActiveId(r.id);
+    setStep("waiting");
+  };
+
   // Nút "Quay lại": lùi về bước liền trước trong luồng.
+  // Rời trang chờ -> tin VẪN treo "Chờ kết nối" (đã lưu ở publish/patch).
   const back = () => {
     if (step === "form") setStep("landing");
-    else if (step === "auction") setStep("form"); // form giữ lại dữ liệu qua `draft`
-    else if (step === "swipe") setStep("auction");
+    else if (step === "waiting") {
+      setActiveId(null);
+      setStep("landing");
+    } else if (step === "swipe") setStep("waiting");
     else if (step === "match") {
       setSwipeKey((k) => k + 1); // quẹt lại từ đầu
       setStep("swipe");
@@ -74,14 +150,18 @@ export function CanThueMuaView({
           <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             Bạn đang xem bằng vai trò <b>{roleName}</b>. Trải nghiệm này được
-            thiết kế cho <b>Khách hàng</b> — giao diện dành cho Môi giới sẽ được
-            xây dựng riêng.
+            thiết kế cho <b>Khách hàng</b>; <b>Môi giới</b> có bảng tin nhu cầu
+            riêng. Các vai trò khác chỉ đang xem thử.
           </p>
         </div>
       )}
 
       {step === "landing" ? (
-        <Landing onStart={() => setStep("form")} />
+        <Landing
+          myReqs={myReqs}
+          onOpen={openRequest}
+          onStart={() => setStep("form")}
+        />
       ) : (
         <>
           {/* Nút quay lại + thanh bước */}
@@ -95,42 +175,45 @@ export function CanThueMuaView({
             </button>
             <Stepper current={STEP_INDEX[step]} />
           </div>
-          {step === "form" && (
-            <DemandForm
-              initial={draft ?? undefined}
-              onSubmit={(d) => {
-                setDraft(d);
-                setStep("auction");
+          {step === "form" && <DemandForm onSubmit={publish} />}
+          {step === "waiting" && active && (
+            <WaitingRoom
+              req={active}
+              brokers={AUCTION_BROKERS}
+              onJoined={(n) => patchReq(active.id, { joined: n })}
+              onStart={() => setStep("swipe")}
+              onClose={() => {
+                patchReq(active.id, { status: "Đã đóng" });
+                reset();
               }}
             />
           )}
-          {step === "auction" && draft && (
-            <AuctionLive
-              draft={draft}
-              brokers={AUCTION_BROKERS}
-              onReady={() => setStep("swipe")}
-            />
-          )}
-          {step === "swipe" && (
+          {step === "swipe" && active && (
             <BrokerSwipe
               key={swipeKey}
-              brokers={AUCTION_BROKERS}
+              brokers={AUCTION_BROKERS.slice(0, active.joined)}
               onDone={(l) => {
                 setLiked(l);
                 setStep("match");
               }}
             />
           )}
-          {step === "match" && draft && (
+          {step === "match" && active && (
             <MatchReveal
-              draft={draft}
+              draft={active.draft}
               liked={liked}
               onRetry={() => {
                 setSwipeKey((k) => k + 1);
                 setStep("swipe");
               }}
-              onUseAll={() => setLiked(AUCTION_BROKERS)}
-              onFinish={reset}
+              onUseAll={() => setLiked(AUCTION_BROKERS.slice(0, active.joined))}
+              onFinish={(winner) => {
+                patchReq(active.id, {
+                  status: "Đã ghép nối",
+                  brokerName: winner?.name,
+                });
+                reset();
+              }}
             />
           )}
         </>
@@ -189,9 +272,9 @@ const HOW_IT_WORKS = [
     desc: "Mô tả BĐS bạn cần mua / thuê — chỉ mất 1 phút, được xác minh.",
   },
   {
-    icon: "Gavel",
-    title: "Phiên đấu giá 30'",
-    desc: "Môi giới đủ điều kiện đăng ký nhận quyền tư vấn cho bạn.",
+    icon: "Radar",
+    title: "Tin treo trên bảng chờ",
+    desc: "Tin luôn mở, không giới hạn thời gian — môi giới đủ điều kiện chủ động đăng ký.",
   },
   {
     icon: "Heart",
@@ -213,12 +296,28 @@ const BENEFITS = [
 ];
 
 const STATUS_TONE: Record<RequestStatus, string> = {
-  "Đang đấu giá": "bg-amber-50 text-amber-600 border-amber-200",
+  "Chờ kết nối": "bg-amber-50 text-amber-600 border-amber-200",
   "Đã ghép nối": "bg-al-50 text-al-700 border-al-200",
   "Hoàn thành": "bg-emerald-50 text-emerald-600 border-emerald-200",
+  "Đã đóng": "bg-slate-100 text-slate-500 border-slate-200",
 };
 
-function Landing({ onStart }: { onStart: () => void }) {
+function Landing({
+  myReqs,
+  onOpen,
+  onStart,
+}: {
+  myReqs: StoredRequest[];
+  onOpen: (r: MyRequest) => void;
+  onStart: () => void;
+}) {
+  // Tin tự đăng (localStorage) đứng trước, tin mock đứng sau — bỏ trùng id
+  // (tin mock "Chờ kết nối" sau khi bấm vào sẽ được nhận nuôi vào storage).
+  const requests: MyRequest[] = [
+    ...myReqs,
+    ...MY_REQUESTS.filter((m) => !myReqs.some((r) => r.id === m.id)),
+  ];
+
   return (
     <div className="space-y-10">
       {/* Hero */}
@@ -233,8 +332,8 @@ function Landing({ onStart }: { onStart: () => void }) {
 
         <div className="relative max-w-2xl">
           <p className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur">
-            <Icon name="Gavel" className="h-3.5 w-3.5 text-flame-400" />
-            Đấu giá quyền môi giới — Broker Auction
+            <Icon name="Radar" className="h-3.5 w-3.5 text-flame-400" />
+            Bảng tin chờ kết nối môi giới — Broker Board
           </p>
           <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-5xl">
             Cần thuê hay mua nhà?
@@ -242,8 +341,8 @@ function Landing({ onStart }: { onStart: () => void }) {
             <span className="text-flame-400"> Hãy để môi giới tiềm năng tự tìm đến bạn.</span>
           </h1>
           <p className="mt-4 max-w-xl text-base text-white/80">
-            Đăng nhu cầu một lần duy nhất. Hệ thống mở phiên đấu giá 30 phút,
-             AI ghép nối đúng{" "}
+            Đăng nhu cầu một lần duy nhất — tin của bạn treo trên bảng tin chờ
+            để môi giới chủ động đăng ký. Khi bạn sẵn sàng, AI ghép nối đúng{" "}
             <b className="text-white">một môi giới phù hợp nhất</b> — không spam,
             không bị gọi dồn dập.
           </p>
@@ -329,7 +428,7 @@ function Landing({ onStart }: { onStart: () => void }) {
             </h2>
             <p className="mt-2 text-sm text-slate-500">
               Trên các kênh thông thường, một tin đăng có thể khiến bạn nhận hàng
-              chục cuộc gọi. Ở đây, cơ chế đấu giá + ghép nối thông minh đảm bảo
+              chục cuộc gọi. Ở đây, cơ chế bảng tin chờ + ghép nối thông minh đảm bảo
               chỉ <b className="text-slate-700">một môi giới tốt nhất</b> đồng
               hành cùng bạn.
             </p>
@@ -367,44 +466,57 @@ function Landing({ onStart }: { onStart: () => void }) {
           </button>
         </div>
         <div className="grid gap-4 lg:grid-cols-3">
-          {MY_REQUESTS.map((r, i) => (
-            <div
-              key={r.id}
-              style={{ animationDelay: `${i * 70}ms` }}
-              className="animate-fade-up rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-[11px] font-bold",
-                    STATUS_TONE[r.status]
-                  )}
-                >
-                  {r.status}
-                </span>
-                <span className="text-xs text-slate-400">{r.createdAt}</span>
+          {requests.map((r, i) => {
+            const waiting = r.status === "Chờ kết nối";
+            return (
+              <div
+                key={r.id}
+                onClick={() => waiting && onOpen(r)}
+                style={{ animationDelay: `${i * 70}ms` }}
+                className={cn(
+                  "animate-fade-up rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+                  waiting && "cursor-pointer hover:border-amber-300"
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-[11px] font-bold",
+                      STATUS_TONE[r.status]
+                    )}
+                  >
+                    {r.status}
+                  </span>
+                  <span className="text-xs text-slate-400">{r.createdAt}</span>
+                </div>
+                <h3 className="mt-3 font-bold text-slate-800">{r.title}</h3>
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                  <Icon name="MapPin" className="h-3.5 w-3.5" />
+                  {r.area}
+                  <span className="text-slate-300">·</span>
+                  <Icon name="Wallet" className="h-3.5 w-3.5" />
+                  {r.budget}
+                </p>
+                {waiting ? (
+                  <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-600">
+                    <Icon name="Timer" className="h-3.5 w-3.5" />
+                    Đang chờ kết nối · {r.joined ?? 0} môi giới đã đăng ký — bấm
+                    để mở tin
+                  </p>
+                ) : r.status === "Đã đóng" ? (
+                  <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
+                    <Icon name="XCircle" className="h-3.5 w-3.5" />
+                    Tin đã được bạn đóng
+                  </p>
+                ) : r.brokerName ? (
+                  <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-al-50 px-3 py-2 text-xs font-semibold text-al-700">
+                    <Icon name="UserCheck" className="h-3.5 w-3.5" />
+                    Môi giới phụ trách: {r.brokerName}
+                  </p>
+                ) : null}
               </div>
-              <h3 className="mt-3 font-bold text-slate-800">{r.title}</h3>
-              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-                <Icon name="MapPin" className="h-3.5 w-3.5" />
-                {r.area}
-                <span className="text-slate-300">·</span>
-                <Icon name="Wallet" className="h-3.5 w-3.5" />
-                {r.budget}
-              </p>
-              {r.brokerName ? (
-                <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-al-50 px-3 py-2 text-xs font-semibold text-al-700">
-                  <Icon name="UserCheck" className="h-3.5 w-3.5" />
-                  Môi giới phụ trách: {r.brokerName}
-                </p>
-              ) : (
-                <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-600">
-                  <Icon name="Timer" className="h-3.5 w-3.5" />
-                  Phiên đấu giá đang mở — chờ ghép nối
-                </p>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>

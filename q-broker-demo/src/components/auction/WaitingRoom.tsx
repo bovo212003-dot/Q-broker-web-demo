@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { AuctionBroker, DemandDraft } from "@/data/auction";
+import { AuctionBroker, StoredRequest } from "@/data/auction";
 import { cn } from "@/lib/utils";
 
-// BƯỚC 2 — Phiên đấu giá quyền môi giới (30 phút, demo rút gọn).
-// Môi giới đủ điều kiện lần lượt đăng ký; đủ người -> sang vòng quẹt chọn.
+// BƯỚC 2 — BẢNG TIN CHỜ (thay cho phiên đấu giá 30').
+// Tin của khách LUÔN MỞ — môi giới đủ điều kiện chủ động đăng ký tham gia.
+// Tin chỉ kết thúc khi khách "Bắt đầu chọn môi giới" hoặc "Đóng tin";
+// rời trang thì tin vẫn treo ở trạng thái "Chờ kết nối".
 
-const JOIN_INTERVAL_MS = 900; // demo: 1 môi giới tham gia mỗi ~0.9s
+const JOIN_INTERVAL_MS = 1400; // demo: mô phỏng môi giới lần lượt đăng ký
 
 const CONDITIONS = [
   "Đã xác thực tài khoản & chứng chỉ hành nghề",
@@ -17,37 +19,33 @@ const CONDITIONS = [
   "Chuyên môn đúng loại bất động sản",
 ];
 
-export function AuctionLive({
-  draft,
+export function WaitingRoom({
+  req,
   brokers,
-  onReady,
+  onJoined,
+  onStart,
+  onClose,
 }: {
-  draft: DemandDraft;
+  req: StoredRequest;
   brokers: AuctionBroker[];
-  onReady: () => void;
+  onJoined: (n: number) => void;
+  onStart: () => void;
+  onClose: () => void;
 }) {
-  const [joined, setJoined] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(30 * 60);
+  const draft = req.draft;
+  const joined = Math.min(req.joined, brokers.length);
   const allIn = joined >= brokers.length;
 
-  // Đồng hồ đếm ngược phiên (hiển thị đúng 30:00 như requirement).
-  useEffect(() => {
-    const t = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Mô phỏng môi giới lần lượt đăng ký tham gia.
+  // Mô phỏng môi giới lần lượt đăng ký tham gia tin (demo).
+  // Số đã đăng ký được lưu lại qua onJoined -> rời trang quay lại vẫn giữ.
   useEffect(() => {
     if (allIn) return;
     const t = setInterval(
-      () => setJoined((n) => Math.min(brokers.length, n + 1)),
+      () => onJoined(Math.min(brokers.length, joined + 1)),
       JOIN_INTERVAL_MS
     );
     return () => clearInterval(t);
-  }, [allIn, brokers.length]);
-
-  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const ss = String(secondsLeft % 60).padStart(2, "0");
+  }, [allIn, joined, brokers.length, onJoined]);
 
   return (
     <div className="mx-auto grid max-w-5xl animate-fade-up gap-6 lg:grid-cols-5">
@@ -104,7 +102,7 @@ export function AuctionLive({
         </div>
       </div>
 
-      {/* Phiên live */}
+      {/* Bảng tin chờ */}
       <div className="lg:col-span-3">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-al-700 via-al-600 to-al-500 p-6 text-white shadow-lg sm:p-8">
           <div className="flex items-center justify-between">
@@ -113,20 +111,23 @@ export function AuctionLive({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-flame-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-flame-500" />
               </span>
-              Phiên đấu giá đang mở
+              Tin của bạn đã mở
             </p>
             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur">
-              Demo rút gọn
+              Không giới hạn thời gian
             </span>
           </div>
 
-          {/* Đồng hồ */}
-          <div className="mt-5 flex items-end gap-3">
-            <p className="font-mono text-5xl font-bold tracking-tight sm:text-6xl">
-              {mm}:{ss}
+          {/* Trạng thái chờ (thay cho đồng hồ đếm ngược) */}
+          <div className="mt-5">
+            <p className="text-2xl font-bold leading-snug sm:text-3xl">
+              Đang chờ kết nối với môi giới tiềm năng
             </p>
-            <p className="pb-2 text-sm text-white/70">
-              còn lại · phiên thật kéo dài 30 phút
+            <p className="mt-2 flex items-start gap-1.5 text-sm text-white/70">
+              <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0" />
+              Đăng ngày {req.createdAt} · Tin luôn treo ở trạng thái chờ — kể cả
+              khi bạn rời trang — cho tới khi bạn bắt đầu chọn môi giới hoặc
+              đóng tin.
             </p>
           </div>
 
@@ -134,7 +135,7 @@ export function AuctionLive({
           <div className="mt-6">
             <div className="flex items-center justify-between text-sm">
               <p className="font-semibold">
-                {joined}/{brokers.length} môi giới đã đăng ký
+                {joined} môi giới đã đăng ký
               </p>
               <p className="text-white/70">Mỗi người chỉ đăng ký 1 lần</p>
             </div>
@@ -146,8 +147,14 @@ export function AuctionLive({
             </div>
           </div>
 
-          {/* Môi giới vừa tham gia */}
+          {/* Danh sách môi giới đã đăng ký */}
           <div className="mt-6 space-y-2">
+            {joined === 0 && (
+              <p className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-6 text-sm text-white/70 backdrop-blur">
+                <Icon name="Loader2" className="h-4 w-4 animate-spin" />
+                Tin vừa được đưa lên bảng tin — môi giới sẽ sớm đăng ký...
+              </p>
+            )}
             {brokers.slice(0, joined).map((b, i) => (
               <div
                 key={b.id}
@@ -169,35 +176,39 @@ export function AuctionLive({
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-emerald-400/20 px-2.5 py-1 text-[11px] font-bold text-emerald-200">
-                  Vừa tham gia
+                  Đã đăng ký
                 </span>
               </div>
             ))}
           </div>
 
-          {/* CTA sang vòng quẹt */}
-          <button
-            disabled={!allIn}
-            onClick={onReady}
-            className={cn(
-              "mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold transition-all",
-              allIn
-                ? "animate-pop-in bg-flame-500 text-white shadow-lg shadow-flame-900/30 hover:-translate-y-0.5 hover:bg-flame-600"
-                : "cursor-wait bg-white/10 text-white/50"
-            )}
-          >
-            {allIn ? (
-              <>
-                <Icon name="Heart" className="h-5 w-5" />
-                Bắt đầu chọn môi giới ({brokers.length})
-              </>
-            ) : (
-              <>
-                <Icon name="Loader2" className="h-5 w-5 animate-spin" />
-                Đang chờ môi giới đăng ký...
-              </>
-            )}
-          </button>
+          {/* Hành động: chọn môi giới ngay hoặc đóng tin */}
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 py-4 text-base font-bold backdrop-blur transition-colors hover:bg-rose-500/30 hover:text-rose-100"
+            >
+              <Icon name="XCircle" className="h-5 w-5" />
+              Đóng tin
+            </button>
+            <button
+              disabled={joined === 0}
+              onClick={onStart}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold transition-all",
+                joined > 0
+                  ? "bg-flame-500 text-white shadow-lg shadow-flame-900/30 hover:-translate-y-0.5 hover:bg-flame-600"
+                  : "cursor-wait bg-white/10 text-white/50"
+              )}
+            >
+              <Icon name="Heart" className="h-5 w-5" />
+              Bắt đầu chọn môi giới ({joined})
+            </button>
+          </div>
+          <p className="mt-3 text-center text-xs text-white/60">
+            Bạn có thể chọn ngay khi có môi giới đăng ký, hoặc chờ thêm để có
+            nhiều lựa chọn hơn.
+          </p>
         </div>
       </div>
     </div>
