@@ -3,17 +3,20 @@ import { Icon } from "@/components/ui/Icon";
 import { RealtorHeader } from "@/components/realtor/RealtorHeader";
 import { RealtorFooter } from "@/components/realtor/RealtorFooter";
 import {
+  AffiliateBrokerCommitment,
   AffiliateCommissions,
   AffiliateCta,
   AffiliateFaqSection,
   AffiliateHero,
   AffiliateLeaderboard,
   AffiliateMarketingKit,
+  AffiliateMoneyFlow,
   AffiliateSteps,
   AffiliateTiers,
 } from "@/components/realtor/AffiliateProgram";
 import { AffiliateCalculator } from "@/components/realtor/AffiliateCalculator";
 import { AffiliateDashboard } from "@/components/realtor/AffiliateDashboard";
+import { AffiliateTermsGate } from "@/components/realtor/AffiliateTermsGate";
 import { ROLES } from "@/config/roles";
 import { RoleId } from "@/types";
 
@@ -43,8 +46,14 @@ export default function AffiliatePage({
     <div className="min-h-screen bg-white">
       <RealtorHeader userName={role?.name} roleId={role?.id} />
 
+      {/* Modal điều khoản chặn trang — phải đồng ý mới thao tác được.
+          Demo: hiện lại mỗi lần vào trang, kèm vai trò (role) tương ứng. */}
+      <AffiliateTermsGate roleId={role?.id} roleName={role?.name} />
+
       <AffiliateHero />
       <AffiliateSteps />
+      <AffiliateMoneyFlow />
+      <AffiliateBrokerCommitment />
       <AffiliateTiers />
       <AffiliateCalculator />
       <AffiliateCommissions />

@@ -59,6 +59,11 @@ export function PropertyCard({ listing }: { listing: Listing }) {
             }
           />
         </button>
+        {/* Nhãn khẳng định nguồn hàng từ Sàn đã được thẩm định pháp lý */}
+        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-xs font-semibold text-emerald-700 shadow">
+          <Icon name="BadgeCheck" className="h-3.5 w-3.5" />
+          Đã thẩm định
+        </span>
       </div>
 
       {/* Thông tin */}

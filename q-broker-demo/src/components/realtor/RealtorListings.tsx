@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { PropertyCard } from "./PropertyCard";
 import { Listing } from "@/data/realtorListings";
@@ -8,15 +9,25 @@ import { Listing } from "@/data/realtorListings";
 // Khối sản phẩm + bộ lọc khu vực (dùng chung state).
 // - Không lọc (Tất cả): trang 1 = 8 sản phẩm gốc, trang 2 = sản phẩm mở rộng.
 // - Bấm 1 khu vực bên dưới -> lưới hiển thị đúng sản phẩm khu vực đó.
+//
+// LƯU Ý MÔ HÌNH: các tin ở đây KHÔNG phải do người dùng tự đăng bán.
+// Chỉ Sàn giao dịch & Ngân hàng mới được đăng sản phẩm vào "Chia sẻ giỏ hàng";
+// các tin hiển thị ở đây được lấy từ đó và đã qua kiểm chứng. Vì vậy tiêu đề &
+// dải CTA hướng người xem về 2 hành động thật sự của nền tảng: đăng nhu cầu
+// (khách) và đấu giá giành khách (môi giới).
 
 const PER_PAGE = 8; // số sản phẩm mỗi trang
 
 export function RealtorListings({
   listings,
   regions,
+  demandHref = "/realtor/can-thue-mua",
+  auctionHref = "/realtor/dau-gia",
 }: {
   listings: Listing[];
   regions: string[];
+  demandHref?: string; // link "Đăng nhu cầu" (giữ ?role= nếu có)
+  auctionHref?: string; // link "Tham gia đấu giá" (giữ ?role= nếu có)
 }) {
   const [region, setRegion] = useState<string | null>(null); // null = Tất cả
   const [page, setPage] = useState(1);
@@ -44,12 +55,12 @@ export function RealtorListings({
         <div className="mb-6 flex items-end justify-between">
           <div>
             <h2 className="text-2xl font-bold text-realtor-ink">
-              Bất động sản cho bạn
+              Các sản phẩm đã được kiểm chứng tại giỏ hàng
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               {region
                 ? `Sản phẩm tại ${region}`
-                : "Dựa trên các tin bạn vừa xem gần đây"}
+                : "Đăng bởi Sàn giao dịch & Ngân hàng trong Chia sẻ giỏ hàng"}
             </p>
           </div>
           {region && (
@@ -116,6 +127,55 @@ export function RealtorListings({
             </button>
           </div>
         )}
+      </section>
+
+      {/* Dải CTA: dẫn về 2 hành động thật của nền tảng thay vì "xem tin rồi thôi" */}
+      <section className="mx-auto max-w-7xl px-4 pb-4 lg:px-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Dành cho khách hàng: đăng nhu cầu tìm nhà */}
+          <Link
+            href={demandHref}
+            className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-realtor-200 hover:shadow-md"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-realtor-50 text-realtor-500">
+              <Icon name="Search" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-realtor-ink">
+                Chưa tìm được căn ưng ý?
+              </p>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Đăng nhu cầu mua/thuê — môi giới sẽ chủ động tìm nhà cho bạn.
+              </p>
+            </div>
+            <Icon
+              name="ArrowRight"
+              className="h-5 w-5 shrink-0 text-realtor-500 transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+
+          {/* Dành cho môi giới: tham gia đấu giá giành khách */}
+          <Link
+            href={auctionHref}
+            className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <Icon name="Gavel" className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-realtor-ink">
+                Bạn là môi giới?
+              </p>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Tham gia đấu giá để giành khách hàng có nhu cầu thật.
+              </p>
+            </div>
+            <Icon
+              name="ArrowRight"
+              className="h-5 w-5 shrink-0 text-emerald-600 transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+        </div>
       </section>
 
       {/* Bộ lọc theo khu vực */}

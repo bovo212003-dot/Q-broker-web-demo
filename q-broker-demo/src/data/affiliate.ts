@@ -20,7 +20,7 @@ export interface AffiliateTier {
   id: string;
   name: string;
   condition: string; // điều kiện đạt hạng (số giao dịch/quý)
-  dealRate: number; // % phí môi giới nhận được khi giao dịch chốt
+  platformShareRate: number; // % PHÍ GIỚI THIỆU (môi giới trả Q-Broker) mà affiliate nhận
   recurringRate: number; // % recurring gói hội viên
   perks: string[]; // quyền lợi kèm theo
   featured?: boolean; // hạng nổi bật (highlight ở giữa)
@@ -81,7 +81,7 @@ export const AFFILIATE_TIERS: AffiliateTier[] = [
     id: "dong",
     name: "Đối tác Đồng",
     condition: "0 – 2 giao dịch chốt / quý",
-    dealRate: 20,
+    platformShareRate: 40,
     recurringRate: 15,
     perks: [
       "Link + mã QR giới thiệu riêng",
@@ -94,7 +94,7 @@ export const AFFILIATE_TIERS: AffiliateTier[] = [
     id: "bac",
     name: "Đối tác Bạc",
     condition: "3 – 9 giao dịch chốt / quý",
-    dealRate: 25,
+    platformShareRate: 50,
     recurringRate: 20,
     featured: true,
     perks: [
@@ -108,7 +108,7 @@ export const AFFILIATE_TIERS: AffiliateTier[] = [
     id: "vang",
     name: "Đối tác Vàng",
     condition: "Từ 10 giao dịch chốt / quý",
-    dealRate: 30,
+    platformShareRate: 60,
     recurringRate: 25,
     perks: [
       "Toàn bộ quyền lợi hạng Bạc",
@@ -123,23 +123,23 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
   {
     icon: "Home",
     product: "Giao dịch mua bán nhà đất",
-    fee: "Phí môi giới 2% giá trị",
-    commission: "20 – 30% phí môi giới",
-    example: "Căn 4 tỷ → phí 80 triệu → bạn nhận 16 – 24 triệu",
+    fee: "Môi giới trả Q-Broker 25% hoa hồng của họ",
+    commission: "40 – 60% phí giới thiệu",
+    example: "Căn 4 tỷ → HH môi giới 80tr → Q-Broker thu 20tr → bạn nhận 8 – 12tr",
     payType: "closing",
   },
   {
     icon: "KeyRound",
     product: "Giao dịch cho thuê",
-    fee: "Phí 1 tháng tiền thuê",
-    commission: "20 – 30% phí môi giới",
-    example: "Thuê 25 triệu/tháng → bạn nhận 5 – 7,5 triệu",
+    fee: "Môi giới trả Q-Broker 25% phí thuê nhận được",
+    commission: "40 – 60% phí giới thiệu",
+    example: "Phí thuê 25tr → Q-Broker thu 6,25tr → bạn nhận 2,5 – 3,75tr",
     payType: "closing",
   },
   {
     icon: "Gavel",
     product: "Đấu giá trực tuyến",
-    fee: "Phí dịch vụ theo lô",
+    fee: "Trích từ phí dịch vụ đấu giá Q-Broker thu",
     commission: "5.000.000 đ / lô chốt",
     example: "Khách trúng đấu giá qua link → nhận cố định 5 triệu",
     payType: "flat",
@@ -147,10 +147,43 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
   {
     icon: "BadgeCheck",
     product: "Gói hội viên Pro Broker",
-    fee: "499.000 đ / tháng",
+    fee: "Q-Broker thu trực tiếp 499.000 đ / tháng",
     commission: "15 – 25% mỗi tháng, trong 12 tháng",
     example: "10 môi giới đăng ký → tới 1,25 triệu đều đặn hàng tháng",
     payType: "recurring",
+  },
+];
+
+// ---- "Ai trả tiền cho bạn?" — dòng tiền 3 bước cho dễ hiểu ----
+// Mô phỏng cách Zillow Flex / Realtor.com ReadyConnect giải thích:
+// người bán trả phí cho nền tảng, nền tảng chia lại cho người giới
+// thiệu — khách của đối tác KHÔNG mất thêm đồng nào.
+
+export interface MoneyFlowStep {
+  icon: string;
+  who: string; // chủ thể trong dòng tiền
+  action: string; // họ làm gì
+  note: string; // giải thích thêm
+}
+
+export const MONEY_FLOW_STEPS: MoneyFlowStep[] = [
+  {
+    icon: "Building2",
+    who: "Chủ nhà / bên bán",
+    action: "Trả hoa hồng cho MÔI GIỚI khi giao dịch thành công",
+    note: "Khoản này là của môi giới như mọi giao dịch BĐS — Q-Broker không thu đồng nào từ khách.",
+  },
+  {
+    icon: "UserRoundCheck",
+    who: "Môi giới",
+    action: "Trả lại Q-Broker 25% hoa hồng làm phí giới thiệu",
+    note: "Vì khách/deal đến từ mạng lưới Q-Broker. Đây là cách nền tảng thu hồi lợi nhuận — giống referral fee của Zillow Flex.",
+  },
+  {
+    icon: "HeartHandshake",
+    who: "Q-Broker → Bạn",
+    action: "Trích 40 – 60% phí giới thiệu đó trả về ví của bạn",
+    note: "Q-Broker giữ phần còn lại để vận hành. Khách của bạn không trả thêm bất kỳ khoản nào.",
   },
 ];
 
@@ -164,8 +197,12 @@ export const AFFILIATE_FAQS: AffiliateFaq[] = [
     a: "Khi khách bấm link của bạn, hệ thống ghi nhớ 30 ngày. Trong thời gian đó khách quay lại và giao dịch (kể cả không qua link) thì hoa hồng vẫn tính cho bạn — dài hơn chuẩn 7 ngày của các nền tảng quốc tế.",
   },
   {
+    q: "Q-Broker lấy tiền ở đâu để trả hoa hồng cho tôi?",
+    a: "Q-Broker là nền tảng trung gian, KHÔNG thu tiền của người mua/bán. Khi môi giới chốt được giao dịch nhờ khách/deal từ mạng lưới, môi giới trả lại Q-Broker 25% hoa hồng của họ làm phí giới thiệu. Q-Broker trích 40 – 60% khoản đó (theo hạng của bạn) trả cho bạn — đúng mô hình referral fee của Zillow Flex.",
+  },
+  {
     q: "Khi nào tôi được thanh toán?",
-    a: "Hoa hồng được đối soát khi giao dịch chốt thành công (mô hình pay-at-closing như Zillow Flex) và chuyển về ví Q-Broker của bạn vào ngày 15 hàng tháng. Rút về ngân hàng bất kỳ lúc nào, tối thiểu 500.000 đ.",
+    a: "Hoa hồng được đối soát khi giao dịch chốt thành công và Q-Broker đã thu được phí giới thiệu từ môi giới (mô hình pay-at-closing như Zillow Flex), rồi chuyển về ví Q-Broker của bạn vào ngày 15 hàng tháng. Rút về ngân hàng bất kỳ lúc nào, tối thiểu 500.000 đ.",
   },
   {
     q: "Tôi theo dõi khách giới thiệu ở đâu?",
@@ -174,6 +211,137 @@ export const AFFILIATE_FAQS: AffiliateFaq[] = [
   {
     q: "Giới thiệu khách nhưng người khác chốt thì sao?",
     a: "Hoa hồng tính theo NGUỒN khách. Khách đến từ link của bạn thì dù môi giới nào của Q-Broker chốt, bạn vẫn nhận đủ tỷ lệ theo hạng — giống cơ chế referral fee chuẩn ngành 25%.",
+  },
+  {
+    q: "Lỡ môi giới không chịu trả phí giới thiệu thì hoa hồng của tôi có mất không?",
+    a: "Không. Rủi ro thu phí là của Q-Broker, không phải của bạn. Hoa hồng giao dịch được giữ ở ví ký quỹ và phí giới thiệu tự động trích trước khi giải ngân cho môi giới, nên tiền của bạn đã được tách sẵn. Môi giới cũng ký cam kết trả phí và chịu chế tài (khoá tài khoản, thu hồi quyền lợi) nếu trốn phí — xem mục \"Cam kết phía môi giới\".",
+  },
+  {
+    q: "Hoa hồng có bị trừ thuế không? Pháp lý thế nào?",
+    a: "Bạn ký hợp đồng cộng tác viên điện tử với Q-Broker (không phải hợp đồng lao động). Với khoản chi trả từ 2.000.000 đ/lần, Q-Broker khấu trừ 10% thuế thu nhập cá nhân tại nguồn theo quy định và cấp chứng từ khấu trừ — số hiển thị trên ví là số bạn thực nhận.",
+  },
+];
+
+// ---- Cam kết phía MÔI GIỚI trả phí giới thiệu ----
+// Khép kín mô hình: affiliate được trả VÌ môi giới bị ràng buộc phải
+// trả phí giới thiệu cho Q-Broker. Gồm nghĩa vụ, cơ chế thu (ví ký
+// quỹ), chế tài và cách xử lý tranh chấp attribution.
+
+export interface BrokerTermsSection {
+  icon: string;
+  title: string;
+  points: string[];
+}
+
+/** Cửa sổ attribution phía môi giới (ngày) — dài hơn cookie affiliate 30 ngày */
+export const BROKER_ATTRIBUTION_DAYS = 365;
+
+export const BROKER_FEE_TERMS: BrokerTermsSection[] = [
+  {
+    icon: "FileSignature",
+    title: "1. Nghĩa vụ trả phí giới thiệu",
+    points: [
+      "Khi nhận khách hoặc deal từ mạng lưới Q-Broker (bao gồm khách do đối tác affiliate giới thiệu) và chốt thành công, môi giới có nghĩa vụ trả Q-Broker phí giới thiệu bằng 25% hoa hồng môi giới của giao dịch đó.",
+      "Nghĩa vụ áp dụng cho mọi giao dịch có nguồn khách được hệ thống ghi nhận thuộc mạng lưới Q-Broker trong vòng 12 tháng kể từ ngày khách được giới thiệu (cửa sổ attribution).",
+      "Môi giới xác nhận đồng ý điều khoản này ngay khi nhận/claim khách trên nền tảng — mỗi khách gắn một mã nguồn (attribution ID) để đối soát.",
+    ],
+  },
+  {
+    icon: "Landmark",
+    title: "2. Cơ chế thu & đảm bảo",
+    points: [
+      "Giao dịch thanh toán qua Q-Broker: hoa hồng được giữ ở VÍ KÝ QUỸ, phí giới thiệu tự động trích trước khi giải ngân phần còn lại cho môi giới — không cần môi giới chủ động chuyển tiền.",
+      "Giao dịch ngoài luồng nền tảng: môi giới phải báo cáo và thanh toán phí giới thiệu trong vòng 7 ngày sau công chứng; Q-Broker xuất biên nhận/hoá đơn.",
+      "Cả hai bên xem chung log giao dịch và trạng thái phí trên dashboard — minh bạch, không đối soát thủ công.",
+    ],
+  },
+  {
+    icon: "ShieldAlert",
+    title: "3. Chế tài khi vi phạm",
+    points: [
+      "Chậm trả: tính phí chậm theo hợp đồng và tạm ngừng phân bổ khách mới cho tới khi tất toán.",
+      "Trốn phí (nhận khách từ mạng lưới rồi chốt ngoài luồng, che giấu giao dịch): khoá tài khoản môi giới, thu hồi toàn bộ quyền lợi và truy thu phí kèm bồi thường theo hợp đồng.",
+      "Tái phạm: chấm dứt hợp tác và đưa vào danh sách hạn chế của Q-Broker.",
+    ],
+  },
+  {
+    icon: "Scale",
+    title: "4. Minh bạch & tranh chấp",
+    points: [
+      "Nếu môi giới cho rằng khách KHÔNG đến từ mạng lưới Q-Broker, có quyền khiếu nại kèm bằng chứng trong 7 ngày; Q-Broker đối chiếu log attribution để phân xử.",
+      "Áp dụng pay-at-closing: không có giao dịch chốt thì không phát sinh phí giới thiệu — môi giới không bị thu phí oan.",
+      "Phí giới thiệu là chi phí hợp lệ của môi giới, được xuất chứng từ để hạch toán và kê khai thuế.",
+    ],
+  },
+];
+
+// ---- Điều khoản chương trình (hiển thị trong modal chặn trang) ----
+// Người dùng phải đọc và đồng ý trước khi thao tác trên trang.
+// Nội dung gói đủ 4 nhóm: cách hoạt động, ai trả tiền, hoa hồng,
+// pháp lý — soạn theo mẫu Operating Agreement của Amazon Associates
+// và Zillow Flex nhưng viết bằng ngôn ngữ đời thường.
+
+export interface AffiliateTermsSection {
+  icon: string;
+  title: string;
+  points: string[]; // mỗi điểm là một gạch đầu dòng ngắn, dễ đọc
+}
+
+/** Tăng version khi sửa nội dung — người dùng sẽ phải đồng ý lại */
+export const AFFILIATE_TERMS_VERSION = "2026-07-v1";
+
+export const AFFILIATE_TERMS_SECTIONS: AffiliateTermsSection[] = [
+  {
+    icon: "Route",
+    title: "1. Cách thức hoạt động",
+    points: [
+      "Bạn được cấp link và mã QR giới thiệu riêng. Khách bấm link, hệ thống ghi nhận bằng cookie trong 30 ngày.",
+      "Trong 30 ngày đó, khách đăng ký xem nhà, đấu giá hay mua gói hội viên thì đều tính là khách của bạn — kể cả khi khách quay lại không qua link.",
+      "Nếu khách bấm link của nhiều đối tác, hoa hồng tính cho người có link được bấm SAU CÙNG (chuẩn last-click như Amazon Associates, Shopee Affiliate).",
+      "Mọi lượt bấm, khách để lại thông tin và trạng thái tư vấn hiển thị realtime trên dashboard của bạn.",
+    ],
+  },
+  {
+    icon: "Landmark",
+    title: "2. Ai trả tiền cho bạn?",
+    points: [
+      "Q-Broker là NỀN TẢNG TRUNG GIAN — không thu tiền của người mua hay người bán. Chủ nhà trả hoa hồng cho môi giới như mọi giao dịch bình thường.",
+      "Nguồn hoa hồng của bạn là PHÍ GIỚI THIỆU: khi môi giới chốt được deal đến từ mạng lưới Q-Broker, môi giới trả lại Q-Broker 25% hoa hồng của họ. Q-Broker trích 40 – 60% khoản này (theo hạng của bạn) trả cho bạn.",
+      "Với gói hội viên Pro Broker và dịch vụ đấu giá, hoa hồng trích từ phí mà Q-Broker thu trực tiếp của chính sản phẩm đó.",
+      "Khách hàng bạn giới thiệu KHÔNG phải trả thêm bất kỳ khoản nào. Bạn không đóng phí tham gia, không doanh số bắt buộc.",
+      "Chương trình chỉ có MỘT cấp: bạn nhận hoa hồng từ khách bạn giới thiệu trực tiếp. Không có hoa hồng tuyến dưới — đây không phải mô hình đa cấp.",
+    ],
+  },
+  {
+    icon: "Wallet",
+    title: "3. Hoa hồng & thanh toán",
+    points: [
+      "Mua bán/cho thuê: nhận 40 – 60% phí giới thiệu theo hạng đối tác (tương đương ~10 – 15% hoa hồng môi giới), CHỈ khi giao dịch chốt thành công (pay-at-closing — mô hình Zillow Flex, Realtor.com ReadyConnect).",
+      "Đấu giá: 5.000.000 đ cố định mỗi lô chốt. Gói hội viên: 15 – 25% giá gói, lặp lại tối đa 12 tháng khi khách còn duy trì gói.",
+      "Hoa hồng được đối soát khi giao dịch hoàn tất công chứng/thanh toán VÀ Q-Broker đã thu được phí giới thiệu từ môi giới, sau đó chuyển vào ví Q-Broker ngày 15 hàng tháng. Rút về ngân hàng bất kỳ lúc nào, tối thiểu 500.000 đ.",
+      "Q-Broker chịu trách nhiệm thu phí giới thiệu từ môi giới; bạn không phải làm việc trực tiếp với môi giới về khoản này.",
+      "Giao dịch bị huỷ, hoàn tiền hoặc khách bỏ gói giữa chừng: phần hoa hồng tương ứng bị thu hồi hoặc trừ vào kỳ thanh toán kế tiếp.",
+    ],
+  },
+  {
+    icon: "Scale",
+    title: "4. Pháp lý & thuế",
+    points: [
+      "Quan hệ giữa bạn và Q-Broker là HỢP TÁC KINH DOANH theo hợp đồng cộng tác viên điện tử — không phải quan hệ lao động, không có lương cứng hay bảo hiểm.",
+      "Q-Broker khấu trừ 10% thuế thu nhập cá nhân tại nguồn cho mỗi lần chi trả từ 2.000.000 đ theo pháp luật Việt Nam và cấp chứng từ khấu trừ khi bạn yêu cầu.",
+      "Nếu bạn là tổ chức/hộ kinh doanh, bạn tự xuất hoá đơn và kê khai thuế theo quy định riêng.",
+      "Thông tin khách hàng bạn tiếp cận được bảo vệ theo Nghị định 13/2023/NĐ-CP — chỉ dùng cho việc giới thiệu trên Q-Broker, cấm bán hoặc chia sẻ cho bên thứ ba.",
+    ],
+  },
+  {
+    icon: "ShieldAlert",
+    title: "5. Quy tắc cấm & chấm dứt",
+    points: [
+      "Cấm: tự giới thiệu chính mình hoặc người nhà để hưởng hoa hồng, spam tin nhắn/email, cam kết lợi nhuận hoặc quảng cáo sai sự thật về bất động sản.",
+      "Cấm chạy quảng cáo đấu thầu từ khoá thương hiệu \"Q-Broker\" và giả mạo là nhân viên chính thức của Q-Broker.",
+      "Vi phạm sẽ bị khoá tài khoản đối tác và thu hồi toàn bộ hoa hồng chưa thanh toán.",
+      "Hai bên đều có thể chấm dứt hợp tác với thông báo trước 7 ngày. Hoa hồng hợp lệ phát sinh trước ngày chấm dứt vẫn được thanh toán đầy đủ.",
+    ],
   },
 ];
 
@@ -185,7 +353,7 @@ export const DEMO_STATS = [
   { icon: "MousePointerClick", label: "Lượt bấm link", value: "1.284", note: "30 ngày qua" },
   { icon: "Users", label: "Khách để lại thông tin", value: "96", note: "tỷ lệ 7,5%" },
   { icon: "Handshake", label: "Giao dịch chốt", value: "12", note: "5 đang tư vấn" },
-  { icon: "Wallet", label: "Hoa hồng tích luỹ", value: "186.500.000 đ", note: "+38,2 triệu tháng này" },
+  { icon: "Wallet", label: "Hoa hồng tích luỹ", value: "93.200.000 đ", note: "+19,1 triệu tháng này" },
 ];
 
 export const DEMO_REFERRALS: ReferralRow[] = [
@@ -195,7 +363,7 @@ export const DEMO_REFERRALS: ReferralRow[] = [
     product: "Mua căn hộ Vinhomes Central Park",
     date: "02/07/2026",
     value: "4,2 tỷ",
-    commission: "21.000.000 đ",
+    commission: "10.500.000 đ",
     status: "closed",
   },
   {
@@ -222,7 +390,7 @@ export const DEMO_REFERRALS: ReferralRow[] = [
     product: "Thuê nhà phố Thảo Điền",
     date: "21/06/2026",
     value: "38 triệu/tháng",
-    commission: "9.500.000 đ",
+    commission: "4.750.000 đ",
     status: "consulting",
   },
   {
@@ -231,7 +399,7 @@ export const DEMO_REFERRALS: ReferralRow[] = [
     product: "Mua nhà phố The Sailing Tower",
     date: "17/06/2026",
     value: "6,4 tỷ",
-    commission: "32.000.000 đ",
+    commission: "16.000.000 đ",
     status: "consulting",
   },
 ];
@@ -246,21 +414,26 @@ export const REFERRAL_STATUS: Record<
   consulting: { label: "Đang tư vấn", className: "bg-sky-50 text-sky-600" },
 };
 
-/** Hoa hồng 6 tháng gần nhất (triệu đồng) — tổng khớp 186,5 triệu tích luỹ */
+/** Hoa hồng 6 tháng gần nhất (triệu đồng) — tổng khớp 93,2 triệu tích luỹ */
 export const DEMO_EARNINGS: { month: string; value: number }[] = [
-  { month: "T2", value: 18.5 },
-  { month: "T3", value: 22.0 },
-  { month: "T4", value: 29.3 },
-  { month: "T5", value: 33.5 },
-  { month: "T6", value: 45.0 },
-  { month: "T7", value: 38.2 },
+  { month: "T2", value: 9.2 },
+  { month: "T3", value: 11.0 },
+  { month: "T4", value: 14.6 },
+  { month: "T5", value: 16.8 },
+  { month: "T6", value: 22.5 },
+  { month: "T7", value: 19.1 },
 ];
 
 // ---- Máy tính hoa hồng ----
 
-/** Phí môi giới nền tảng thu trên mỗi giao dịch (2% giá trị) */
+/** Hoa hồng môi giới trên giá trị BĐS (2%) — của môi giới, dùng để tính ví dụ */
 export const BROKERAGE_FEE_RATE = 0.02;
-/** Giá gói hội viên Pro Broker (đ/tháng) */
+/**
+ * Phí giới thiệu: môi giới trả lại Q-Broker 25% hoa hồng khi chốt deal đến
+ * từ mạng lưới. Đây là doanh thu nền tảng — nguồn duy nhất để trả affiliate.
+ */
+export const PLATFORM_FEE_RATE = 0.25;
+/** Giá gói hội viên Pro Broker (đ/tháng) — Q-Broker thu trực tiếp */
 export const MEMBERSHIP_PRICE = 499_000;
 
 /** Xác định hạng đối tác theo số giao dịch chốt mỗi QUÝ */
@@ -282,11 +455,11 @@ export interface LeaderboardRow {
 }
 
 export const AFFILIATE_LEADERBOARD: LeaderboardRow[] = [
-  { rank: 1, name: "Trần Q. M***", region: "TP. Thủ Đức", deals: 18, earnings: "412.000.000 đ", tierId: "vang" },
-  { rank: 2, name: "Nguyễn H. L***", region: "Bình Thạnh", deals: 14, earnings: "356.500.000 đ", tierId: "vang" },
-  { rank: 3, name: "Lê T. V***", region: "Hà Nội", deals: 11, earnings: "298.000.000 đ", tierId: "vang" },
-  { rank: 4, name: "Phạm N. K***", region: "Đà Nẵng", deals: 8, earnings: "204.500.000 đ", tierId: "bac" },
-  { rank: 5, name: "Võ M. T***", region: "Nha Trang", deals: 7, earnings: "186.500.000 đ", tierId: "bac" },
+  { rank: 1, name: "Trần Q. M***", region: "TP. Thủ Đức", deals: 18, earnings: "206.000.000 đ", tierId: "vang" },
+  { rank: 2, name: "Nguyễn H. L***", region: "Bình Thạnh", deals: 14, earnings: "178.000.000 đ", tierId: "vang" },
+  { rank: 3, name: "Lê T. V***", region: "Hà Nội", deals: 11, earnings: "149.000.000 đ", tierId: "vang" },
+  { rank: 4, name: "Phạm N. K***", region: "Đà Nẵng", deals: 8, earnings: "102.000.000 đ", tierId: "bac" },
+  { rank: 5, name: "Võ M. T***", region: "Nha Trang", deals: 7, earnings: "93.200.000 đ", tierId: "bac" },
 ];
 
 // ---- Kho tài liệu marketing (creative assets) ----

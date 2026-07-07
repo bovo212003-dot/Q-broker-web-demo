@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
@@ -22,6 +23,8 @@ import {
   INITIAL_MARKETS,
   PricePoint,
 } from "@/data/auctionLive";
+import { withRole } from "@/lib/role";
+import { RoleId } from "@/types";
 import { LegalModal } from "./LegalModal";
 
 // =============================================================
@@ -86,6 +89,10 @@ const buildInitialMarkets = (): Record<string, Market> =>
   );
 
 export function AuctionExchange({ initialLotId }: { initialLotId?: string }) {
+  // Giữ ngữ cảnh role khi quay về livestream (?role=...).
+  const roleId = (useSearchParams().get("role") ?? undefined) as
+    | RoleId
+    | undefined;
   const [markets, setMarkets] = useState<Record<string, Market>>(
     buildInitialMarkets
   );
@@ -436,7 +443,7 @@ export function AuctionExchange({ initialLotId }: { initialLotId?: string }) {
                   </span>
                 )}
                 <Link
-                  href="/realtor/livestream"
+                  href={withRole("/realtor/livestream", roleId)}
                   className="absolute right-3 top-3 flex items-center gap-1.5 rounded-md bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm hover:bg-black/70"
                 >
                   <Icon name="PlayCircle" className="h-3.5 w-3.5" />

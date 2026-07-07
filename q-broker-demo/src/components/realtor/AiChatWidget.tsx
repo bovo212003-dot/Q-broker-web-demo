@@ -186,26 +186,44 @@ export function AiChatWidget() {
       )}
 
       {/* Icon nổi (bánh răng + chữ AUTOMATION LAND) */}
-      <button
-        type="button"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+      <div
+        className={"relative " + (open ? "" : "animate-float")}
         style={{ width: SIZE, height: SIZE }}
-        className="relative flex touch-none select-none items-center justify-center overflow-hidden rounded-full bg-white shadow-xl ring-4 ring-white/60 transition-transform hover:scale-105 active:scale-95"
-        aria-label="Mở chat AI AUTOMATION LAND"
-        title="Chat với AI AUTOMATION LAND"
       >
-        {/* Logo AI (ảnh của bạn) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/bot-avatar.png"
-          alt="Trợ lý AI AUTOMATION LAND"
-          className="pointer-events-none h-full w-full object-cover"
-        />
-        {/* Chấm báo "online" */}
-        <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
-      </button>
+        {/* Vòng sóng lan toả gây chú ý (chỉ khi chưa mở chat) */}
+        {!open && (
+          <>
+            <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-brand-500/40" />
+            <span
+              className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-brand-500/25"
+              style={{ animationDelay: "0.6s" }}
+            />
+          </>
+        )}
+        <button
+          type="button"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          style={{ width: SIZE, height: SIZE }}
+          className="relative flex touch-none select-none items-center justify-center overflow-hidden rounded-full bg-white shadow-xl ring-4 ring-white/60 transition-transform hover:scale-110 active:scale-95"
+          aria-label="Mở chat AI AUTOMATION LAND"
+          title="Chat với AI AUTOMATION LAND"
+        >
+          {/* Logo AI (ảnh của bạn) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bot-avatar.png"
+            alt="Trợ lý AI AUTOMATION LAND"
+            className="pointer-events-none h-full w-full object-cover"
+          />
+          {/* Chấm báo "online" (nhấp nháy) */}
+          <span className="absolute right-0.5 top-0.5 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
