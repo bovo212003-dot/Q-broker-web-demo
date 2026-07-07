@@ -370,22 +370,24 @@ function CandidatePanel() {
           </span>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 focus-within:border-al-400">
-            <Icon name="Search" className="h-5 w-5 text-slate-400" />
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+          {/* Ô tìm kiếm */}
+          <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 transition-all focus-within:border-al-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-al-100">
+            <Icon name="Search" className="h-5 w-5 shrink-0 text-slate-400" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Tìm vị trí, công ty..."
-              className="w-full bg-transparent py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+              className="w-full bg-transparent py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
             />
           </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            <FilterSelect value={area} onChange={setArea} placeholder="Khu vực" options={[...REC_AREAS]} />
-            <FilterSelect value={work} onChange={setWork} placeholder="Hình thức" options={[...WORK_TYPES]} />
-            <FilterSelect value={salary} onChange={setSalary} placeholder="Mức thu nhập" options={[...SALARY_RANGES]} />
-            <FilterSelect value={company} onChange={setCompany} placeholder="Loại doanh nghiệp" options={[...COMPANY_TYPES]} />
-            <FilterSelect value={focus} onChange={setFocus} placeholder="Loại hình BĐS" options={[...PROPERTY_FOCUS]} />
+          {/* Bộ lọc — pill có icon dẫn + mũi tên tuỳ biến */}
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
+            <FilterSelect icon="MapPin" value={area} onChange={setArea} placeholder="Khu vực" options={[...REC_AREAS]} />
+            <FilterSelect icon="Clock" value={work} onChange={setWork} placeholder="Hình thức" options={[...WORK_TYPES]} />
+            <FilterSelect icon="Wallet" value={salary} onChange={setSalary} placeholder="Mức thu nhập" options={[...SALARY_RANGES]} />
+            <FilterSelect icon="Building2" value={company} onChange={setCompany} placeholder="Loại doanh nghiệp" options={[...COMPANY_TYPES]} />
+            <FilterSelect icon="Home" value={focus} onChange={setFocus} placeholder="Loại hình BĐS" options={[...PROPERTY_FOCUS]} />
           </div>
         </div>
 
@@ -394,7 +396,7 @@ function CandidatePanel() {
             Không có tin phù hợp bộ lọc.
           </div>
         ) : (
-          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 space-y-3">
             {list.map((job, i) => (
               <div key={job.id} style={{ animationDelay: `${(i % 6) * 50}ms` }} className="animate-fade-up">
                 <JobCard
@@ -491,28 +493,48 @@ function FilterSelect({
   onChange,
   placeholder,
   options,
+  icon,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   options: string[];
+  icon?: string;
 }) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cn(
-        "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium focus:border-al-400 focus:outline-none",
-        value ? "text-slate-800" : "text-slate-400"
+    <div className="relative">
+      {icon && (
+        <Icon
+          name={icon}
+          className={cn(
+            "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2",
+            value ? "text-al-500" : "text-slate-400"
+          )}
+        />
       )}
-    >
-      <option value="">{placeholder}</option>
-      {options.map((o) => (
-        <option key={o} value={o} className="text-slate-800">
-          {o}
-        </option>
-      ))}
-    </select>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          "w-full cursor-pointer appearance-none rounded-xl border py-2.5 pr-9 text-sm font-medium transition-all hover:border-al-300 focus:border-al-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-al-100",
+          icon ? "pl-9" : "pl-3",
+          value
+            ? "border-al-200 bg-al-50/50 text-slate-800"
+            : "border-slate-200 bg-slate-50 text-slate-500"
+        )}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o} value={o} className="text-slate-800">
+            {o}
+          </option>
+        ))}
+      </select>
+      <Icon
+        name="ChevronDown"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
+    </div>
   );
 }
 

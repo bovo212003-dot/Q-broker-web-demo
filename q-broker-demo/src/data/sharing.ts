@@ -101,6 +101,7 @@ export interface MyShareItem {
   scope: ShareScope;
   status: MyItemStatus;
   receivers: number;
+  image?: string; // ảnh nguồn hàng (data URL khi người dùng tự tải lên)
 }
 
 export const MY_INVENTORY: Record<"broker" | "exchange" | "bank", MyShareItem[]> = {

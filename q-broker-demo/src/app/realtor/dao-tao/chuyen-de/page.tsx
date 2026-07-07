@@ -6,7 +6,7 @@ import { SegmentTabs } from "@/components/training/SegmentTabs";
 import { TopicCard } from "@/components/training/TopicCard";
 import { TOPICS } from "@/data/training";
 
-const FILTERS = ["Tất cả", "Cơ bản", "Chuyên môn"] as const;
+const FILTERS = ["Tất cả", "Cơ sở", "Chuyên môn"] as const;
 type Filter = (typeof FILTERS)[number];
 
 // TAB CHUYÊN ĐỀ — 16 chuyên đề chuẩn, lọc theo nhóm + tìm kiếm.
