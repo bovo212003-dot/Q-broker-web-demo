@@ -27,10 +27,10 @@ const NOTI_TONE: Record<NotiTone, string> = {
 const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
   { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
-  { label: "Cần thuê - Mua", href: "/realtor/can-thue-mua" },
+  { label: "Cần thuê - mua", href: "/realtor/can-thue-mua" },
   { label: "Tuyển dụng", href: "/realtor/tuyen-dung" },
   { label: "Live stream", href: "/realtor/livestream" },
-  { label: "Afilate", href: "/realtor/affiliate" },
+  { label: "Affilate", href: "/realtor/affiliate" },
   { label: "Tin tức", href: "/realtor/tin-tuc" },
 ];
 
@@ -45,7 +45,8 @@ type MoreItem = {
 
 const MORE: MoreItem[] = [
   { label: "Nhà của tôi", href: "#", icon: "Home" },
-  { label: "Kết bạn", href: "#", icon: "UserPlus", roles: ["broker", "admin", "customer"] },
+  { label: "Tin nhắn", href: "/realtor/tin-nhan", icon: "MessageCircle", roles: ["broker", "admin", "customer"] },
+  { label: "Kết bạn", href: "/realtor/ket-ban", icon: "UserPlus", roles: ["broker", "admin", "customer"] },
   { label: "Tìm môi giới", href: "#", icon: "Search", roles: ["customer"] },
   { label: "Kí hợp đồng online", href: "#", icon: "FileSignature", roles: ["broker"] },
   { label: "Khách hàng (CRM)", href: "/realtor/khach-hang", icon: "Users", roles: ["broker"] },
@@ -114,7 +115,7 @@ export function RealtorHeader({
         </Link>
 
         {/* Menu chính (desktop) */}
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden items-center gap-5 lg:flex xl:gap-6">
           {NAV.map((item) => {
             const internal = item.href.startsWith("/");
             const active = internal && pathname.startsWith(item.href);
@@ -124,7 +125,7 @@ export function RealtorHeader({
                   key={item.label}
                   href={withRole(item.href, roleId)}
                   className={
-                    "text-sm font-semibold transition-colors " +
+                    "whitespace-nowrap text-sm font-semibold transition-colors " +
                     (active
                       ? "text-realtor-600"
                       : "text-slate-700 hover:text-realtor-500")
@@ -138,7 +139,7 @@ export function RealtorHeader({
               <a
                 key={item.label}
                 href={item.href}
-                className="text-sm font-semibold text-slate-700 hover:text-realtor-500"
+                className="whitespace-nowrap text-sm font-semibold text-slate-700 hover:text-realtor-500"
               >
                 {item.label}
               </a>
@@ -150,7 +151,7 @@ export function RealtorHeader({
             <button
               type="button"
               onClick={() => setMoreOpen((v) => !v)}
-              className="flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-realtor-500"
+              className="flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-slate-700 hover:text-realtor-500"
               aria-haspopup="menu"
             >
               Thêm ...
@@ -196,7 +197,7 @@ export function RealtorHeader({
         </nav>
 
         {/* Bên phải: chuông + tin nhắn + role/đăng nhập */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {/* Chuông thông báo + tin nhắn (chỉ hiện khi đã đăng nhập) */}
           {userName && (
             <div className="hidden items-center gap-1 sm:flex">
@@ -318,9 +319,9 @@ export function RealtorHeader({
 
                     <div className="max-h-96 overflow-y-auto">
                       {CONVERSATIONS.map((c) => (
-                        <button
+                        <Link
                           key={c.id}
-                          type="button"
+                          href={withRole(`/realtor/tin-nhan?c=${c.id}`, roleId)}
                           onClick={() => setMsgOpen(false)}
                           className={
                             "flex w-full items-center gap-3 border-b border-slate-50 px-4 py-3 text-left transition-colors hover:bg-slate-50 " +
@@ -367,17 +368,17 @@ export function RealtorHeader({
                               <span className="h-2.5 w-2.5 rounded-full bg-realtor-500" />
                             )}
                           </div>
-                        </button>
+                        </Link>
                       ))}
                     </div>
 
-                    <a
-                      href="#"
+                    <Link
+                      href={withRole("/realtor/tin-nhan", roleId)}
                       onClick={() => setMsgOpen(false)}
                       className="block border-t border-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-realtor-500 hover:bg-slate-50"
                     >
                       Xem tất cả tin nhắn
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -390,16 +391,16 @@ export function RealtorHeader({
               <button
                 type="button"
                 onClick={() => setUserOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-full border border-slate-300 py-1 pl-1 pr-3 text-sm font-semibold text-slate-800 hover:border-slate-400"
+                className="flex max-w-[200px] items-center gap-2 rounded-full border border-slate-300 py-1 pl-1 pr-3 text-sm font-semibold text-slate-800 hover:border-slate-400"
                 aria-haspopup="menu"
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-realtor-500 text-xs text-white">
                   {userName.charAt(0).toUpperCase()}
                 </span>
-                {userName}
+                <span className="truncate">{userName}</span>
                 <Icon
                   name="ChevronDown"
-                  className={`h-4 w-4 transition-transform ${
+                  className={`h-4 w-4 shrink-0 transition-transform ${
                     userOpen ? "rotate-180" : ""
                   }`}
                 />
