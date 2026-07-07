@@ -34,6 +34,15 @@ const NAV = [
   { label: "Tin tức", href: "/realtor/tin-tuc" },
 ];
 
+// Bảng drop của "Đào tạo" — hiện khi hover vào mục Đào tạo trên header.
+// exact: chỉ active khi đúng đường dẫn (dùng cho "Trang chủ").
+const DAO_TAO_MENU = [
+  { label: "Trang chủ", href: "/realtor/dao-tao", icon: "Home", desc: "Tổng quan, thông báo & khoá học", exact: true },
+  { label: "Chuyên đề", href: "/realtor/dao-tao/chuyen-de", icon: "BookOpen", desc: "Bài học theo chủ đề" },
+  { label: "Trắc nghiệm", href: "/realtor/dao-tao/trac-nghiem", icon: "PencilLine", desc: "Luyện đề & câu hỏi" },
+  { label: "Tự luận", href: "/realtor/dao-tao/tu-luan", icon: "FileText", desc: "Bài tập viết & tình huống" },
+];
+
 // Các mục trong "Thêm ...".
 // roles: danh sách role được phép thấy mục đó. Bỏ trống -> mọi role.
 type MoreItem = {
@@ -119,6 +128,75 @@ export function RealtorHeader({
           {NAV.map((item) => {
             const internal = item.href.startsWith("/");
             const active = internal && pathname.startsWith(item.href);
+
+            // "Đào tạo" -> bảng drop hiện khi hover (CSS group-hover, không cần JS).
+            if (item.href === "/realtor/dao-tao") {
+              return (
+                <div key={item.label} className="group relative">
+                  <Link
+                    href={withRole(item.href, roleId)}
+                    className={
+                      "flex items-center gap-1 whitespace-nowrap text-sm font-semibold transition-colors " +
+                      (active
+                        ? "text-realtor-600"
+                        : "text-slate-700 hover:text-realtor-500")
+                    }
+                  >
+                    {item.label}
+                    <Icon
+                      name="ChevronDown"
+                      className="h-4 w-4 transition-transform group-hover:rotate-180"
+                    />
+                  </Link>
+
+                  {/* pt-3 làm "cầu nối" để rê chuột xuống bảng không mất hover */}
+                  <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                      {DAO_TAO_MENU.map((sub) => {
+                        const subActive = sub.exact
+                          ? pathname === sub.href
+                          : pathname.startsWith(sub.href);
+                        return (
+                          <Link
+                            key={sub.href}
+                            href={withRole(sub.href, roleId)}
+                            className={
+                              "flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors " +
+                              (subActive ? "bg-realtor-50" : "hover:bg-slate-50")
+                            }
+                          >
+                            <span
+                              className={
+                                "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg " +
+                                (subActive
+                                  ? "bg-realtor-500 text-white"
+                                  : "bg-realtor-50 text-realtor-500")
+                              }
+                            >
+                              <Icon name={sub.icon} className="h-4 w-4" />
+                            </span>
+                            <span className="min-w-0">
+                              <span
+                                className={
+                                  "block text-sm font-semibold " +
+                                  (subActive ? "text-realtor-600" : "text-slate-800")
+                                }
+                              >
+                                {sub.label}
+                              </span>
+                              <span className="block text-xs text-slate-400">
+                                {sub.desc}
+                              </span>
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             if (internal) {
               return (
                 <Link
@@ -476,6 +554,35 @@ export function RealtorHeader({
             const cls =
               "block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-slate-50 " +
               (active ? "bg-realtor-50 text-realtor-600" : "text-slate-700");
+
+            // "Đào tạo" -> link + các mục con thụt vào (mobile không hover được).
+            if (item.href === "/realtor/dao-tao") {
+              return (
+                <div key={item.label}>
+                  <Link
+                    href={withRole(item.href, roleId)}
+                    onClick={() => setOpen(false)}
+                    className={cls}
+                  >
+                    {item.label}
+                  </Link>
+                  <div className="my-1 ml-3 border-l border-slate-100 pl-2">
+                    {DAO_TAO_MENU.filter((s) => !s.exact).map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={withRole(sub.href, roleId)}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                      >
+                        <Icon name={sub.icon} className="h-4 w-4 text-realtor-500" />
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
             return internal ? (
               <Link
                 key={item.label}

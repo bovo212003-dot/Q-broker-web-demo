@@ -43,6 +43,9 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { label: "Phiếu đăng ký", icon: "FileText", href: "/realtor/dao-tao", tone: "slate" },
   { label: "Gói VIP", icon: "Crown", href: "/realtor/dao-tao", tone: "flame" },
   { label: "Lịch sử", icon: "History", href: "/realtor/dao-tao/trac-nghiem", tone: "amber" },
+  { label: "Chuyên đề", icon: "Layers", href: "/realtor/dao-tao/chuyen-de", tone: "sky" },
+  { label: "Trắc nghiệm", icon: "ListChecks", href: "/realtor/dao-tao/trac-nghiem", tone: "flame" },
+  { label: "Tự luận", icon: "PenLine", href: "/realtor/dao-tao/tu-luan", tone: "pink" },
 ];
 
 // ---- Banner khuyến mại / tuyển dụng (carousel) --------------
@@ -147,7 +150,7 @@ export const COURSES: Course[] = [
 export interface Topic {
   id: number;
   title: string;
-  group: "Cơ bản" | "Chuyên môn";
+  group: "Cơ sở" | "Chuyên môn";
   lessons: number;
   minutes: number;
   free: boolean;
@@ -155,11 +158,11 @@ export interface Topic {
 }
 
 export const TOPICS: Topic[] = [
-  { id: 1, title: "Các quy định pháp luật về kinh doanh bất động sản", group: "Cơ bản", lessons: 9, minutes: 120, free: true, image: img("photo-1450101499163-c8848c66ca85") },
-  { id: 2, title: "Các quy định pháp luật về nhà ở liên quan đến kinh doanh BĐS", group: "Cơ bản", lessons: 7, minutes: 100, free: true, image: img("photo-1486406146926-c627a92ad1ab") },
-  { id: 3, title: "Các quy định pháp luật về đất đai liên quan đến kinh doanh BĐS", group: "Cơ bản", lessons: 8, minutes: 110, free: true, image: img("photo-1500382017468-9049fed747ef") },
-  { id: 4, title: "Pháp lý đầu tư bất động sản — trình tự & nội dung dự án", group: "Cơ bản", lessons: 6, minutes: 90, free: true, image: img("photo-1487958449943-2429e8be8625") },
-  { id: 5, title: "Tổng quan về dịch vụ môi giới bất động sản", group: "Cơ bản", lessons: 6, minutes: 80, free: true, image: img("photo-1521791136064-7986c2920216") },
+  { id: 1, title: "Các quy định pháp luật về kinh doanh bất động sản", group: "Cơ sở", lessons: 9, minutes: 120, free: true, image: img("photo-1450101499163-c8848c66ca85") },
+  { id: 2, title: "Các quy định pháp luật về nhà ở liên quan đến kinh doanh BĐS", group: "Cơ sở", lessons: 7, minutes: 100, free: true, image: img("photo-1486406146926-c627a92ad1ab") },
+  { id: 3, title: "Các quy định pháp luật về đất đai liên quan đến kinh doanh BĐS", group: "Cơ sở", lessons: 8, minutes: 110, free: true, image: img("photo-1500382017468-9049fed747ef") },
+  { id: 4, title: "Pháp lý đầu tư bất động sản — trình tự & nội dung dự án", group: "Cơ sở", lessons: 6, minutes: 90, free: true, image: img("photo-1487958449943-2429e8be8625") },
+  { id: 5, title: "Tổng quan về dịch vụ môi giới bất động sản", group: "Cơ sở", lessons: 6, minutes: 80, free: true, image: img("photo-1521791136064-7986c2920216") },
   { id: 6, title: "Quy trình và kỹ năng môi giới bất động sản", group: "Chuyên môn", lessons: 8, minutes: 130, free: false, image: img("photo-1560518883-ce09059eeffa") },
   { id: 7, title: "Định giá bất động sản", group: "Chuyên môn", lessons: 7, minutes: 120, free: false, image: img("photo-1554224155-6726b3ff858f") },
   { id: 8, title: "Marketing bất động sản", group: "Chuyên môn", lessons: 5, minutes: 70, free: false, image: img("photo-1460925895917-afdab827c52f") },
@@ -168,7 +171,7 @@ export const TOPICS: Topic[] = [
   { id: 11, title: "Phát triển đô thị & nhà ở xã hội", group: "Chuyên môn", lessons: 5, minutes: 80, free: false, image: img("photo-1479839672679-a46483c0e34c") },
   { id: 12, title: "Thẩm định hồ sơ pháp lý bất động sản", group: "Chuyên môn", lessons: 7, minutes: 110, free: false, image: img("photo-1591696205602-2f950c417cb9") },
   { id: 13, title: "Kỹ năng tư vấn & chăm sóc khách hàng", group: "Chuyên môn", lessons: 5, minutes: 75, free: false, image: img("photo-1573164713988-8665fc963095") },
-  { id: 14, title: "Đạo đức nghề nghiệp môi giới BĐS", group: "Cơ bản", lessons: 4, minutes: 60, free: true, image: img("photo-1507679799987-c73779587ccf") },
+  { id: 14, title: "Đạo đức nghề nghiệp môi giới BĐS", group: "Cơ sở", lessons: 4, minutes: 60, free: true, image: img("photo-1507679799987-c73779587ccf") },
   { id: 15, title: "Ứng dụng công nghệ trong môi giới BĐS", group: "Chuyên môn", lessons: 5, minutes: 70, free: false, image: img("photo-1519389950473-47ba0277781c") },
   { id: 16, title: "Ôn tập tổng hợp & luyện đề sát hạch", group: "Chuyên môn", lessons: 8, minutes: 140, free: false, image: img("photo-1434030216411-0b793f4b4173") },
 ];

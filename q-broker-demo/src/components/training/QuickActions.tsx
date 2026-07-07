@@ -18,7 +18,7 @@ const TONE: Record<QuickAction["tone"], { grad: string; shadow: string }> = {
 
 export function QuickActions({ roleId }: { roleId?: RoleId }) {
   return (
-    <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:grid-cols-6">
+    <div className="mx-auto grid max-w-4xl grid-cols-3 gap-3 sm:gap-4">
       {QUICK_ACTIONS.map((a, i) => {
         const tone = TONE[a.tone];
         return (

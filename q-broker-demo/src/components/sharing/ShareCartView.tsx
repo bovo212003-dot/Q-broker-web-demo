@@ -227,7 +227,7 @@ function Workspace({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-al-700">
             <Icon name="FolderOpen" className="h-5 w-5 text-flame-500" />
-            Giỏ chia sẻ của tôi
+            Nguồn hàng đã chia sẽ
             <span className="rounded-full bg-al-50 px-2.5 py-0.5 text-sm text-al-600">
               {mine.length}
             </span>
@@ -238,7 +238,7 @@ function Workspace({
               className="inline-flex items-center gap-1.5 rounded-xl border border-al-200 bg-white px-4 py-2 text-sm font-semibold text-al-600 shadow-sm transition-colors hover:border-al-400"
             >
               <Icon name="Plus" className="h-4 w-4" />
-              Chia sẻ nguồn hàng
+              Chia sẻ nguồn hàng mới
             </button>
           )}
         </div>

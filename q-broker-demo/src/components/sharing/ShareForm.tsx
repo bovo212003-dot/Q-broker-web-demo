@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 
 // Form chia sẻ nguồn hàng mới — theo quy trình PDF: sau khi gửi,
 // tin ở trạng thái "Chờ xác minh" (AI Realtor + chuyên gia thẩm định).
-const COMMISSIONS = [30, 40, 50, 60];
+const COMMISSION_MIN = 10;
+const COMMISSION_MAX = 80;
 
 export function ShareForm({
   onSubmit,
@@ -29,8 +30,18 @@ export function ShareForm({
   const [price, setPrice] = useState("");
   const [commission, setCommission] = useState(50);
   const [scope, setScope] = useState<ShareScope>(SHARE_SCOPES[0]);
+  const [image, setImage] = useState<string | null>(null);
 
   const valid = title.trim() !== "" && kind !== null && area !== "" && price.trim() !== "";
+
+  // Đọc ảnh người dùng chọn -> data URL để xem trước & lưu kèm tin.
+  const onPickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setImage(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const submit = () => {
     if (!valid) return;
@@ -44,6 +55,7 @@ export function ShareForm({
       scope,
       status: "Chờ xác minh",
       receivers: 0,
+      image: image ?? undefined,
     });
   };
 
@@ -87,6 +99,40 @@ export function ShareForm({
           </div>
         </div>
 
+        {/* Ảnh nguồn hàng */}
+        <div className="sm:col-span-2">
+          <Label>Ảnh nguồn hàng</Label>
+          {image ? (
+            <div className="relative overflow-hidden rounded-xl border border-slate-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt="Ảnh nguồn hàng" className="h-48 w-full object-cover" />
+              <div className="absolute right-2 top-2 flex gap-2">
+                <label className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-slate-900/80">
+                  <Icon name="RefreshCw" className="h-3.5 w-3.5" />
+                  Đổi ảnh
+                  <input type="file" accept="image/*" onChange={onPickImage} className="hidden" />
+                </label>
+                <button
+                  onClick={() => setImage(null)}
+                  className="rounded-lg bg-slate-900/60 p-1.5 text-white backdrop-blur hover:bg-rose-500"
+                  aria-label="Xoá ảnh"
+                >
+                  <Icon name="Trash2" className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-8 text-center transition-colors hover:border-al-400 hover:bg-al-50/40">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-al-50 text-al-500">
+                <Icon name="ImagePlus" className="h-5 w-5" />
+              </span>
+              <span className="text-sm font-semibold text-slate-600">Thêm ảnh nguồn hàng</span>
+              <span className="text-xs text-slate-400">Bấm để chọn ảnh (PNG, JPG) từ máy của bạn</span>
+              <input type="file" accept="image/*" onChange={onPickImage} className="hidden" />
+            </label>
+          )}
+        </div>
+
         {/* Khu vực */}
         <div>
           <Label>Khu vực *</Label>
@@ -115,24 +161,28 @@ export function ShareForm({
           />
         </div>
 
-        {/* Hoa hồng chia sẻ */}
+        {/* Hoa hồng chia sẻ — thanh trượt, kéo phải để tăng % */}
         <div>
           <Label>Hoa hồng cho môi giới đầu khách</Label>
-          <div className="flex gap-2">
-            {COMMISSIONS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCommission(c)}
-                className={cn(
-                  "flex-1 rounded-xl border py-2.5 text-sm font-bold transition-colors",
-                  commission === c
-                    ? "border-flame-500 bg-flame-500 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-flame-300"
-                )}
-              >
-                {c}%
-              </button>
-            ))}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-end justify-between">
+              <span className="text-xs text-slate-400">Kéo sang phải để tăng hoa hồng</span>
+              <span className="text-2xl font-bold text-flame-600">{commission}%</span>
+            </div>
+            <input
+              type="range"
+              min={COMMISSION_MIN}
+              max={COMMISSION_MAX}
+              step={1}
+              value={commission}
+              onChange={(e) => setCommission(Number(e.target.value))}
+              aria-label="Hoa hồng"
+              className="mt-3 h-2 w-full cursor-pointer accent-flame-500"
+            />
+            <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-slate-400">
+              <span>{COMMISSION_MIN}%</span>
+              <span>{COMMISSION_MAX}%</span>
+            </div>
           </div>
         </div>
 

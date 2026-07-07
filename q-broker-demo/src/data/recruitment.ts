@@ -130,12 +130,12 @@ export interface CvLanguage {
 }
 
 export const CANDIDATE_CV = {
-  name: "Trần Gia Huy",
+  name: "Võ Hoàng Tuấn",
   avatar: img("photo-1560250097-0b93528c311a", 200),
   headline: "Chuyên viên môi giới căn hộ & nhà phố khu Nam TP.HCM",
   area: "Quận 7, TP.HCM",
   phone: "0912 345 678",
-  email: "giahuy.broker@gmail.com",
+  email: "vohoangtuan.broker@gmail.com",
   years: 4,
   tier: "Bạc III",
   points: 18_250,
