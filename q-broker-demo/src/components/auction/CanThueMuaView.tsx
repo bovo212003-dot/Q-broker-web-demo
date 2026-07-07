@@ -10,6 +10,7 @@ import {
   MyRequest,
   RequestStatus,
   StoredRequest,
+  img,
   loadMyRequests,
   saveMyRequests,
 } from "@/data/auction";
@@ -322,6 +323,17 @@ function Landing({
     <div className="space-y-10">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-al-700 via-al-600 to-al-500 px-6 py-10 text-white shadow-lg sm:px-12 sm:py-14">
+        {/* Ảnh nền phủ toàn khung + ken-burns — gradient chuyển mượt */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={img("photo-1600585154340-be6161a56a0c", 1200)}
+            alt=""
+            className="h-full w-full animate-kenburns object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-al-800 via-al-700/90 to-al-600/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-al-800/60 to-transparent" />
+        </div>
         <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-flame-500/30 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-16 left-1/4 h-56 w-56 rounded-full bg-al-300/20 blur-3xl" />
         <div className="pointer-events-none absolute right-10 top-10 hidden animate-float lg:block">
@@ -331,28 +343,40 @@ function Landing({
         </div>
 
         <div className="relative max-w-2xl">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur">
+          <p className="inline-flex animate-fade-up items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur">
             <Icon name="Radar" className="h-3.5 w-3.5 text-flame-400" />
             Bảng tin chờ kết nối môi giới — Broker Board
           </p>
-          <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-5xl">
+          <h1
+            style={{ animationDelay: "80ms" }}
+            className="mt-4 animate-fade-up text-3xl font-bold leading-tight sm:text-5xl"
+          >
             Cần thuê hay mua nhà?
             <br />
             <span className="text-flame-400"> Hãy để môi giới tiềm năng tự tìm đến bạn.</span>
           </h1>
-          <p className="mt-4 max-w-xl text-base text-white/80">
+          <p
+            style={{ animationDelay: "160ms" }}
+            className="mt-4 max-w-xl animate-fade-up text-base text-white/80"
+          >
             Đăng nhu cầu một lần duy nhất — tin của bạn treo trên bảng tin chờ
             để môi giới chủ động đăng ký. Khi bạn sẵn sàng, AI ghép nối đúng{" "}
             <b className="text-white">một môi giới phù hợp nhất</b> — không spam,
             không bị gọi dồn dập.
           </p>
-          <div className="mt-7 flex flex-wrap items-center gap-4">
+          <div
+            style={{ animationDelay: "240ms" }}
+            className="mt-7 flex animate-fade-up flex-wrap items-center gap-4"
+          >
             <button
               onClick={onStart}
-              className="inline-flex items-center gap-2 rounded-2xl bg-flame-500 px-7 py-4 text-base font-bold shadow-lg shadow-flame-900/30 transition-all hover:-translate-y-0.5 hover:bg-flame-600"
+              className="group inline-flex items-center gap-2 rounded-2xl bg-flame-500 px-7 py-4 text-base font-bold shadow-lg shadow-flame-900/30 transition-all hover:-translate-y-0.5 hover:bg-flame-600"
             >
               Đăng nhu cầu ngay
-              <Icon name="ArrowRight" className="h-5 w-5" />
+              <Icon
+                name="ArrowRight"
+                className="h-5 w-5 transition-transform group-hover:translate-x-1"
+              />
             </button>
             <div className="flex items-center gap-2 text-sm text-white/75">
               <div className="flex -space-x-2">
@@ -420,9 +444,24 @@ function Landing({
       </section>
 
       {/* Vì sao khác biệt */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="grid items-center gap-6 lg:grid-cols-2">
-          <div>
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid items-stretch lg:grid-cols-2">
+          {/* Ảnh minh hoạ */}
+          <div className="group relative min-h-[240px] overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={img("photo-1582407947304-fd86f028f716", 1000)}
+              alt="Môi giới đồng hành cùng khách hàng"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-al-800/70 via-al-800/10 to-transparent" />
+            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3.5 py-2 text-sm font-bold text-white backdrop-blur">
+              <Icon name="HeartHandshake" className="h-4 w-4 text-flame-400" />
+              1 môi giới tốt nhất đồng hành cùng bạn
+            </div>
+          </div>
+          {/* Nội dung */}
+          <div className="p-6 sm:p-8">
             <h2 className="text-lg font-bold text-al-700">
               Khác gì việc tự đi tìm môi giới?
             </h2>
@@ -432,20 +471,21 @@ function Landing({
               chỉ <b className="text-slate-700">một môi giới tốt nhất</b> đồng
               hành cùng bạn.
             </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {BENEFITS.map((b) => (
-              <div
-                key={b.text}
-                className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3.5 text-sm text-slate-600"
-              >
-                <Icon
-                  name={b.icon}
-                  className="mt-0.5 h-4 w-4 shrink-0 text-flame-500"
-                />
-                {b.text}
-              </div>
-            ))}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {BENEFITS.map((b, i) => (
+                <div
+                  key={b.text}
+                  style={{ animationDelay: `${i * 80}ms` }}
+                  className="flex animate-fade-up items-start gap-2.5 rounded-xl bg-slate-50 p-3.5 text-sm text-slate-600 transition-colors hover:bg-al-50"
+                >
+                  <Icon
+                    name={b.icon}
+                    className="mt-0.5 h-4 w-4 shrink-0 text-flame-500"
+                  />
+                  {b.text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
