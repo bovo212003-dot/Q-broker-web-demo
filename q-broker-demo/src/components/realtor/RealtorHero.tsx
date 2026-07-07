@@ -20,7 +20,7 @@ export function RealtorHero() {
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center sm:py-28">
         <RealtorLogo light className="mb-6" />
         <h1 className="text-3xl font-bold uppercase text-white drop-shadow-sm sm:text-5xl">
-          Hệ sinh thái dành cho môi giới bất động sản hiện đại
+          Hệ sinh thái BĐS toàn diện Q-Broker
         </h1>
         <p className="mt-3 text-base text-white/90 sm:text-lg">
           Kết nối đúng người · Chia sẻ đúng giá trị · Chốt giao dịch thành công
