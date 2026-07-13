@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { RoleId } from "@/types";
+import { withRole } from "@/lib/role";
 import { formatVnd } from "@/lib/utils";
 import { LISTINGS } from "@/data/realtorListings";
 import {
@@ -12,18 +15,35 @@ import {
   type QuoteInput,
 } from "@/data/priceQuote";
 
-const TERM_OPTIONS = [10, 15, 20, 25] as const;
-
 // Chỉ giữ chữ số -> number (dùng cho ô nhập giá có phân tách nghìn).
 function parseDigits(v: string): number {
   const n = Number(v.replace(/\D/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
 
-export function PriceQuoteView({ agentName = "Môi giới Q-Broker" }: { agentName?: string }) {
+export function PriceQuoteView({
+  agentName = "Môi giới Q-Broker",
+  roleId,
+}: {
+  agentName?: string;
+  roleId?: RoleId;
+}) {
   const [input, setInput] = useState<QuoteInput>(DEFAULT_QUOTE_INPUT);
   const [copied, setCopied] = useState(false);
+  const [bankOpen, setBankOpen] = useState(false); // dropdown ngân hàng
+  const bankRef = useRef<HTMLDivElement>(null);
 
+  // Đóng dropdown ngân hàng khi click ra ngoài.
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (bankRef.current && !bankRef.current.contains(e.target as Node))
+        setBankOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  // Bảng giá tham khảo mở cho mọi vai trò (khách, môi giới...).
   const bank = QUOTE_BANKS.find((b) => b.id === input.bankId) ?? QUOTE_BANKS[0];
   const listing = LISTINGS.find((l) => l.id === input.listingId);
   const result = useMemo(() => computeQuote(input, bank), [input, bank]);
@@ -65,8 +85,26 @@ export function PriceQuoteView({ agentName = "Môi giới Q-Broker" }: { agentNa
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-      {/* Print: chỉ in phần phiếu */}
-      <style>{`@media print{[data-noprint]{display:none!important}[data-quote]{box-shadow:none!important;border:none!important}body{background:#fff!important}}`}</style>
+      {/* Print: CHỈ in đúng tấm phiếu (data-quote), ẩn mọi thứ khác kể cả
+          header/footer của trang. Kỹ thuật: ẩn toàn bộ rồi hiện lại riêng
+          tấm phiếu và đưa nó lên đầu trang giấy. */}
+      <style>{`
+        @media print {
+          body { background: #fff !important; }
+          body * { visibility: hidden !important; }
+          [data-quote], [data-quote] * { visibility: visible !important; }
+          [data-quote] {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+          }
+          @page { margin: 12mm; }
+        }
+      `}</style>
 
       {/* Banner */}
       <div
@@ -152,58 +190,139 @@ export function PriceQuoteView({ agentName = "Môi giới Q-Broker" }: { agentNa
             valueText={`Vay ${formatVnd(result.loanAmount)} • tối đa ${bank.maxLtv}%`}
           />
 
-          {/* Ngân hàng */}
+          {/* Ngân hàng — dropdown */}
           <Field label="Ngân hàng cho vay">
-            <div className="grid grid-cols-2 gap-2">
-              {QUOTE_BANKS.map((b) => {
-                const active = b.id === input.bankId;
-                return (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() =>
-                      patch({ bankId: b.id, ltvPct: Math.min(input.ltvPct, b.maxLtv) })
-                    }
-                    className={
-                      "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition-colors " +
-                      (active
-                        ? "border-realtor-500 bg-realtor-50 text-realtor-700 ring-1 ring-realtor-500"
-                        : "border-slate-200 text-slate-700 hover:border-slate-300")
-                    }
-                  >
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: b.color }}
-                    />
-                    <span className="min-w-0 truncate">{b.short}</span>
-                  </button>
-                );
-              })}
+            <div ref={bankRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setBankOpen((v) => !v)}
+                className="flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:border-realtor-500 focus:outline-none focus:ring-2 focus:ring-realtor-100"
+                aria-haspopup="listbox"
+                aria-expanded={bankOpen}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={bank.logo}
+                    alt={bank.short}
+                    className="h-6 w-6 shrink-0 rounded-md"
+                  />
+                  <span className="truncate">{bank.name}</span>
+                </span>
+                <Icon
+                  name="ChevronDown"
+                  className={
+                    "h-4 w-4 shrink-0 text-slate-400 transition-transform " +
+                    (bankOpen ? "rotate-180" : "")
+                  }
+                />
+              </button>
+
+              {bankOpen && (
+                <div
+                  className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+                  role="listbox"
+                >
+                  {QUOTE_BANKS.map((b) => {
+                    const active = b.id === input.bankId;
+                    return (
+                      <button
+                        key={b.id}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        onClick={() => {
+                          patch({ bankId: b.id, ltvPct: Math.min(input.ltvPct, b.maxLtv) });
+                          setBankOpen(false);
+                        }}
+                        className={
+                          "flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-slate-50 " +
+                          (active ? "bg-realtor-50" : "")
+                        }
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={b.logo}
+                            alt={b.short}
+                            className="h-6 w-6 shrink-0 rounded-md"
+                          />
+                          <span
+                            className={
+                              "truncate font-semibold " +
+                              (active ? "text-realtor-700" : "text-slate-700")
+                            }
+                          >
+                            {b.name}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-xs text-slate-400">
+                          ưu đãi {b.promoRate}%
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             <p className="mt-1.5 text-xs text-slate-400">
               Ưu đãi {bank.promoRate}%/năm trong {bank.promoMonths} tháng, sau đó {bank.rate}%/năm.
             </p>
           </Field>
 
-          {/* Kỳ hạn */}
-          <Field label="Kỳ hạn vay">
-            <div className="flex gap-2">
-              {TERM_OPTIONS.map((y) => {
-                const active = y === input.termYears;
+          {/* Kỳ hạn — thanh kéo */}
+          <SliderField
+            label="Kỳ hạn vay"
+            value={input.termYears}
+            min={5}
+            max={30}
+            step={1}
+            suffix=" năm"
+            onChange={(v) => patch({ termYears: v })}
+            valueText={`${input.termYears} năm • ${input.termYears * 12} tháng`}
+          />
+
+          {/* Nhân viên hỗ trợ khoản vay theo ngân hàng đã chọn */}
+          <Field
+            label={`Nhân viên hỗ trợ khoản vay (${bank.sales.length})`}
+          >
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-600">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={bank.logo} alt={bank.short} className="h-5 w-5 rounded" />
+              {bank.name}
+            </div>
+            <div className="space-y-2">
+              {bank.sales.map((rep) => {
+                const consultHref = withRole(
+                  `/realtor/tin-nhan?bank=${bank.id}&rep=${rep.id}` +
+                    (input.listingId ? `&product=${input.listingId}` : ""),
+                  roleId,
+                );
                 return (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => patch({ termYears: y })}
-                    className={
-                      "flex-1 rounded-xl border px-2 py-2 text-sm font-semibold transition-colors " +
-                      (active
-                        ? "border-realtor-500 bg-realtor-500 text-white"
-                        : "border-slate-200 text-slate-700 hover:border-slate-300")
-                    }
+                  <div
+                    key={rep.id}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 p-2.5"
                   >
-                    {y} năm
-                  </button>
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                      style={{ backgroundColor: bank.color }}
+                    >
+                      {rep.name.charAt(0)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {rep.name}
+                      </p>
+                      <p className="truncate text-xs text-slate-500">{rep.title}</p>
+                    </div>
+                    <Link
+                      href={consultHref}
+                      className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-realtor-500 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-realtor-600"
+                    >
+                      <Icon name="MessageCircle" className="h-3.5 w-3.5" />
+                      Tư vấn ngay
+                    </Link>
+                  </div>
                 );
               })}
             </div>

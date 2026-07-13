@@ -1,11 +1,19 @@
 // =============================================================
 // DỮ LIỆU MẪU cho trang AFFILIATE (/realtor/affiliate)
-// Cơ chế mô phỏng theo các chương trình affiliate BĐS thế giới:
-// - Zillow Affiliate: link giới thiệu + cookie + % hoa hồng cố định
-// - Zillow Flex / Realtor.com ReadyConnect: "pay-at-closing" — chỉ
-//   trả phí giới thiệu khi giao dịch CHỐT thành công (25–35%)
-// - Agent-to-agent referral: chuẩn ngành 25% hoa hồng gộp
-// - Carrot / Showcase IDX: hoa hồng recurring cho gói subscription
+// Thiết kế theo MÔ HÌNH MỸ, chạy song song HAI LÀN (xem tài liệu
+// TAI-LIEU-Affiliate-kieu-My.md):
+//
+//   • LÀN 1 — Referral / Success Fee (pay-at-closing): nền tảng đưa
+//     khách đã sàng lọc cho môi giới; khi CHỐT, môi giới trả lại một
+//     % hoa hồng của họ. Chuẩn ngành: referral môi giới 25% (20–30%);
+//     nền tảng lead-gen thu cao hơn — Zillow Flex 15–40% (~35%),
+//     Realtor.com ReadyConnect 30–38%, Redfin/HomeLight/UpNest 30–33%.
+//     Q-Broker chọn 25% để cạnh tranh.
+//
+//   • LÀN 2 — Affiliate / CPA (link + cookie): trả theo hành động/đơn
+//     qua link giới thiệu (đăng ký, gói Pro, lead, khoá học). Cookie
+//     30–90 ngày (SaaS 60–90), last-click; trả định kỳ hàng tháng,
+//     có ngưỡng tối thiểu — chuẩn Amazon Associates / affiliate network.
 // =============================================================
 
 /** Một bước trong quy trình "Cách hoạt động" */
@@ -34,7 +42,22 @@ export interface CommissionProduct {
   commission: string; // phần affiliate nhận
   example: string; // ví dụ tính tiền cụ thể
   payType: "closing" | "recurring" | "flat";
+  lane: 1 | 2; // 1 = Referral pay-at-closing (giao dịch); 2 = Affiliate/CPA (dịch vụ)
 }
+
+/** Metadata 2 làn theo mô hình Mỹ — hiển thị nhóm ở bảng hoa hồng */
+export const LANE_META: Record<1 | 2, { tag: string; title: string; desc: string }> = {
+  1: {
+    tag: "Làn 1 · Referral",
+    title: "Referral giao dịch — pay-at-closing",
+    desc: "Khách/deal từ mạng lưới, chỉ tính phí khi CHỐT. Đây là nguồn thu nhập lớn, giống Zillow Flex / Realtor.com ReadyConnect.",
+  },
+  2: {
+    tag: "Làn 2 · Affiliate / CPA",
+    title: "Affiliate dịch vụ — link + cookie",
+    desc: "Trả theo hành động qua link giới thiệu (gói Pro, đấu giá, khoá học). Dòng tiền đều, có thể recurring — chuẩn affiliate network.",
+  },
+};
 
 /** Câu hỏi thường gặp */
 export interface AffiliateFaq {
@@ -127,6 +150,7 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
     commission: "40 – 60% phí giới thiệu",
     example: "Căn 4 tỷ → HH môi giới 80tr → Q-Broker thu 20tr → bạn nhận 8 – 12tr",
     payType: "closing",
+    lane: 1,
   },
   {
     icon: "KeyRound",
@@ -135,6 +159,7 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
     commission: "40 – 60% phí giới thiệu",
     example: "Phí thuê 25tr → Q-Broker thu 6,25tr → bạn nhận 2,5 – 3,75tr",
     payType: "closing",
+    lane: 1,
   },
   {
     icon: "Gavel",
@@ -143,6 +168,7 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
     commission: "5.000.000 đ / lô chốt",
     example: "Khách trúng đấu giá qua link → nhận cố định 5 triệu",
     payType: "flat",
+    lane: 2,
   },
   {
     icon: "BadgeCheck",
@@ -151,6 +177,7 @@ export const COMMISSION_PRODUCTS: CommissionProduct[] = [
     commission: "15 – 25% mỗi tháng, trong 12 tháng",
     example: "10 môi giới đăng ký → tới 1,25 triệu đều đặn hàng tháng",
     payType: "recurring",
+    lane: 2,
   },
 ];
 
@@ -194,7 +221,7 @@ export const AFFILIATE_FAQS: AffiliateFaq[] = [
   },
   {
     q: "Cookie 30 ngày nghĩa là gì?",
-    a: "Khi khách bấm link của bạn, hệ thống ghi nhớ 30 ngày. Trong thời gian đó khách quay lại và giao dịch (kể cả không qua link) thì hoa hồng vẫn tính cho bạn — dài hơn chuẩn 7 ngày của các nền tảng quốc tế.",
+    a: "Khi khách bấm link của bạn, hệ thống ghi nhớ 30 ngày. Trong thời gian đó khách quay lại và giao dịch (kể cả không qua link) thì hoa hồng vẫn tính cho bạn. 30 ngày nằm trong khung chuẩn 30–90 ngày của affiliate quốc tế (thương mại 7–30 ngày, SaaS 60–90 ngày). Áp dụng cho Làn 2 (dịch vụ); riêng giao dịch nhà đất ở Làn 1 dùng cửa sổ attribution 12 tháng gắn theo khách.",
   },
   {
     q: "Q-Broker lấy tiền ở đâu để trả hoa hồng cho tôi?",

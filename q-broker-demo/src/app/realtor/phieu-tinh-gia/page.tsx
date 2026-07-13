@@ -24,7 +24,7 @@ export default function PhieuTinhGiaPage({
   return (
     <div className="min-h-screen bg-slate-50">
       <RealtorHeader userName={name} roleId={roleId} />
-      <PriceQuoteView agentName={name} />
+      <PriceQuoteView agentName={name} roleId={roleId} />
       <RealtorFooter />
     </div>
   );
