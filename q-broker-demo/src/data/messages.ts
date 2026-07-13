@@ -18,6 +18,15 @@ export interface Conversation {
   role?: string; // vai trò/mô tả ngắn (khách hàng, môi giới, sàn, ngân hàng)
 }
 
+/** Card sản phẩm (căn nhà) ghim đầu hội thoại — kiểu Shopee. */
+export interface ChatProduct {
+  title: string; // tên/địa chỉ căn
+  subtitle: string; // khu vực / mô tả ngắn
+  price: string; // giá đã định dạng
+  image: string; // ảnh đại diện
+  href?: string; // link xem chi tiết (tuỳ chọn)
+}
+
 /** Loại tin nhắn kiểu Messenger: chữ (mặc định), ảnh, tin thoại, thả tim/like. */
 export type MessageKind = "text" | "image" | "voice" | "like";
 

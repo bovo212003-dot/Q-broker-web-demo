@@ -7,6 +7,7 @@ import {
   AFFILIATE_TIERS,
   BROKER_FEE_TERMS,
   COMMISSION_PRODUCTS,
+  LANE_META,
   MARKETING_ASSETS,
   MONEY_FLOW_STEPS,
 } from "@/data/affiliate";
@@ -269,47 +270,70 @@ export function AffiliateTiers() {
   );
 }
 
-/** Bảng hoa hồng theo từng sản phẩm/dịch vụ */
+/** Bảng hoa hồng — nhóm theo 2 LÀN của mô hình Mỹ (Referral vs Affiliate/CPA) */
 export function AffiliateCommissions() {
+  const lanes: (1 | 2)[] = [1, 2];
   return (
     <section id="hoa-hong" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-14 lg:px-8">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-realtor-ink sm:text-3xl">
-          Hoa hồng theo từng sản phẩm
+          Hai làn thu nhập, một chương trình
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
-          Bốn nguồn thu nhập trong một chương trình — từ hoa hồng lớn khi chốt
-          giao dịch tới dòng tiền đều đặn hàng tháng.
+          Theo mô hình Mỹ: <b>Làn 1</b> là hoa hồng lớn khi chốt giao dịch
+          (pay-at-closing), <b>Làn 2</b> là dòng tiền đều từ dịch vụ qua link
+          giới thiệu.
         </p>
       </div>
-      <div className="mt-8 grid gap-5 sm:grid-cols-2">
-        {COMMISSION_PRODUCTS.map((c) => {
-          const pt = PAY_TYPE_LABEL[c.payType];
+
+      <div className="mt-10 space-y-10">
+        {lanes.map((lane) => {
+          const meta = LANE_META[lane];
+          const items = COMMISSION_PRODUCTS.filter((c) => c.lane === lane);
           return (
-            <div
-              key={c.product}
-              className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-realtor-50 text-realtor-500">
-                <Icon name={c.icon} className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-sm font-bold text-realtor-ink">{c.product}</h3>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${pt.className}`}
-                  >
-                    {pt.label}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">{c.fee}</p>
-                <p className="mt-2 text-base font-extrabold text-realtor-500">
-                  {c.commission}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                  <Icon name="Calculator" className="mr-1 inline h-3 w-3" />
-                  {c.example}
-                </p>
+            <div key={lane}>
+              {/* Đầu làn */}
+              <div className="flex flex-col gap-1 border-l-4 border-realtor-500 pl-4">
+                <span className="text-xs font-bold uppercase tracking-wide text-realtor-500">
+                  {meta.tag}
+                </span>
+                <h3 className="text-lg font-bold text-realtor-ink">{meta.title}</h3>
+                <p className="max-w-2xl text-sm text-slate-600">{meta.desc}</p>
+              </div>
+
+              {/* Sản phẩm trong làn */}
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                {items.map((c) => {
+                  const pt = PAY_TYPE_LABEL[c.payType];
+                  return (
+                    <div
+                      key={c.product}
+                      className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                    >
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-realtor-50 text-realtor-500">
+                        <Icon name={c.icon} className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-sm font-bold text-realtor-ink">{c.product}</h4>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${pt.className}`}
+                          >
+                            {pt.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">{c.fee}</p>
+                        <p className="mt-2 text-base font-extrabold text-realtor-500">
+                          {c.commission}
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                          <Icon name="Calculator" className="mr-1 inline h-3 w-3" />
+                          {c.example}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

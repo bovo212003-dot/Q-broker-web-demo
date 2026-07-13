@@ -26,11 +26,11 @@ const NOTI_TONE: Record<NotiTone, string> = {
 // Menu chính -> dùng chung cho MỌI role.
 const NAV = [
   { label: "Đào tạo", href: "/realtor/dao-tao" },
+  { label: "Dự án", href: "/realtor/du-an" },
   { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
   { label: "Cần thuê - mua", href: "/realtor/can-thue-mua" },
   { label: "Tuyển dụng", href: "/realtor/tuyen-dung" },
   { label: "Live stream", href: "/realtor/livestream" },
-  { label: "Affilate", href: "/realtor/affiliate" },
   { label: "Tin tức", href: "/realtor/tin-tuc" },
 ];
 
@@ -54,6 +54,7 @@ type MoreItem = {
 
 const MORE: MoreItem[] = [
   { label: "Nhà của tôi", href: "#", icon: "Home" },
+  { label: "Affilate", href: "/realtor/affiliate", icon: "Handshake" },
   { label: "Phiếu tính giá", href: "/realtor/phieu-tinh-gia", icon: "Calculator" },
   { label: "Tin nhắn", href: "/realtor/tin-nhan", icon: "MessageCircle", roles: ["broker", "admin", "customer"] },
   { label: "Kết bạn", href: "/realtor/ket-ban", icon: "UserPlus", roles: ["broker", "admin", "customer"] },

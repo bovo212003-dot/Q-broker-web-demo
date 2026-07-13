@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import Link from "next/link";
 import {
   CONVERSATIONS,
   getThread,
   randomReply,
   type ChatMessage,
   type Conversation,
+  type ChatProduct,
 } from "@/data/messages";
 
 // =============================================================
@@ -35,9 +37,13 @@ function previewText(m: ChatMessage): string {
 export function MessagesView({
   initialId,
   extraConv,
+  product,
+  productConvId,
 }: {
   initialId?: string;
   extraConv?: Conversation;
+  product?: ChatProduct; // card căn nhà ghim đầu hội thoại (kiểu Shopee)
+  productConvId?: string; // hội thoại được ghim card
 }) {
   // Danh sách hội thoại làm việc: ghép extraConv (nếu chưa có) lên đầu.
   const baseConvs = useMemo<Conversation[]>(() => {
@@ -59,9 +65,21 @@ export function MessagesView({
   );
 
   // Luồng tin theo hội thoại — state cục bộ để "gửi" thêm được.
-  const [threads, setThreads] = useState<Record<string, ChatMessage[]>>(() =>
-    Object.fromEntries(baseConvs.map((c) => [c.id, getThread(c.id)]))
-  );
+  const [threads, setThreads] = useState<Record<string, ChatMessage[]>>(() => {
+    const base = Object.fromEntries(baseConvs.map((c) => [c.id, getThread(c.id)]));
+    // Hội thoại tư vấn vay mới mở: chèn lời chào của sale nhắc tới căn nhà.
+    if (productConvId && product && !(base[productConvId]?.length)) {
+      base[productConvId] = [
+        {
+          id: `${productConvId}-greet`,
+          fromMe: false,
+          text: `Chào anh/chị 👋 Em là ${extraConv?.name ?? "chuyên viên tư vấn"}. Em thấy mình đang quan tâm căn "${product.title}". Em hỗ trợ phương án vay & lãi suất tốt nhất cho căn này nhé!`,
+          time: "Bây giờ",
+        },
+      ];
+    }
+    return base;
+  });
   // Đánh dấu đã đọc cục bộ (mở hội thoại -> hết chấm chưa đọc).
   const [read, setRead] = useState<Record<string, boolean>>({});
   // Hội thoại nào đối phương đang "soạn tin" (hiệu ứng ba chấm).
@@ -267,6 +285,7 @@ export function MessagesView({
               conv={active}
               thread={activeThread}
               typing={!!typing[activeId]}
+              product={activeId === productConvId ? product : undefined}
               onBack={() => setMobileChat(false)}
               onSend={sendMessage}
               onSendImage={sendImage}
@@ -351,6 +370,7 @@ function ChatWindow({
   conv,
   thread,
   typing,
+  product,
   onBack,
   onSend,
   onSendImage,
@@ -360,6 +380,7 @@ function ChatWindow({
   conv: Conversation;
   thread: ChatMessage[];
   typing: boolean;
+  product?: ChatProduct;
   onBack: () => void;
   onSend: (text: string) => void;
   onSendImage: (dataUrl: string) => void;
@@ -452,6 +473,9 @@ function ChatWindow({
           </button>
         </div>
       </header>
+
+      {/* Card sản phẩm ghim (kiểu Shopee) — căn nhà đang được tư vấn */}
+      {product && <ProductCard product={product} />}
 
       {/* Danh sách tin nhắn */}
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-5">
@@ -615,6 +639,43 @@ function ChatWindow({
         )}
       </div>
     </>
+  );
+}
+
+/** Card sản phẩm (căn nhà) ghim đầu hội thoại — phong cách Shopee. */
+function ProductCard({ product }: { product: ChatProduct }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-slate-200 bg-realtor-50/60 px-4 py-2.5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={product.image}
+        alt={product.title}
+        className="h-14 w-14 shrink-0 rounded-lg object-cover ring-1 ring-slate-200"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-realtor-500">
+          <Icon name="Home" className="h-3 w-3" />
+          Căn đang tư vấn
+        </p>
+        <p className="truncate text-sm font-semibold text-slate-800">
+          {product.title}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="truncate text-xs text-slate-500">{product.subtitle}</span>
+          <span className="shrink-0 text-sm font-bold text-realtor-600">
+            {product.price}
+          </span>
+        </div>
+      </div>
+      {product.href && (
+        <Link
+          href={product.href}
+          className="shrink-0 rounded-lg border border-realtor-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-realtor-600 hover:bg-realtor-50"
+        >
+          Xem
+        </Link>
+      )}
+    </div>
   );
 }
 
