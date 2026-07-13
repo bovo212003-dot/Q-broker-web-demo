@@ -54,6 +54,7 @@ type MoreItem = {
 
 const MORE: MoreItem[] = [
   { label: "Nhà của tôi", href: "#", icon: "Home" },
+  { label: "Phiếu tính giá", href: "/realtor/phieu-tinh-gia", icon: "Calculator" },
   { label: "Tin nhắn", href: "/realtor/tin-nhan", icon: "MessageCircle", roles: ["broker", "admin", "customer"] },
   { label: "Kết bạn", href: "/realtor/ket-ban", icon: "UserPlus", roles: ["broker", "admin", "customer"] },
   { label: "Tìm môi giới", href: "#", icon: "Search", roles: ["customer"] },
