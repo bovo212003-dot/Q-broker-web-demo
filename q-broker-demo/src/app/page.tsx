@@ -2,13 +2,6 @@ import Link from "next/link";
 import { ROLES, ROLE_ORDER } from "@/config/roles";
 import { Icon } from "@/components/ui/Icon";
 
-// =============================================================
-// TRANG LANDING (Chọn vai trò)
-// -------------------------------------------------------------
-// Đây là trang mẫu theo yêu cầu: 6 nút ở giữa màn hình đại diện
-// cho 6 role. Nhấn vào 1 nút -> chuyển sang trang home của role đó.
-// Danh sách nút được sinh tự động từ config/roles.ts.
-// =============================================================
 
 export default function HomePage() {
   return (
