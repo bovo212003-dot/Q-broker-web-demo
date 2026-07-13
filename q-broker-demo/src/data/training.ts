@@ -179,40 +179,255 @@ export const TOPICS: Topic[] = [
 // ---- Trắc nghiệm (tab Trắc nghiệm) --------------------------
 export type ExamGroup = "Cơ sở" | "Chuyên môn";
 
-export interface ExamSet {
-  id: string;
-  index: number;
-  title: string;
-  group: ExamGroup;
-  questions: number;
-  minutes: number;
-  done: boolean;
-  score?: number; // % nếu đã làm
+/** Cấu hình đề TỰ LUYỆN theo nhóm (bản web hoá màn "Bộ đề tổng hợp" trên app):
+ *  người dùng tạo đề ngẫu nhiên theo phạm vi chuyên đề của từng nhóm. */
+export interface SelfPracticeConfig {
+  questions: number; // tổng số câu
+  minutes: number; // thời gian làm bài
+  rangeLabel: string; // phạm vi câu hỏi hiển thị
+  desc: string; // mô tả nguồn câu hỏi
+  startNo: number; // số thứ tự đề mặc định kế tiếp
 }
 
-/** Sinh danh sách đề theo nhóm (mô phỏng 50 đề Cơ sở, 40 đề Chuyên môn) */
-function makeExamSets(group: ExamGroup, count: number, doneUpto: number): ExamSet[] {
-  const prefix = group === "Cơ sở" ? "Đề Cơ Sở Số" : "Đề Chuyên Môn Số";
-  return Array.from({ length: count }, (_, i) => {
-    const index = i + 1;
-    const done = index <= doneUpto;
-    return {
-      id: `${group === "Cơ sở" ? "cs" : "cm"}-${index}`,
-      index,
-      title: `${prefix} ${index}`,
-      group,
-      questions: 40,
-      minutes: 120,
-      done,
-      score: done ? 72 + ((index * 7) % 25) : undefined,
-    };
-  });
-}
-
-export const EXAM_SETS: Record<ExamGroup, ExamSet[]> = {
-  "Cơ sở": makeExamSets("Cơ sở", 50, 1),
-  "Chuyên môn": makeExamSets("Chuyên môn", 40, 0),
+export const SELF_PRACTICE: Record<ExamGroup, SelfPracticeConfig> = {
+  "Cơ sở": {
+    questions: 40,
+    minutes: 120,
+    rangeLabel: "Chuyên đề 1 - 12",
+    desc: "Bộ đề thi gồm 40 câu hỏi được tạo ngẫu nhiên từ Chuyên đề 1 đến Chuyên đề 12.",
+    startNo: 2,
+  },
+  "Chuyên môn": {
+    questions: 40,
+    minutes: 120,
+    rangeLabel: "Chuyên đề 13 & 14",
+    desc: "Bộ đề thi gồm 40 câu hỏi được tạo ngẫu nhiên từ Chuyên đề 13 và Chuyên đề 14.",
+    startNo: 1,
+  },
 };
+
+// ---- Ngân hàng câu hỏi (mock) & bài thi đang làm ------------
+export interface QuizQuestion {
+  q: string;
+  options: string[]; // 3-4 lựa chọn
+  answer: number; // index đáp án đúng
+}
+
+const CO_SO_BANK: QuizQuestion[] = [
+  {
+    q: "Cá nhân bán/cho thuê mua nhà ở, công trình xây dựng không nhằm mục đích kinh doanh hoặc dưới mức quy mô nhỏ phải tuân thủ yêu cầu hình thức hợp đồng nào?",
+    options: [
+      "Không có yêu cầu đặc biệt.",
+      "Sử dụng mẫu hợp đồng do Bộ Tài chính ban hành.",
+      "Hợp đồng lập thành văn bản và được công chứng hoặc chứng thực.",
+      "Đăng ký hợp đồng tại Sở Xây dựng.",
+    ],
+    answer: 2,
+  },
+  {
+    q: "Thời hạn sở hữu nhà chung cư theo Luật Nhà ở 2023 được xác định như thế nào?",
+    options: [
+      "Sở hữu có thời hạn 50 năm.",
+      "Sở hữu có thời hạn 70 năm.",
+      "Theo thời hạn ghi trong hợp đồng mua bán.",
+      "Không quy định thời hạn sở hữu; chỉ có thời hạn sử dụng theo thiết kế/kiểm định. Quyền sử dụng đất ổn định lâu dài.",
+    ],
+    answer: 3,
+  },
+  {
+    q: "Giá đất cụ thể được áp dụng trong trường hợp nào sau đây theo Luật Đất đai 2024?",
+    options: [
+      "Tính tiền thuê đất trả tiền hàng năm.",
+      "Tính thuế sử dụng đất phi nông nghiệp đối với hộ gia đình.",
+      "Tính phí trước bạ khi chuyển nhượng quyền sử dụng đất.",
+      "Tính tiền bồi thường khi Nhà nước thu hồi đất.",
+    ],
+    answer: 3,
+  },
+  {
+    q: "Đối với dự án đầu tư xây dựng nhà ở thương mại, yêu cầu nào sau đây không bắt buộc?",
+    options: [
+      "Phải có phương án đầu tư xây dựng hệ thống hạ tầng kỹ thuật.",
+      "Phải cam kết tiến độ bán hàng cụ thể.",
+      "Phải phù hợp với quy hoạch phát triển nhà ở.",
+      "Phải có phương án đóng góp quỹ phát triển nhà ở xã hội.",
+    ],
+    answer: 1,
+  },
+  {
+    q: "Sở hữu chung hợp nhất được hiểu là gì?",
+    options: [
+      "Là sở hữu chung mà trong đó, phần quyền sở hữu của mỗi chủ sở hữu chung không được xác định đối với tài sản chung.",
+      "Là sở hữu chung hợp nhất có thể phân chia.",
+      "Là sở hữu của nhiều chủ thể đối với tài sản.",
+      "Là sở hữu chung mà trong đó phần quyền sở hữu của mỗi chủ sở hữu được xác định đối với tài sản chung.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Cơ quan nào quy định việc phân hạng và công nhận phân hạng nhà chung cư?",
+    options: ["Chính phủ.", "Bộ Xây dựng.", "UBND cấp tỉnh.", "Sở Xây dựng."],
+    answer: 1,
+  },
+  {
+    q: "Việc chuyển nhượng hợp đồng mua bán, thuê mua nhà ở hình thành trong tương lai không được áp dụng đối với?",
+    options: [
+      "Hợp đồng cho thuê, cho thuê lại quyền sử dụng đất.",
+      "Hợp đồng mua bán, thuê mua nhà ở xã hội.",
+      "Hợp đồng thuê nhà ở, công trình xây dựng thương mại.",
+      "Hợp đồng chuyển nhượng quyền sử dụng đất.",
+    ],
+    answer: 1,
+  },
+  {
+    q: "Thời điểm tính thuế khi hợp đồng chuyển nhượng có hiệu lực theo quy định của pháp luật được áp dụng trong trường hợp nào?",
+    options: [
+      "Khi cá nhân nhận chuyển nhượng nhà ở hình thành trong tương lai, quyền sử dụng đất gắn với công trình xây dựng tương lai.",
+      "Khi hợp đồng chuyển nhượng có thỏa thuận bên mua là người nộp thuế thay cho bên bán.",
+      "Khi hợp đồng chuyển nhượng không có thỏa thuận bên mua là người nộp thuế thay cho bên bán.",
+    ],
+    answer: 2,
+  },
+  {
+    q: "Diện tích tối thiểu để tách thửa đất ở do cơ quan nào quy định?",
+    options: [
+      "Chính phủ.",
+      "Bộ Tài nguyên và Môi trường.",
+      "UBND cấp tỉnh.",
+      "Văn phòng đăng ký đất đai.",
+    ],
+    answer: 2,
+  },
+  {
+    q: '"Sổ hồng" là tên gọi thường dùng của loại giấy tờ nào?',
+    options: [
+      "Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất.",
+      "Hợp đồng mua bán nhà.",
+      "Giấy phép xây dựng.",
+      "Biên bản bàn giao nhà.",
+    ],
+    answer: 0,
+  },
+];
+
+const CHUYEN_MON_BANK: QuizQuestion[] = [
+  {
+    q: "Trong tư vấn BĐS, nguyên tắc quan trọng nhất khi cung cấp thông tin cho khách hàng là gì?",
+    options: [
+      "Trung thực, chính xác và đầy đủ.",
+      "Chỉ nêu ưu điểm của sản phẩm.",
+      "Giấu thông tin bất lợi để dễ chốt.",
+      "Phóng đại giá trị đầu tư.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Kỹ năng lắng nghe chủ động giúp môi giới điều gì?",
+    options: [
+      "Hiểu đúng nhu cầu thực sự của khách hàng.",
+      "Rút ngắn thời gian bằng cách nói nhiều hơn.",
+      "Chốt deal mà không cần tìm hiểu.",
+      "Bỏ qua phản hồi của khách.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Đạo đức nghề nghiệp môi giới BĐS yêu cầu điều nào sau đây?",
+    options: [
+      "Bảo mật thông tin khách hàng.",
+      "Ưu tiên hoa hồng hơn lợi ích khách.",
+      "Cạnh tranh bằng cách nói xấu đồng nghiệp.",
+      "Cam kết vượt quá khả năng thực hiện.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Khi định giá sơ bộ một bất động sản, yếu tố nào ảnh hưởng lớn nhất?",
+    options: [
+      "Vị trí và tình trạng pháp lý.",
+      "Màu sơn của căn nhà.",
+      "Tên của chủ nhà.",
+      "Hướng gió theo phong thủy tuyệt đối.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Quy trình môi giới chuẩn thường bắt đầu bằng bước nào?",
+    options: [
+      "Tìm hiểu nhu cầu khách hàng.",
+      "Ký hợp đồng đặt cọc.",
+      "Bàn giao nhà.",
+      "Thu hoa hồng.",
+    ],
+    answer: 0,
+  },
+  {
+    q: "Marketing bất động sản hiệu quả nên tập trung vào điều gì?",
+    options: [
+      "Đúng tệp khách hàng mục tiêu.",
+      "Đăng càng nhiều nơi càng tốt bất kể đối tượng.",
+      "Chỉ dùng tờ rơi giấy.",
+      "Không cần hình ảnh sản phẩm.",
+    ],
+    answer: 0,
+  },
+];
+
+export const QUIZ_BANK: Record<ExamGroup, QuizQuestion[]> = {
+  "Cơ sở": CO_SO_BANK,
+  "Chuyên môn": CHUYEN_MON_BANK,
+};
+
+/** Bài thi đang làm — lưu localStorage để quay lại còn tiếp tục được. */
+export interface ActiveExam {
+  id: string;
+  name: string;
+  group: ExamGroup;
+  questions: QuizQuestion[];
+  answers: (number | null)[]; // đáp án đã chọn theo từng câu
+  marked: number[]; // các câu đã đánh dấu
+  current: number; // câu đang xem
+  remainingSec: number; // thời gian còn lại (giây)
+  createdAt: string; // "13/07/2026 16:06"
+}
+
+/** Sinh bài thi 40 câu từ ngân hàng câu hỏi của nhóm (lặp vòng cho đủ 40). */
+export function buildExam(group: ExamGroup, name: string): ActiveExam {
+  const bank = QUIZ_BANK[group];
+  const total = SELF_PRACTICE[group].questions;
+  const questions = Array.from({ length: total }, (_, i) => bank[i % bank.length]);
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return {
+    id: `ex-${Date.now()}`,
+    name,
+    group,
+    questions,
+    answers: Array(total).fill(null),
+    marked: [],
+    current: 0,
+    remainingSec: SELF_PRACTICE[group].minutes * 60,
+    createdAt: `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`,
+  };
+}
+
+const ACTIVE_EXAM_KEY = "qb-active-exam";
+
+export function loadActiveExam(): ActiveExam | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(ACTIVE_EXAM_KEY);
+    return raw ? (JSON.parse(raw) as ActiveExam) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveActiveExam(exam: ActiveExam | null) {
+  if (typeof window === "undefined") return;
+  if (exam) localStorage.setItem(ACTIVE_EXAM_KEY, JSON.stringify(exam));
+  else localStorage.removeItem(ACTIVE_EXAM_KEY);
+}
 
 // ---- Tự luận (tab Tự luận) ----------------------------------
 export type EssayGroup = "Kiến thức cơ sở" | "Kiến thức chuyên môn";

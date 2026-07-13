@@ -37,7 +37,7 @@ const NAV = [
 // Bảng drop của "Đào tạo" — hiện khi hover vào mục Đào tạo trên header.
 // exact: chỉ active khi đúng đường dẫn (dùng cho "Trang chủ").
 const DAO_TAO_MENU = [
-  { label: "Trang chủ", href: "/realtor/dao-tao", icon: "Home", desc: "Tổng quan, thông báo & khoá học", exact: true },
+  { label: "Các khóa đào tạo", href: "/realtor/dao-tao", icon: "Home", desc: "Tổng quan, thông báo & khoá học", exact: true },
   { label: "Chuyên đề", href: "/realtor/dao-tao/chuyen-de", icon: "BookOpen", desc: "Bài học theo chủ đề" },
   { label: "Trắc nghiệm", href: "/realtor/dao-tao/trac-nghiem", icon: "PencilLine", desc: "Luyện đề & câu hỏi" },
   { label: "Tự luận", href: "/realtor/dao-tao/tu-luan", icon: "FileText", desc: "Bài tập viết & tình huống" },
