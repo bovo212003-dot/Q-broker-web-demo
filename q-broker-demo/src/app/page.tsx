@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ROLES, ROLE_ORDER } from "@/config/roles";
 import { Icon } from "@/components/ui/Icon";
+import { RealtorLogo } from "@/components/realtor/RealtorLogo";
 
 
 export default function HomePage() {
@@ -9,15 +10,13 @@ export default function HomePage() {
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-4 py-16">
         {/* Tiêu đề */}
         <div className="mb-10 text-center">
-          <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-700 text-white">
-            <Icon name="Building2" className="h-7 w-7" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Hệ sinh thái BĐS toàn diện{" "}
-            <span className="text-brand-700">Q-Broker</span>
+          <RealtorLogo className="mx-auto mb-5 h-16 sm:h-20" />
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+            Chọn vai trò để bắt đầu
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-slate-500">
-            Bản demo giao diện. Chọn một vai trò để xem trang chủ tương ứng.
+            Bản demo giao diện Hệ sinh thái BĐS toàn diện — chọn một vai trò để
+            xem trang chủ tương ứng.
           </p>
         </div>
 
