@@ -53,6 +53,7 @@ type MoreItem = {
 };
 
 const MORE: MoreItem[] = [
+  { label: "Bản đồ tìm BĐS", href: "/realtor/ban-do", icon: "Map" },
   { label: "Nhà của tôi", href: "#", icon: "Home" },
   { label: "Affilate", href: "/realtor/affiliate", icon: "Handshake" },
   { label: "Phiếu tính giá", href: "/realtor/phieu-tinh-gia", icon: "Calculator" },
