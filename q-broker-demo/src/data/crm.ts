@@ -390,3 +390,43 @@ export const CRM_CUSTOMERS: CrmCustomer[] = [
     ],
   },
 ];
+
+// ================= Ảnh minh hoạ (chân dung + BĐS quan tâm) =================
+const img = (id: string, w = 200) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+
+/** Chân dung khách theo thứ tự id (c1, c2, ...) — ổn định giữa các lần render. */
+const PORTRAITS = [
+  "photo-1573496359142-b8d87734a5a2",
+  "photo-1560250097-0b93528c311a",
+  "photo-1580489944761-15a19d654956",
+  "photo-1573497019940-1c28c88b4f3e",
+  "photo-1507003211169-0a1dd7228f2d",
+  "photo-1544005313-94ddf0286df2",
+  "photo-1472099645785-5658abf4ff4e",
+  "photo-1438761681033-6461ffad8d80",
+  "photo-1633332755192-727a05c4013d",
+  "photo-1534528741775-53994a69daeb",
+  "photo-1500648767791-00dcc994a43e",
+  "photo-1552374196-c4e7ffc6e126",
+  "photo-1506794778202-cad84cf45f1d",
+];
+
+export function crmAvatar(c: CrmCustomer, w = 200): string {
+  const idx = parseInt(c.id.slice(1), 10) - 1;
+  return img(PORTRAITS[idx % PORTRAITS.length], w);
+}
+
+/** Ảnh BĐS khách quan tâm — chọn theo từ khoá trong tên BĐS, xoay vòng theo id. */
+const PROPERTY_IMGS: { match: RegExp; ids: string[] }[] = [
+  { match: /biệt thự/i, ids: ["photo-1613490493576-7fde63acd811", "photo-1580587771525-78b9dba3b914"] },
+  { match: /đất nền|đất/i, ids: ["photo-1500382017468-9049fed747ef"] },
+  { match: /nhà phố|nhà riêng/i, ids: ["photo-1512917774080-9991f1c4c750", "photo-1570129477492-45c003edd2be"] },
+  { match: /./, ids: ["photo-1522708323590-d24dbb6b0267", "photo-1545324418-cc1a3fa10c00", "photo-1560448204-e02f11c3d0e2"] },
+];
+
+export function crmPropertyImg(c: CrmCustomer, w = 400): string {
+  const idx = parseInt(c.id.slice(1), 10);
+  const group = PROPERTY_IMGS.find((g) => g.match.test(c.property))!;
+  return img(group.ids[idx % group.ids.length], w);
+}

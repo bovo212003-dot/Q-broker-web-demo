@@ -89,6 +89,10 @@ const config: Config = {
           "0%": { transform: "scale(1) translate(0, 0)" },
           "100%": { transform: "scale(1.12) translate(-2%, -1%)" },
         },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
         // Thanh tiến trình cảnh (hero intro): lấp đầy từ trái sang phải.
         progress: {
           "0%": { transform: "scaleX(0)" },
@@ -108,6 +112,7 @@ const config: Config = {
         float: "float 4s ease-in-out infinite",
         shimmer: "shimmer 2.2s linear infinite",
         kenburns: "kenburns 18s ease-in-out infinite alternate",
+        "slide-in-right": "slide-in-right .3s ease-out both",
         progress: "progress 5s linear forwards",
         wipe: "wipe .8s cubic-bezier(.7,0,.3,1) forwards",
       },
