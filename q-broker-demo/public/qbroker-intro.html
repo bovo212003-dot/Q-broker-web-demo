@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Q-Broker — Video giới thiệu hệ sinh thái BĐS</title>
+
+<!-- Google Fonts: Playfair Display (tiêu đề) + Inter (nội dung) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Inter cần cả 800 cho cụm số liệu (xem .stat .val). Nếu không khai báo,
+     trình duyệt sẽ "bôi đậm giả" từ weight 700 và nét số bị nhoè. -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+/* =====================================================================
+   Q-BROKER — INTRO VIDEO (65s, 7 scene, lặp vô hạn, tự chạy, không tiếng)
+   Bảng màu: navy #0A1F44 / #0d2a5c · vàng đồng #C9A227 · trắng
+   Sân khấu cố định 1920×820 (~21:9), JS scale cho vừa khung nhúng.
+   CHỈNH TIMECODE: xem phần <script> — mỗi scene một khối comment riêng.
+   ===================================================================== */
+:root{
+  --navy:#0A1F44;
+  --navy-2:#0d2a5c;      /* navy sáng hơn cho gradient */
+  --navy-deep:#05122b;   /* navy tối */
+  --gold:#C9A227;
+  --gold-2:#e3c667;      /* vàng sáng highlight */
+  --white:#ffffff;
+  --muted:rgba(255,255,255,.72);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* Nền ngoài sân khấu: cùng gradient navy, không bao giờ để lộ màu đen. */
+html,body{
+  height:100%;overflow:hidden;
+  font-family:'Inter',system-ui,sans-serif;color:var(--white);
+  background:radial-gradient(120% 120% at 50% 15%,var(--navy-2) 0%,var(--navy) 45%,var(--navy-deep) 100%);
+}
+body{display:flex;align-items:center;justify-content:center}
+
+#viewport{
+  position:fixed;inset:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 50% 15%,var(--navy-2) 0%,var(--navy) 45%,var(--navy-deep) 100%);
+}
+
+/* ---- Sân khấu 1920×820 (~21:9) ----
+   Neo tâm sân khấu vào tâm khung rồi mới scale => luôn căn giữa cả ngang
+   lẫn dọc ở mọi kích thước iframe. JS chỉ set biến --stage-scale. */
+#stage{
+  position:absolute;left:50%;top:50%;
+  width:1920px;height:820px;
+  transform-origin:center center;
+  transform:translate(-50%,-50%) scale(var(--stage-scale,1));
+  overflow:hidden;
+  background:radial-gradient(120% 120% at 50% 12%,var(--navy-2) 0%,var(--navy) 48%,var(--navy-deep) 100%);
+}
+
+/* =====================================================================
+   HIỆU ỨNG NỀN DÙNG CHUNG: camera · parallax skyline · rim light ·
+   particles · vignette · grain
+   ===================================================================== */
+
+/* --- Lớp "máy quay": GSAP scale/pan nhẹ lớp này để tạo chuyển động camera.
+   Phải là lớp RIÊNG bên trong #stage, vì transform của #stage đã bị
+   fitStage() chiếm dụng (translate + scale theo kích thước khung). --- */
+#camera{position:absolute;inset:0;transform-origin:center center;will-change:transform}
+
+/* --- Nền parallax 3 lớp skyline: xa mờ/chậm -> gần rõ/nhanh ---
+   .pxLayer = dịch theo scene (GSAP timeline)
+   .pxInner = trôi ngang liên tục (tween vô hạn riêng)
+   Tách 2 lớp để 2 chuyển động không đè transform lên nhau. */
+#bgFx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pxLayer{position:absolute;left:-14%;right:-14%;bottom:0}
+.pxInner{width:100%}
+/* Lớp lưới sàn chứa phần tử absolute (.bpGrid). Nếu .pxInner không được
+   định vị và không có chiều cao, .bpGrid sẽ neo vào .pxLayer và tween trôi
+   ngang trên .pxInner thành vô tác dụng — lưới đứng im. */
+#pxMid .pxInner{position:absolute;inset:0}
+.pxLayer svg{display:block;width:100%;height:auto}
+/* 3 lớp giữ nguyên cơ chế parallax, nhưng đổi nội dung:
+   pxFar = khối nhà wireframe · pxMid = lưới sàn phối cảnh · pxNear = skyline mờ */
+#pxFar {opacity:.85;bottom:150px}
+#pxMid {opacity:.9;bottom:0;top:34%}
+#pxNear{opacity:.5;bottom:0}
+
+/* Skyline giờ chỉ còn MỘT lớp, làm mờ mạnh và đẩy xuống chân trời — vừa đủ
+   gợi ý "thành phố", không còn là hình chữ nhật cạnh cứng kiểu clip-art. */
+.skyBlur{filter:blur(7px)}
+
+/* Nét vẽ kiến trúc: khối nhà dạng wireframe, chỉ có đường viền vàng mảnh. */
+.wire{fill:none;stroke:rgba(201,162,39,.20);stroke-width:2;stroke-linejoin:round}
+.wireDim{stroke:rgba(201,162,39,.11);stroke-width:1.5;stroke-dasharray:8 10}
+
+/* Lưới sàn phối cảnh kiểu bản vẽ kiến trúc: 2 lớp gradient kẻ ô, nghiêng
+   bằng perspective + rotateX nên chạy dần về phía chân trời. Mask cho nó
+   tan biến ở phía xa, tránh cảm giác "giấy kẻ ô" phẳng. */
+.bpGrid{
+  position:absolute;left:-30%;right:-30%;bottom:0;height:78%;
+  background-image:
+    linear-gradient(rgba(201,162,39,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,162,39,.13) 1px, transparent 1px);
+  background-size:130px 130px;
+  transform:perspective(760px) rotateX(67deg);
+  transform-origin:bottom center;
+  -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,.95), transparent 72%);
+          mask-image:linear-gradient(to top, rgba(0,0,0,.95), transparent 72%);
+}
+
+/* Tia sáng volumetric: các dải sáng chéo rất mờ, blend screen. */
+.rays{position:absolute;inset:-25% -15%;pointer-events:none;mix-blend-mode:screen;transform:rotate(-19deg)}
+.ray{
+  position:absolute;top:0;bottom:0;width:150px;filter:blur(18px);
+  background:linear-gradient(90deg,transparent,rgba(201,162,39,.13),transparent);
+  animation:rayDrift 24s ease-in-out infinite alternate;
+}
+@keyframes rayDrift{0%{opacity:.35;transform:translateX(-40px)}100%{opacity:.9;transform:translateX(40px)}}
+
+/* Đèn cửa sổ: chấm vàng li ti trên thân nhà (trong <g clip-path> nên không
+   lọt ra nền trời). Đã giảm số lượng mạnh — nền phải LÙI lại nhường chữ. */
+.win{fill:#ffd97a;animation:winFlicker 7s ease-in-out infinite alternate}
+@keyframes winFlicker{0%{opacity:.18}100%{opacity:.62}}
+
+/* Vạch chân trời mảnh, hắt sáng vàng ngay dưới đáy skyline */
+.horizon{
+  position:absolute;left:0;right:0;bottom:96px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,162,39,.45) 30%,rgba(201,162,39,.45) 70%,transparent);
+}
+.horizonGlow{
+  position:absolute;left:0;right:0;bottom:40px;height:180px;
+  background:linear-gradient(0deg,rgba(201,162,39,.13),transparent);
+}
+
+/* Quầng sáng trôi chậm phía sau skyline */
+/* GRADIENT MESH: các khối màu lớn, blur mạnh, trôi rất chậm và lệch pha —
+   đây mới là "phông" chính của video, thay cho skyline vẽ chi tiết. */
+.glow{position:absolute;border-radius:50%;filter:blur(120px);opacity:.5;animation:drift 34s ease-in-out infinite alternate}
+.glow.g1{width:820px;height:820px;left:-220px;top:-280px;background:rgba(201,162,39,.16)}
+.glow.g2{width:900px;height:900px;right:-260px;bottom:-360px;background:rgba(37,99,235,.20);animation-delay:-11s}
+.glow.g3{width:600px;height:600px;left:40%;top:34%;background:rgba(201,162,39,.09);animation-delay:-19s}
+.glow.g4{width:700px;height:700px;left:8%;bottom:-260px;background:rgba(23,120,140,.14);animation-delay:-26s}
+.glow.g5{width:560px;height:560px;right:14%;top:-200px;background:rgba(88,70,190,.13);animation-delay:-33s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(70px,42px) scale(1.16)}}
+
+/* --- Rim light có hướng: vệt vàng ẤM hắt từ trái, vệt xanh LẠNH từ phải.
+   Tương phản nóng–lạnh là thủ pháp color grading cơ bản của phim; nó kéo
+   bảng màu navy phẳng thành có khối. --- */
+.rim{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
+.rimWarm{background:radial-gradient(70% 100% at 0% 45%,rgba(201,162,39,.16),transparent 60%)}
+.rimCool{background:radial-gradient(70% 100% at 100% 55%,rgba(56,120,220,.15),transparent 60%)}
+
+#particles{position:absolute;inset:0;width:100%;height:100%}
+
+/* --- Vignette: tối 4 góc, dồn mắt vào trung tâm --- */
+.vignette{
+  position:absolute;inset:0;pointer-events:none;z-index:20;
+  background:radial-gradient(115% 105% at 50% 50%,transparent 42%,rgba(3,10,26,.42) 78%,rgba(3,10,26,.72) 100%);
+}
+
+/* --- Grain: noise feTurbulence nhúng data-URI, rất nhẹ --- */
+.grain{
+  position:absolute;inset:0;pointer-events:none;z-index:21;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =====================================================================
+   SCENE & TYPOGRAPHY DÙNG CHUNG
+   ===================================================================== */
+.scene{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;opacity:0;padding:0 110px;
+  /* Nền giờ có 260 đốm đèn cửa sổ + rim light nên chữ trắng mảnh dễ chìm.
+     text-shadow là thuộc tính KẾ THỪA nên đặt một lần ở .scene là phủ hết
+     mọi chữ con, không phải bôi từng class. */
+  text-shadow:0 2px 22px rgba(3,10,26,.6), 0 1px 3px rgba(3,10,26,.45);
+}
+/* Scrim: quầng tối rất nhẹ ngay sau khối nội dung, tách chữ khỏi nền.
+   Nằm dưới các phần tử con (chúng vẽ sau trong DOM) nhưng trên #bgFx. */
+.scene::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(58% 64% at 50% 50%,rgba(4,14,34,.45),transparent 72%);
+}
+/* Chữ đen trên nút vàng thì không cần đổ bóng tối */
+.cta{text-shadow:none}
+.serif{font-family:'Playfair Display',serif}
+
+/* Phần tử có animation vào — mặc định ẩn, GSAP bật lên. */
+.an{opacity:0}
+/* prefers-reduced-motion: bỏ mọi chuyển động, chỉ còn fade giữa các scene. */
+body.reduce .an{opacity:1!important;transform:none!important}
+
+/* Chữ tách theo TỪ (không tách theo ký tự — tiếng Việt có dấu tổ hợp,
+   tách ký tự sẽ vỡ dấu). Mỗi từ bay vào lệch pha nhau => chữ "chảy" vào
+   thay vì cả khối "nhảy" vào. */
+.w{display:inline-block;opacity:0;will-change:transform,opacity}
+body.reduce .w{opacity:1!important;transform:none!important}
+
+.eyebrow{font-size:20px;font-weight:600;letter-spacing:.42em;text-transform:uppercase;color:var(--gold)}
+.sceneTitle{font-size:76px;font-weight:700;letter-spacing:.06em;line-height:1.1}
+.sceneDesc{margin-top:22px;font-size:27px;font-weight:300;line-height:1.5;color:var(--muted);max-width:1080px}
+
+/* Icon dùng chung (nạp từ <symbol> bên dưới) */
+.ic{stroke:var(--gold);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.icoBox{
+  width:118px;height:118px;border-radius:26px;display:grid;place-items:center;
+  background:linear-gradient(150deg,rgba(201,162,39,.20),rgba(201,162,39,.05));
+  border:1px solid rgba(201,162,39,.42);box-shadow:0 18px 50px rgba(0,0,0,.4);
+}
+.icoBox .ic{width:60px;height:60px}
+
+/* Số liệu (counter) */
+.statRow{display:flex;gap:90px;align-items:flex-start;justify-content:center;margin-top:34px}
+.stat .val{
+  /* Dùng Inter (không phải Playfair) CHỈ cho cụm số: Playfair là font hiển
+     thị, chữ số tỉ lệ — số 1 hẹp hơn số 8 nhiều nên khi counter chạy thì bề
+     rộng đổi liên tục và cả dòng rung lắc. Inter có sẵn bộ chữ số tabular,
+     khoá mọi chữ số về cùng bề ngang => số đứng yên tuyệt đối khi đếm.
+     Tiêu đề vẫn giữ Playfair, nên tương phản serif/sans càng rõ vai trò. */
+  font-family:'Inter',system-ui,sans-serif;
+  font-weight:800;font-size:74px;line-height:1;color:#fff;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1;
+}
+.stat .val .u{color:var(--gold)}
+.stat .cap{margin-top:10px;font-size:21px;font-weight:400;color:var(--muted)}
+
+/* Mask reveal: chữ trượt từ dưới lên trong khung overflow hidden (không fade) */
+.mask{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
+.mask > span,.mask > img{display:block}
+body.reduce .mask > span,body.reduce .mask > img{transform:none!important}
+
+/* Light sweep: vệt sáng vàng đồng quét ngang (logo scene 1/7, nút CTA) */
+.sweepWrap{position:relative;display:inline-block;overflow:hidden}
+.sweepBar{
+  position:absolute;top:-20%;bottom:-20%;width:28%;left:0;pointer-events:none;
+  transform:skewX(-18deg) translateX(-320%);
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),rgba(227,198,103,.65),transparent);
+}
+
+/* Logo Q-Broker — dùng đúng ảnh logo của web (public/logo.png, bản cho nền
+   tối). Tỉ lệ gốc 1192×292 (~4.08:1) nên chỉ set width, height tự theo. */
+.logoImg{display:block;margin:0 auto;height:auto;user-select:none;-webkit-user-drag:none}
+
+/* ===== SCENE 1 ===== */
+#s1logo{width:700px}
+
+/* ===== SCENE 2 ===== */
+/* Nhịp 1: 3 dòng vấn đề + các mảnh hình học rời rạc */
+.painLine{font-size:44px;font-weight:300;color:rgba(255,255,255,.6);margin:10px 0}
+#shardField{position:absolute;inset:0;pointer-events:none}
+.shard{position:absolute;left:50%;top:50%}
+.shardIn{
+  width:100%;height:100%;border:1.5px solid rgba(140,165,210,.45);
+  background:rgba(120,145,195,.10);animation:shardFloat 9s ease-in-out infinite alternate;
+}
+.shardIn.round{border-radius:50%}
+@keyframes shardFloat{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(14px,-18px) rotate(12deg)}}
+
+/* Khối logo hợp nhất giữa nhịp 1 và 2 */
+#mergeBlock{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1200px}
+/* drop-shadow bám theo kênh alpha của PNG nên quầng sáng vàng ôm đúng nét logo */
+#mergeLogo{width:600px;filter:drop-shadow(0 0 34px rgba(201,162,39,.55))}
+#mergeTitle{margin-top:26px;font-size:60px;font-weight:700}
+#mergeSub{margin-top:16px;font-size:26px;font-weight:300;color:var(--muted)}
+
+/* Nhịp 2: hub + 5 node vòng cung */
+#ecoTitle{position:absolute;top:96px;left:0;right:0}
+#ecoWrap{position:relative;width:1300px;height:420px}
+#ecoWrap svg.links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.gline{fill:none;stroke:url(#goldGrad);stroke-width:2.5;stroke-dasharray:1;stroke-dashoffset:1}
+/* Hub trung tâm: trước là chữ "QB" trong hình tròn. Logo web tỉ lệ ~4:1 nên
+   hình tròn sẽ bóp logo còn quá nhỏ để đọc => đổi sang khối bo tròn nằm
+   ngang (stadium) vừa khổ logo. */
+.hub{
+  position:absolute;left:650px;top:250px;transform:translate(-50%,-50%);
+  width:250px;height:118px;border-radius:999px;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 35%,#12336e,#0a1f44);
+  border:2px solid var(--gold);box-shadow:0 0 0 8px rgba(201,162,39,.12),0 18px 60px rgba(0,0,0,.5);
+}
+.hub .hubLogo{width:180px;height:auto;display:block;user-select:none}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px}
+.node .dot{
+  width:96px;height:96px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(201,162,39,.45);
+  box-shadow:0 10px 40px rgba(0,0,0,.4);transition:none;
+}
+.node .dot .ic{width:42px;height:42px}
+.node .lbl{font-size:20px;font-weight:600;white-space:nowrap}
+
+/* ===== SCENE 4: card quỹ căn bay vào kho trung tâm ===== */
+#depotWrap{position:relative;width:900px;height:250px;margin-top:26px}
+#depot{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:190px;height:150px;border-radius:20px;display:grid;place-items:center;
+  background:linear-gradient(150deg,rgba(201,162,39,.20),rgba(201,162,39,.04));
+  border:1.5px solid rgba(201,162,39,.55);box-shadow:0 0 60px rgba(201,162,39,.18);
+}
+#depot .ic{width:66px;height:66px}
+.flyCard{
+  position:absolute;left:50%;top:50%;width:118px;height:78px;border-radius:12px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(4px);display:flex;flex-direction:column;justify-content:center;gap:7px;padding:0 14px;
+}
+.flyCard i{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.45)}
+.flyCard i:last-child{width:58%;background:rgba(201,162,39,.65)}
+
+/* ===== SCENE 5: pulse ring + chấm đỏ đang phát ===== */
+#liveIco{position:relative;display:grid;place-items:center;width:180px;height:180px}
+.pulseRing{position:absolute;left:50%;top:50%;width:118px;height:118px;margin:-59px 0 0 -59px;border-radius:50%;border:2px solid rgba(201,162,39,.55);opacity:0}
+.liveTag{
+  display:inline-flex;align-items:center;gap:13px;margin-bottom:26px;
+  padding:11px 26px;border-radius:999px;background:rgba(220,38,38,.14);border:1.5px solid rgba(248,113,113,.65);
+}
+.liveTag b{font-size:19px;font-weight:700;letter-spacing:.22em;color:#fca5a5}
+.liveDot{width:13px;height:13px;border-radius:50%;background:#ef4444;box-shadow:0 0 14px #ef4444;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.15}}
+
+/* ===== SCENE 6: chia đôi màn hình ===== */
+#splitWrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;gap:0}
+.half{width:50%;padding:0 78px;display:flex;flex-direction:column;align-items:center}
+.half h2{font-size:56px;font-weight:700;letter-spacing:.05em;margin-top:26px}
+.half p{margin-top:18px;font-size:24px;font-weight:300;line-height:1.5;color:var(--muted);max-width:460px}
+#splitLine{
+  position:absolute;left:50%;top:50%;width:2px;height:420px;margin-top:-210px;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent);
+  transform:scaleY(0);transform-origin:center center;
+}
+
+/* ===== SCENE 7: vòng icon quanh logo + CTA ===== */
+#ringWrap{position:relative;width:700px;height:380px}
+#ringLogo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:400px}
+/* Bắt buộc: #ringLogo là .sweepWrap có overflow:hidden. Nếu ảnh bên trong
+   không được set width, nó giữ khổ gốc 1192px và bị cắt còn đúng 400px —
+   trên màn hình chỉ còn thấy chữ "Q-". */
+#ringLogo .logoImg{width:100%}
+.ringIco{
+  position:absolute;left:50%;top:50%;width:78px;height:78px;margin:-39px 0 0 -39px;
+  border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.07);border:1.5px solid rgba(201,162,39,.5);
+  box-shadow:0 10px 34px rgba(0,0,0,.4);
+}
+.ringIco .ic{width:34px;height:34px}
+.slogan{margin-top:26px;font-size:32px;font-weight:300;font-style:italic;color:var(--muted)}
+.cta{
+  margin-top:30px;display:inline-flex;align-items:center;gap:14px;
+  padding:22px 54px;border-radius:999px;text-decoration:none;
+  font-size:25px;font-weight:700;letter-spacing:.03em;color:#1a1204;
+  background:linear-gradient(120deg,var(--gold-2),var(--gold));
+  box-shadow:0 18px 50px rgba(201,162,39,.35);
+}
+.cta svg{width:25px;height:25px;stroke:#1a1204;fill:none;stroke-width:2.4}
+#s7web{margin-top:24px;font-size:19px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+
+/* ===== Nút phát lại (góc phải dưới, ngoài sân khấu nên không bị cắt) ===== */
+.controls{position:absolute;right:26px;bottom:22px;z-index:30}
+.ctrlBtn{
+  width:52px;height:52px;border-radius:50%;cursor:pointer;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  display:grid;place-items:center;transition:background .2s;backdrop-filter:blur(6px);
+}
+.ctrlBtn:hover{background:rgba(255,255,255,.18)}
+.ctrlBtn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8}
+</style>
+</head>
+<body>
+
+<!-- Kho icon dùng chung (khai báo một lần, gọi lại bằng <use>) -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-train" viewBox="0 0 24 24"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5"/><path d="M22 8v6"/></symbol>
+  <symbol id="ic-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
+  <symbol id="ic-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 16.2a6 6 0 0 0 0-8.4"/><path d="M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></symbol>
+  <symbol id="ic-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l3 3M14 9l3 3"/></symbol>
+  <symbol id="ic-project" viewBox="0 0 24 24"><path d="M3 21h18M5 21V5l7-3 7 3v16"/><path d="M9 9h2M13 9h2M9 13h2M13 13h2M9 17h6"/></symbol>
+  <symbol id="ic-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+</svg>
+
+<div id="viewport">
+  <div id="stage">
+
+  <!-- Lớp máy quay: mọi thứ bên trong bị scale/pan nhẹ theo từng scene
+       (Ken Burns). Vignette + grain nằm NGOÀI lớp này để bám khung hình. -->
+  <div id="camera">
+
+    <!-- ============ NỀN: parallax skyline + rim light + particles ============ -->
+    <div id="bgFx">
+      <div class="glow g1"></div>
+      <div class="glow g2"></div>
+      <div class="glow g3"></div>
+      <div class="glow g4"></div>
+      <div class="glow g5"></div>
+
+      <!-- Tia sáng volumetric chéo qua khung -->
+      <div class="rays">
+        <div class="ray" style="left:6%;animation-delay:-3s"></div>
+        <div class="ray" style="left:24%;width:90px;animation-delay:-11s"></div>
+        <div class="ray" style="left:47%;width:190px;animation-delay:-18s"></div>
+        <div class="ray" style="left:71%;width:110px;animation-delay:-7s"></div>
+        <div class="ray" style="left:88%;animation-delay:-22s"></div>
+      </div>
+
+      <!-- Lớp xa: KHỐI NHÀ WIREFRAME — chỉ đường viền vàng mảnh, không tô đặc.
+           Đây là "nét vẽ kiến trúc" thay cho silhouette hộp vuông trước đây. -->
+      <div class="pxLayer" id="pxFar"><div class="pxInner">
+        <svg viewBox="0 0 2400 420" preserveAspectRatio="none">
+          <g class="wire">
+            <path d="M120,420 L120,180 L300,120 L300,420"/>
+            <path d="M120,180 L300,120M170,420 L170,196M230,420 L230,176M300,120 L300,420"/>
+            <path d="M470,420 L470,250 L610,250 L610,420M470,300 L610,300M470,352 L610,352M540,250 L540,420"/>
+            <path d="M760,420 L760,140 L900,90 L900,420M760,200 L900,152M760,262 L900,214M760,324 L900,276M830,118 L830,420"/>
+            <path d="M1090,420 L1090,286 L1310,286 L1310,420M1090,340 L1310,340M1160,286 L1160,420M1240,286 L1240,420"/>
+            <path d="M1480,420 L1480,160 L1620,206 L1620,420M1480,240 L1620,282M1480,318 L1620,358M1550,183 L1550,420"/>
+            <path d="M1810,420 L1810,232 L1990,232 L1990,420M1810,300 L1990,300M1900,232 L1900,420"/>
+            <path d="M2160,420 L2160,132 L2300,176 L2300,420M2160,220 L2300,260M2160,306 L2300,344M2230,154 L2230,420"/>
+          </g>
+          <!-- Đường gióng kích thước kiểu bản vẽ kỹ thuật -->
+          <g class="wireDim">
+            <path d="M120,96 L300,36M300,120 L300,36M120,180 L120,96"/>
+            <path d="M760,58 L900,10M900,90 L900,10M760,140 L760,58"/>
+            <path d="M2160,100 L2300,144M2160,132 L2160,100"/>
+          </g>
+        </svg>
+      </div></div>
+
+      <!-- Lớp giữa: LƯỚI SÀN PHỐI CẢNH (bản vẽ kiến trúc) -->
+      <div class="pxLayer" id="pxMid"><div class="pxInner">
+        <div class="bpGrid"></div>
+      </div></div>
+
+      <!-- Lớp gần: skyline duy nhất còn lại, làm mờ mạnh ở chân trời -->
+      <div class="pxLayer" id="pxNear"><div class="pxInner">
+        <svg class="skyBlur" viewBox="0 0 2400 380" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="gNear" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0c2149"/><stop offset="1" stop-color="#030c22"/>
+            </linearGradient>
+            <clipPath id="clipNear"><path d="M0,380 L0,250 L140,250 L140,175 L260,175 L260,285 L380,285 L380,205 L500,205 L500,150 L620,150 L620,270 L750,270 L750,195 L870,195 L870,290 L990,290 L990,165 L1110,165 L1110,255 L1240,255 L1240,190 L1360,190 L1360,285 L1480,285 L1480,155 L1600,155 L1600,265 L1730,265 L1730,200 L1850,200 L1850,290 L1970,290 L1970,170 L2090,170 L2090,260 L2220,260 L2220,195 L2340,195 L2340,275 L2400,275 L2400,380 Z"/></clipPath>
+          </defs>
+          <path fill="url(#gNear)" d="M0,380 L0,250 L140,250 L140,175 L260,175 L260,285 L380,285 L380,205 L500,205 L500,150 L620,150 L620,270 L750,270 L750,195 L870,195 L870,290 L990,290 L990,165 L1110,165 L1110,255 L1240,255 L1240,190 L1360,190 L1360,285 L1480,285 L1480,155 L1600,155 L1600,265 L1730,265 L1730,200 L1850,200 L1850,290 L1970,290 L1970,170 L2090,170 L2090,260 L2220,260 L2220,195 L2340,195 L2340,275 L2400,275 L2400,380 Z"/>
+          <g clip-path="url(#clipNear)" data-win="near"></g>
+        </svg>
+      </div></div>
+
+      <div class="horizonGlow"></div>
+      <div class="horizon"></div>
+      <canvas id="particles"></canvas>
+
+      <!-- Rim light: ấm bên trái, lạnh bên phải -->
+      <div class="rim rimWarm"></div>
+      <div class="rim rimCool"></div>
+    </div>
+
+    <!-- ================================================================
+         SCENE 1 (0–7s): MỞ ĐẦU — logo mask reveal + scale nở + light sweep
+         ================================================================ -->
+    <section class="scene" id="scene1">
+      <div class="sweepWrap">
+        <span class="mask"><img id="s1logo" class="logoImg" src="/logo.png" alt="Q-Broker" /></span>
+        <i class="sweepBar" id="s1sweep"></i>
+      </div>
+      <!-- Scene 1 chỉ còn ảnh logo: dòng phụ đã bỏ (ảnh logo có sẵn chữ
+           "Hệ sinh thái BĐS toàn diện"), gạch phân cách cũng đã bỏ. -->
+    </section>
+
+    <!-- ================================================================
+         SCENE 2 (7–18s): GIỚI THIỆU HỆ SINH THÁI
+         Nhịp 1 (7–12s): 3 dòng vấn đề + mảnh rời rạc -> hút vào tâm
+         Nhịp 2 (12–18s): hub + 5 node vòng cung, đường nối vẽ dần
+         ================================================================ -->
+    <section class="scene" id="scene2">
+      <!-- Các mảnh hình học rời rạc (JS sinh ra) -->
+      <div id="shardField"></div>
+
+      <!-- Nhịp 1: 3 dòng vấn đề -->
+      <div id="painLines">
+        <p class="painLine an">Thị trường phân mảnh.</p>
+        <p class="painLine an">Thông tin rời rạc.</p>
+        <p class="painLine an">Môi giới đơn độc.</p>
+      </div>
+
+      <!-- Nhịp 1 (10s+): khối logo hợp nhất -->
+      <div id="mergeBlock" class="an">
+        <img id="mergeLogo" class="logoImg" src="/logo.png" alt="Q-Broker" />
+        <span class="mask"><span id="mergeTitle" class="serif">Q-Broker hợp nhất tất cả.</span></span>
+        <p id="mergeSub">Một nền tảng — trọn vẹn hành trình bất động sản.</p>
+      </div>
+
+      <!-- Nhịp 2: cấu trúc hệ sinh thái -->
+      <div id="ecoTitle" class="eyebrow an">5 trụ cột của hệ sinh thái</div>
+      <div id="ecoWrap" class="an">
+        <svg class="links" viewBox="0 0 1300 420" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#e3c667"/><stop offset="1" stop-color="#C9A227"/>
+            </linearGradient>
+          </defs>
+          <!-- hub (650,250) -> 5 node trên vòng cung ellipse rx=520 ry=180 -->
+          <path class="gline" pathLength="1" d="M650,250 L130,250"></path>
+          <path class="gline" pathLength="1" d="M650,250 L282,123"></path>
+          <path class="gline" pathLength="1" d="M650,250 L650,70"></path>
+          <path class="gline" pathLength="1" d="M650,250 L1018,123"></path>
+          <path class="gline" pathLength="1" d="M650,250 L1170,250"></path>
+        </svg>
+
+        <div class="hub"><img class="hubLogo" src="/logo.png" alt="Q-Broker" /></div>
+
+        <div class="node" data-node style="left:130px;top:250px">
+          <div class="dot"><svg class="ic"><use href="#ic-train"/></svg></div>
+          <div class="lbl">Đào tạo</div>
+        </div>
+        <div class="node" data-node style="left:282px;top:123px">
+          <div class="dot"><svg class="ic"><use href="#ic-share"/></svg></div>
+          <div class="lbl">Chia sẻ giỏ hàng</div>
+        </div>
+        <div class="node" data-node style="left:650px;top:70px">
+          <div class="dot"><svg class="ic"><use href="#ic-live"/></svg></div>
+          <div class="lbl">Live stream</div>
+        </div>
+        <div class="node" data-node style="left:1018px;top:123px">
+          <div class="dot"><svg class="ic"><use href="#ic-key"/></svg></div>
+          <div class="lbl">Cần thuê-mua</div>
+        </div>
+        <div class="node" data-node style="left:1170px;top:250px">
+          <div class="dot"><svg class="ic"><use href="#ic-project"/></svg></div>
+          <div class="lbl">Dự án</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCENE 3 (18–26s): ĐÀO TẠO
+         ================================================================ -->
+    <section class="scene" id="scene3">
+      <div class="icoBox an" data-s3><svg class="ic"><use href="#ic-train"/></svg></div>
+      <h2 class="sceneTitle serif an" data-s3 style="margin-top:30px">ĐÀO TẠO</h2>
+      <p class="sceneDesc an" data-s3>Khoá học chuẩn hoá, chứng chỉ hành nghề — nâng tầm môi giới chuyên nghiệp.</p>
+      <div class="statRow">
+        <div class="stat an" data-s3>
+          <div class="val"><span data-count="48">0</span></div>
+          <div class="cap">khoá đào tạo &amp; chứng chỉ</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCENE 4 (26–34s): CHIA SẺ GIỎ HÀNG
+         ================================================================ -->
+    <section class="scene" id="scene4">
+      <h2 class="sceneTitle serif an" data-s4>CHIA SẺ GIỎ HÀNG</h2>
+      <p class="sceneDesc an" data-s4>Kho nguồn hàng dùng chung giữa môi giới, sàn giao dịch và ngân hàng.<br/>Kết nối đúng người bán — đúng người cần.</p>
+
+      <!-- Card quỹ căn bay từ nhiều hướng vào kho trung tâm -->
+      <div id="depotWrap">
+        <div id="depot" class="an"><svg class="ic"><use href="#ic-box"/></svg></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+        <div class="flyCard" data-fly><i></i><i></i></div>
+      </div>
+
+      <div class="statRow" style="margin-top:14px">
+        <div class="stat an" data-s4>
+          <div class="val"><span data-count="1800" data-suffix="+">0</span></div>
+          <div class="cap">quỹ hàng</div>
+        </div>
+        <div class="stat an" data-s4>
+          <div class="val">24<span class="u">h</span></div>
+          <div class="cap">kết nối</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCENE 5 (34–42s): LIVE STREAM
+         ================================================================ -->
+    <section class="scene" id="scene5">
+      <div class="liveTag an" data-s5><span class="liveDot"></span><b>ĐANG PHÁT TRỰC TIẾP</b></div>
+      <div id="liveIco" class="an" data-s5>
+        <div class="pulseRing" data-pulse></div>
+        <div class="pulseRing" data-pulse></div>
+        <div class="pulseRing" data-pulse></div>
+        <div class="icoBox"><svg class="ic"><use href="#ic-live"/></svg></div>
+      </div>
+      <h2 class="sceneTitle serif an" data-s5 style="margin-top:26px">LIVE STREAM</h2>
+      <p class="sceneDesc an" data-s5>Phiên live đấu giá trực tiếp — minh bạch, cạnh tranh, chốt nhanh.</p>
+      <div class="statRow">
+        <div class="stat an" data-s5>
+          <div class="val"><span data-count="150" data-suffix="+">0</span></div>
+          <div class="cap">phiên live đấu giá mỗi tháng</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCENE 6 (42–50s): CẦN THUÊ - MUA & DỰ ÁN (chia đôi màn hình)
+         ================================================================ -->
+    <section class="scene" id="scene6">
+      <div id="splitWrap">
+        <div class="half an" id="halfL">
+          <div class="icoBox"><svg class="ic"><use href="#ic-key"/></svg></div>
+          <h2 class="serif">CẦN THUÊ - MUA</h2>
+          <p>Đăng nhu cầu, khớp lệnh tự động với nguồn hàng phù hợp.</p>
+        </div>
+        <div id="splitLine"></div>
+        <div class="half an" id="halfR">
+          <div class="icoBox"><svg class="ic"><use href="#ic-project"/></svg></div>
+          <h2 class="serif">DỰ ÁN</h2>
+          <p>Kho dự án cập nhật liên tục, thông tin pháp lý minh bạch.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCENE 7 (50–65s): TỔNG KẾT & CTA
+         ================================================================ -->
+    <section class="scene" id="scene7">
+      <div id="ringWrap">
+        <div class="sweepWrap" id="ringLogo">
+          <img class="logoImg" src="/logo.png" alt="Q-Broker" />
+          <i class="sweepBar" id="s7sweepLogo"></i>
+        </div>
+        <div class="ringIco" data-ring><svg class="ic"><use href="#ic-train"/></svg></div>
+        <div class="ringIco" data-ring><svg class="ic"><use href="#ic-share"/></svg></div>
+        <div class="ringIco" data-ring><svg class="ic"><use href="#ic-live"/></svg></div>
+        <div class="ringIco" data-ring><svg class="ic"><use href="#ic-key"/></svg></div>
+        <div class="ringIco" data-ring><svg class="ic"><use href="#ic-project"/></svg></div>
+      </div>
+
+      <div class="statRow" style="margin-top:0">
+        <div class="stat an" data-s7>
+          <div class="val"><span data-count="12500" data-suffix="+">0</span></div>
+          <div class="cap">môi giới trong mạng lưới</div>
+        </div>
+        <div class="stat an" data-s7>
+          <div class="val"><span data-count="3200" data-suffix="+">0</span></div>
+          <div class="cap">giao dịch thành công</div>
+        </div>
+      </div>
+
+      <p class="slogan serif an" data-s7>“Bắt đầu hành trình bất động sản của bạn ngay hôm nay.”</p>
+
+      <div class="sweepWrap" id="ctaWrap" style="border-radius:999px">
+        <a class="cta an" id="cta" href="#">
+          Khám phá ngay
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <i class="sweepBar" id="s7sweepCta"></i>
+      </div>
+
+      <div id="s7web" class="an">www.q-broker.vn</div>
+    </section>
+
+  </div><!-- /#camera -->
+
+    <!-- Lớp phủ chất phim — ngoài #camera nên đứng yên so với khung hình -->
+    <div class="vignette"></div>
+    <div class="grain"></div>
+  </div>
+
+  <!-- Nút phát lại — nằm ngoài #stage nên không bị sân khấu cắt mất. -->
+  <div class="controls">
+    <button class="ctrlBtn" id="btnReplay" title="Phát lại từ đầu" aria-label="Phát lại từ đầu">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- GSAP qua CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* =====================================================================
+   SÂN KHẤU: scale 1920×820 cho vừa khung nhúng (giữ đúng ~21:9)
+   ===================================================================== */
+const STAGE_W = 1920, STAGE_H = 820;
+const stage = document.getElementById('stage');
+function fitStage(){
+  const s = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  // Chỉ đổi biến scale — phần translate(-50%,-50%) căn giữa nằm trong CSS.
+  stage.style.setProperty('--stage-scale', String(s));
+}
+window.addEventListener('resize', fitStage);
+// Nhúng trong iframe: kích thước đổi sau khi trang đã parse (layout trang cha,
+// lazy-load, xoay máy) => theo dõi cả resize của tài liệu.
+window.addEventListener('load', fitStage);
+if(window.ResizeObserver){ new ResizeObserver(fitStage).observe(document.documentElement); }
+fitStage();
+
+/* =====================================================================
+   prefers-reduced-motion: tắt parallax/particles, bỏ mọi tween nội scene,
+   chỉ giữ dissolve giữa các scene (CSS .reduce lo phần hiện phần tử).
+   ===================================================================== */
+const REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+if(REDUCE) document.body.classList.add('reduce');
+
+/* =====================================================================
+   HẠT SÁNG — 3 nhóm theo chiều sâu, khớp với 3 lớp parallax:
+   xa  = nhỏ, mờ, chậm   |   giữa   |   gần = to, rõ, nhanh hơn.
+   Cùng số hạt nhưng không gian có chiều sâu thật thay vì phẳng.
+   rafId để tạm dừng được khi banner khuất tầm nhìn (xem phần TIẾT KIỆM PIN).
+   ===================================================================== */
+let rafId = null;
+function startParticles(){
+  if(REDUCE || rafId !== null) return;
+  const cvs = document.getElementById('particles');
+  const ctx = cvs.getContext('2d');
+  cvs.width = STAGE_W; cvs.height = STAGE_H;
+  // [số hạt, bán kính, hệ số tốc độ, độ mờ nền]
+  const TIERS = [[14,1.0,0.06,.12],[10,1.7,0.11,.22],[7,2.6,0.18,.34]];
+  const DOTS = [];
+  for(const [n, r, sp, a] of TIERS){
+    for(let i=0;i<n;i++) DOTS.push({
+      x: Math.random()*STAGE_W, y: Math.random()*STAGE_H,
+      r: r*(0.7+Math.random()*0.6),
+      vx: (Math.random()-.5)*sp, vy: (Math.random()-.5)*sp*.6,
+      a: a*(0.7+Math.random()*0.6)
+    });
+  }
+  (function draw(){
+    ctx.clearRect(0,0,STAGE_W,STAGE_H);
+    for(const d of DOTS){
+      d.x += d.vx; d.y += d.vy;
+      if(d.x<0) d.x=STAGE_W; if(d.x>STAGE_W) d.x=0;
+      if(d.y<0) d.y=STAGE_H; if(d.y>STAGE_H) d.y=0;
+      ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(201,162,39,${d.a})`;
+      ctx.fill();
+    }
+    rafId = requestAnimationFrame(draw);
+  })();
+}
+function stopParticles(){
+  if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
+}
+startParticles();
+
+/* =====================================================================
+   ĐÈN CỬA SỔ TOÀ NHÀ — rải chấm vàng li ti vào <g clip-path> của mỗi lớp
+   skyline, nên chúng chỉ hiện trên thân nhà chứ không lọt ra nền trời.
+   Nhấp nháy rất chậm, lệch pha ngẫu nhiên (CSS .win).
+   ===================================================================== */
+if(!REDUCE){
+  const NS = 'http://www.w3.org/2000/svg';
+  // [tên lớp, số đèn, chiều cao vùng có nhà trong viewBox]
+  // Chỉ còn lớp skyline duy nhất, và giảm từ 260 xuống 60 đèn: nền phải LÙI
+  // lại nhường chữ, chưa kể 260 thẻ <rect> cùng chạy CSS animation là gánh
+  // nặng thật trên máy yếu.
+  for(const [key, count, top, bottom] of [['near',60,150,380]]){
+    const g = document.querySelector(`[data-win="${key}"]`);
+    if(!g) continue;
+    for(let i=0;i<count;i++){
+      const r = document.createElementNS(NS,'rect');
+      r.setAttribute('x', (Math.random()*2400).toFixed(1));
+      r.setAttribute('y', (top + Math.random()*(bottom-top)).toFixed(1));
+      r.setAttribute('width', '7');
+      r.setAttribute('height', '9');
+      r.setAttribute('class','win');
+      r.style.animationDelay = (-Math.random()*7)+'s';
+      r.style.animationDuration = (5+Math.random()*5)+'s';
+      g.appendChild(r);
+    }
+  }
+}
+
+/* =====================================================================
+   SCENE 2 — sinh các mảnh hình học rời rạc (nhịp 1)
+   Mỗi mảnh: lớp ngoài để GSAP hút vào tâm, lớp trong trôi lơ lửng bằng CSS
+   (tách 2 lớp để 2 transform không đè nhau).
+   ===================================================================== */
+const SHARDS = [];
+(function buildShards(){
+  const field = document.getElementById('shardField');
+  for(let i=0;i<14;i++){
+    const size = 26 + Math.random()*54;
+    const el = document.createElement('div');
+    el.className = 'shard';
+    el.style.width = size+'px'; el.style.height = size+'px';
+    const inner = document.createElement('div');
+    inner.className = 'shardIn' + (Math.random()<.35 ? ' round' : '');
+    inner.style.animationDelay = (-Math.random()*9)+'s';
+    el.appendChild(inner);
+    field.appendChild(el);
+    // Toạ độ ban đầu: rải quanh tâm (đơn vị px so với tâm sân khấu)
+    const ang = Math.random()*Math.PI*2;
+    const dist = 260 + Math.random()*520;
+    SHARDS.push({
+      el,
+      x: Math.cos(ang)*dist,
+      y: Math.sin(ang)*dist*0.52,
+      rot: (Math.random()-.5)*70
+    });
+  }
+})();
+if(!REDUCE){
+  SHARDS.forEach(s => gsap.set(s.el, {x:s.x, y:s.y, rotate:s.rot, opacity:0}));
+}
+
+/* =====================================================================
+   SCENE 7 — xếp 5 icon thành vòng ellipse quanh logo
+   rx=300 ry=150, 5 góc cách đều bắt đầu từ đỉnh.
+   ===================================================================== */
+const RING = Array.from(document.querySelectorAll('[data-ring]')).map((el,i) => {
+  const a = -Math.PI/2 + i * (Math.PI*2/5);
+  return { el, x: Math.cos(a)*300, y: Math.sin(a)*150 };
+});
+if(!REDUCE){
+  RING.forEach(r => gsap.set(r.el, {x:0, y:0, scale:.3, opacity:0}));
+}
+
+/* =====================================================================
+   SCENE 4 — vị trí xuất phát của các card quỹ căn (bay từ nhiều hướng)
+   ===================================================================== */
+const FLY = Array.from(document.querySelectorAll('[data-fly]')).map((el,i) => {
+  const a = (i/6)*Math.PI*2 + 0.4;
+  return { el, x: Math.cos(a)*430, y: Math.sin(a)*210 };
+});
+if(!REDUCE){
+  FLY.forEach(f => gsap.set(f.el, {xPercent:-50, yPercent:-50, x:f.x, y:f.y, opacity:0, rotate:(Math.random()-.5)*30}));
+}
+
+/* =====================================================================
+   BỐ CỤC TĨNH CHO prefers-reduced-motion
+   Không có tween nên phải tự dựng "trạng thái kết" của từng scene, nếu
+   không các khối nối tiếp nhau (scene 2) sẽ hiện chồng lên nhau, còn các
+   phần tử chờ GSAP đặt vị trí (card bay, vòng icon) sẽ dồn đống ở tâm.
+   ===================================================================== */
+if(REDUCE){
+  // Scene 2: chỉ giữ sơ đồ hệ sinh thái (trạng thái cuối), bỏ nhịp dẫn nhập
+  gsap.set(['#painLines','#mergeBlock','#shardField'], {display:'none'});
+  gsap.set('.gline', {strokeDashoffset:0});
+  // Scene 4: bỏ hiệu ứng card bay
+  gsap.set('[data-fly]', {display:'none'});
+  // Scene 6: đường kẻ giữa vẽ sẵn
+  gsap.set('#splitLine', {scaleY:1});
+  // Scene 7: xếp sẵn 5 icon thành vòng quanh logo
+  RING.forEach(r => gsap.set(r.el, {x:r.x, y:r.y}));
+}
+
+/* =====================================================================
+   TIỆN ÍCH TIMELINE
+   ===================================================================== */
+const scenes = [1,2,3,4,5,6,7].map(n => document.getElementById('scene'+n));
+
+// Dissolve mềm 0.8s giữa các scene — không cắt gắt.
+function sceneIn (tl, el, at){ tl.to(el, {opacity:1, duration:.8, ease:'power2.out'}, at); }
+function sceneOut(tl, el, at){ tl.to(el, {opacity:0, duration:.8, ease:'power2.in' }, at); }
+
+// Parallax: mỗi lần chuyển scene, 3 lớp trượt ngang với tốc độ khác nhau
+// (xa chậm -> gần nhanh) tạo chiều sâu. dir = 1 hoặc -1.
+let pxPos = 0;
+function parallax(tl, at, dir){
+  if(REDUCE) return;
+  pxPos += dir;
+  tl.to('#pxFar',  {xPercent: pxPos*1.1, duration:1.6, ease:'power2.inOut'}, at);
+  tl.to('#pxMid',  {xPercent: pxPos*2.4, duration:1.6, ease:'power2.inOut'}, at);
+  tl.to('#pxNear', {xPercent: pxPos*4.2, duration:1.6, ease:'power2.inOut'}, at);
+}
+
+// TRÔI NGANG LIÊN TỤC: trước đây skyline chỉ nhúc nhích lúc chuyển scene,
+// còn suốt 8 giây trong scene thì đứng chết. Tween vô hạn này chạy trên lớp
+// .pxInner (tách khỏi .pxLayer để không đè transform của parallax ở trên)
+// nên nền luôn "thở". ease 'none' để tốc độ đều, không thấy nhịp.
+const ambient = [];
+if(!REDUCE){
+  ambient.push(
+    gsap.to('#pxFar  .pxInner', {xPercent:-3, duration:90, ease:'none', repeat:-1, yoyo:true}),
+    gsap.to('#pxMid  .pxInner', {xPercent:-5, duration:70, ease:'none', repeat:-1, yoyo:true}),
+    gsap.to('#pxNear .pxInner', {xPercent:-8, duration:55, ease:'none', repeat:-1, yoyo:true})
+  );
+}
+
+// MÁY QUAY (Ken Burns): scale + pan rất chậm suốt chiều dài mỗi scene, đảo
+// chiều xen kẽ để không bị trôi mãi một phía. Đây là thứ biến "slideshow"
+// thành "phim" với ít dòng code nhất.
+function camera(tl, at, dur, i){
+  if(REDUCE) return;
+  const dir = i % 2 === 0 ? 1 : -1;
+  tl.fromTo('#camera',
+    {scale:1, x:0, y:0},
+    {scale:1.045, x:dir*-20, y:dir*9, duration:dur, ease:'none'}, at);
+}
+
+// TÁCH CHỮ THEO TỪ. Không tách theo ký tự: tiếng Việt có dấu tổ hợp, tách
+// ký tự sẽ làm vỡ dấu. Giữ nguyên các thẻ con (vd <br>) và khoảng trắng.
+function splitWords(el){
+  if(el.dataset.split) return;
+  el.dataset.split = '1';
+  const frag = document.createDocumentFragment();
+  for(const node of Array.from(el.childNodes)){
+    if(node.nodeType === 3){
+      for(const part of node.textContent.split(/(\s+)/)){
+        if(!part) continue;
+        if(/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); }
+        else{
+          const s = document.createElement('span');
+          s.className = 'w'; s.textContent = part;
+          frag.appendChild(s);
+        }
+      }
+    } else {
+      frag.appendChild(node.cloneNode(true));
+    }
+  }
+  el.innerHTML = '';
+  el.appendChild(frag);
+}
+
+// Chữ "chảy" vào theo từng từ. expo.out = lao vào rất nhanh rồi hãm lại mượt
+// — cảm giác có trọng lượng, khác hẳn kiểu nảy ngược của back.out.
+function words(tl, target, at, stagger){
+  if(REDUCE) return;
+  const els = typeof target === 'string'
+    ? Array.from(document.querySelectorAll(target))
+    : [target];
+  if(!els.length) return;
+  els.forEach(splitWords);
+  const kids = els.reduce((acc,e) => acc.concat(Array.from(e.querySelectorAll('.w'))), []);
+  if(!kids.length) return;
+  // Phần tử cha thường mang class .an (opacity:0) — phải bật cha lên đúng
+  // thời điểm, nếu không các từ con có animate cũng vẫn vô hình.
+  tl.set(els, {opacity:1}, at);
+  tl.fromTo(kids,
+    {opacity:0, yPercent:105},
+    {opacity:1, yPercent:0, duration:1.15, ease:'expo.out', stagger: stagger==null ? .035 : stagger}, at);
+}
+
+// Light sweep: vệt sáng quét ngang qua phần tử.
+function sweep(tl, sel, at){
+  if(REDUCE) return;
+  tl.fromTo(sel, {x:'-320%'}, {x:'420%', duration:1.15, ease:'power2.inOut'}, at);
+}
+
+// Counter: đếm lên data-count, có dấu phân cách nghìn kiểu VN và hậu tố.
+// KHÔNG bắt đầu từ 0: đếm 0 -> 12.500 trong 1.2s thì hầu hết khung hình hiện
+// những con số vô nghĩa. Xuất phát ở ~70% đích, người xem đọc như đang "chốt
+// sổ" và mọi con số thoáng qua đều là số hợp lý.
+function countUp(tl, el, at, dur, from){
+  const end = +el.dataset.count, suffix = el.dataset.suffix || '';
+  const fmt = v => Math.round(v).toLocaleString('vi-VN') + suffix;
+  if(REDUCE){ tl.set(el, {onComplete:() => { el.textContent = fmt(end); }}, at); return; }
+  const obj = {v: Math.round(end * (from == null ? 0.7 : from))};
+  el.textContent = fmt(obj.v);   // giá trị chờ trước khi tween chạy
+  // expo.out: vọt lên gần đích ngay rồi hãm dần — snappy, không tạo khoảng
+  // chết như kiểu đếm đều 2.4s trước đây.
+  tl.to(obj, {
+    v:end, duration:dur || 1.2, ease:'expo.out',
+    onUpdate:() => { el.textContent = fmt(obj.v); }
+  }, at);
+}
+
+// Trượt vào + stagger cho một nhóm phần tử (bỏ qua khi reduced-motion).
+// Kèm MOTION BLUR: vật thể lao nhanh mà nét căng thì mắt đọc thành "giả";
+// nhoè lúc đang bay rồi nét dần khi hãm lại chính là cách phim tạo cảm giác
+// tốc độ. Chỉ áp ở cấp KHỐI (vài phần tử), không áp cho từng từ — hàng chục
+// lớp filter cùng lúc sẽ nặng máy mà mắt gần như không phân biệt được.
+function slideIn(tl, sel, at, from, stagger){
+  if(REDUCE) return;
+  tl.fromTo(sel,
+    {opacity:0, filter:'blur(9px)', ...from},
+    {opacity:1, x:0, y:0, filter:'blur(0px)', duration:1.35, ease:'expo.out', stagger: stagger==null ? .12 : stagger}, at);
+}
+
+/* =====================================================================
+   TIMELINE CHÍNH — 65s, 7 scene, tự chạy khi load, lặp vô hạn.
+   Đổi timecode bằng tham số vị trí (giây) ở cuối mỗi lệnh.
+   ===================================================================== */
+// repeatDelay đã bỏ: xem ghi chú "VÒNG LẶP LIỀN MẠCH" ở cuối scene 7.
+const tl = gsap.timeline({ paused:false, repeat:-1 });
+
+/* ===== SCENE 1: MỞ ĐẦU (0–7s) ===== */
+sceneIn(tl, scenes[0], 0);
+camera(tl, 0, 7.0, 0);
+if(!REDUCE){
+  // Mask reveal: logo trượt từ dưới lên trong khung overflow hidden (không fade)
+  tl.fromTo('#s1logo',
+    {yPercent:115, filter:'blur(10px)'},
+    {yPercent:0, filter:'blur(0px)', duration:1.6, ease:'expo.out'}, 0.15);
+  // Logo giờ là ảnh nên không giãn được letter-spacing như chữ; thay bằng
+  // scale nở nhẹ 0.94 -> 1 để giữ nhịp "vươn ra" của bản dựng chữ trước đây.
+  tl.fromTo('#s1logo', {scale:.94}, {scale:1, duration:1.7, ease:'expo.out'}, 0.3);
+}
+sweep(tl, '#s1sweep', 1.7);   // vệt sáng quét qua logo sau khi hiện xong
+sceneOut(tl, scenes[0], 6.2);
+parallax(tl, 6.2, -1);
+
+/* ===== SCENE 2: GIỚI THIỆU HỆ SINH THÁI (7–18s) ===== */
+sceneIn(tl, scenes[1], 7.0);
+camera(tl, 7.0, 11.0, 1);
+
+/* -- Nhịp 1 (7–12s): bối cảnh & định vị -- */
+if(!REDUCE){
+  // Mảnh hình học rời rạc trôi lơ lửng, chưa liên kết
+  tl.to('.shard', {opacity:1, duration:1.0, stagger:.05, ease:'power1.out'}, 7.0);
+  // 3 dòng vấn đề hiện lần lượt cách nhau 0.5s, mỗi dòng chữ chảy theo từ
+  document.querySelectorAll('#painLines .painLine').forEach((line,i) => {
+    words(tl, line, 7.2 + i*0.5, .04);
+  });
+  // 10s: 3 dòng fade out, các mảnh HÚT VÀO tâm và hợp nhất
+  tl.to('#painLines .painLine', {opacity:0, duration:.6, ease:'power2.in'}, 10.0);
+  SHARDS.forEach((s,i) => {
+    tl.to(s.el, {x:0, y:0, scale:.15, opacity:0, rotate:0, duration:1.1, ease:'power2.in'}, 10.15 + i*0.03);
+  });
+  // Khối logo phát sáng vàng đồng hiện ra từ tâm
+  tl.fromTo('#mergeBlock',
+    {opacity:0, scale:.72, filter:'blur(14px)'},
+    {opacity:1, scale:1, filter:'blur(0px)', duration:1.3, ease:'expo.out'}, 11.0);
+  tl.fromTo('#mergeTitle', {yPercent:120}, {yPercent:0, duration:1.3, ease:'expo.out'}, 11.3);
+}
+words(tl, '#mergeSub', 11.75, .03);
+
+/* -- Nhịp 2 (12–18s): cấu trúc hệ sinh thái -- */
+if(!REDUCE){
+  // Khối logo thu nhỏ về vị trí hub rồi nhường chỗ cho sơ đồ
+  tl.to('#mergeBlock', {scale:.42, y:40, opacity:0, duration:1.0, ease:'power2.inOut'}, 12.4);
+  tl.to('#ecoTitle', {opacity:1, y:0, duration:1.1, ease:'expo.out'}, 12.8);
+  tl.fromTo('#ecoWrap', {opacity:0, scale:.9}, {opacity:1, scale:1, duration:1.3, ease:'expo.out'}, 12.9);
+  // Đường nối vẽ dần từ hub ra từng node, stagger 0.25s
+  tl.to('.gline', {strokeDashoffset:0, duration:.85, stagger:.25, ease:'power2.inOut'}, 13.6);
+  // Khi đường chạm node thì node sáng lên (glow vàng đồng) — lệch pha 0.55s
+  document.querySelectorAll('[data-node] .dot').forEach((dot,i) => {
+    tl.fromTo(dot,
+      {opacity:.25, scale:.8, boxShadow:'0 10px 40px rgba(0,0,0,.4)'},
+      {opacity:1, scale:1, boxShadow:'0 0 26px 4px rgba(201,162,39,.45)', duration:.9, ease:'expo.out'},
+      13.6 + i*0.25 + 0.55);
+    tl.fromTo(dot.parentElement.querySelector('.lbl'), {opacity:0}, {opacity:1, duration:.4}, 13.9 + i*0.25 + 0.55);
+  });
+}
+sceneOut(tl, scenes[1], 17.2);
+parallax(tl, 17.2, 1);
+
+/* ===== SCENE 3: ĐÀO TẠO (18–26s) ===== */
+sceneIn(tl, scenes[2], 18.0);
+camera(tl, 18.0, 8.0, 2);
+slideIn(tl, '#scene3 .icoBox, #scene3 .stat', 18.2, {x:120}, .12); // trượt từ phải
+words(tl, '#scene3 .sceneTitle', 18.5, .05);
+words(tl, '#scene3 .sceneDesc', 18.9, .028);
+countUp(tl, document.querySelector('#scene3 [data-count]'), 19.6, 1.2);
+sceneOut(tl, scenes[2], 25.2);
+parallax(tl, 25.2, -1);
+
+/* ===== SCENE 4: CHIA SẺ GIỎ HÀNG (26–34s) ===== */
+sceneIn(tl, scenes[3], 26.0);
+camera(tl, 26.0, 8.0, 3);
+slideIn(tl, '#scene4 .stat', 26.2, {y:40}, .12);
+words(tl, '#scene4 .sceneTitle', 26.3, .05);
+words(tl, '#scene4 .sceneDesc', 26.7, .028);
+if(!REDUCE){
+  // Các card quỹ căn bay từ nhiều hướng vào kho trung tâm
+  FLY.forEach((f,i) => {
+    tl.fromTo(f.el,
+      {x:f.x, y:f.y, opacity:0, scale:1},
+      {opacity:1, duration:.45, ease:'power1.out'}, 27.2 + i*0.16);
+    tl.to(f.el, {x:0, y:0, scale:.35, opacity:0, rotate:0, duration:1.15, ease:'power2.in'}, 27.7 + i*0.16);
+  });
+  tl.fromTo('#depot', {opacity:0, scale:.8}, {opacity:1, scale:1, duration:1.1, ease:'expo.out'}, 27.0);
+  tl.to('#depot', {boxShadow:'0 0 90px rgba(201,162,39,.45)', duration:.5, yoyo:true, repeat:5, ease:'sine.inOut'}, 28.2);
+}
+countUp(tl, document.querySelector('#scene4 [data-count]'), 29.6, 1.2);
+sceneOut(tl, scenes[3], 33.2);
+parallax(tl, 33.2, 1);
+
+/* ===== SCENE 5: LIVE STREAM (34–42s) ===== */
+sceneIn(tl, scenes[4], 34.0);
+camera(tl, 34.0, 8.0, 4);
+slideIn(tl, '#scene5 .liveTag, #scene5 #liveIco, #scene5 .stat', 34.2, {y:40}, .12);
+words(tl, '#scene5 .sceneTitle', 34.6, .05);
+words(tl, '#scene5 .sceneDesc', 35.0, .028);
+if(!REDUCE){
+  // Pulse ring lan toả liên tục quanh icon phát sóng
+  document.querySelectorAll('[data-pulse]').forEach((ring,i) => {
+    tl.fromTo(ring,
+      {opacity:.65, scale:1},
+      {opacity:0, scale:2.6, duration:2.4, ease:'power2.out', repeat:2},
+      34.6 + i*0.8);
+  });
+}
+countUp(tl, document.querySelector('#scene5 [data-count]'), 35.8, 1.2);
+sceneOut(tl, scenes[4], 41.2);
+parallax(tl, 41.2, -1);
+
+/* ===== SCENE 6: CẦN THUÊ - MUA & DỰ ÁN (42–50s) ===== */
+sceneIn(tl, scenes[5], 42.0);
+camera(tl, 42.0, 8.0, 5);
+if(!REDUCE){
+  // Hai nửa trượt vào từ 2 phía đối diện
+  tl.fromTo('#halfL', {opacity:0, x:-260, filter:'blur(12px)'}, {opacity:1, x:0, filter:'blur(0px)', duration:1.5, ease:'expo.out'}, 42.2);
+  tl.fromTo('#halfR', {opacity:0, x: 260, filter:'blur(12px)'}, {opacity:1, x:0, filter:'blur(0px)', duration:1.5, ease:'expo.out'}, 42.2);
+  // Đường kẻ vàng đồng mảnh vẽ dần ở giữa
+  tl.fromTo('#splitLine', {scaleY:0}, {scaleY:1, duration:1.0, ease:'power2.inOut'}, 42.9);
+}
+words(tl, '#scene6 .half h2', 42.9, .05);
+words(tl, '#scene6 .half p', 43.3, .028);
+sceneOut(tl, scenes[5], 49.2);
+parallax(tl, 49.2, 1);
+
+/* ===== SCENE 7: TỔNG KẾT & CTA (50–65s) ===== */
+sceneIn(tl, scenes[6], 50.0);
+camera(tl, 50.0, 15.0, 6);
+if(!REDUCE){
+  tl.fromTo('#ringLogo', {opacity:0, scale:.85}, {opacity:1, scale:1, duration:1.4, ease:'expo.out'}, 50.2);
+  // 5 icon trụ cột bay từ tâm ra xếp thành vòng quanh logo.
+  // Giữ DUY NHẤT chỗ này dùng back.out — một cú nảy có chủ đích thì là điểm
+  // nhấn, dùng khắp nơi thì thành "PowerPoint".
+  RING.forEach((r,i) => {
+    tl.to(r.el, {x:r.x, y:r.y, scale:1, opacity:1, duration:1.0, ease:'back.out(1.4)'}, 50.9 + i*0.14);
+  });
+}
+sweep(tl, '#s7sweepLogo', 52.2);
+// Hai con số đếm tăng song song
+countUp(tl, document.querySelectorAll('#scene7 [data-count]')[0], 53.0, 1.3);
+countUp(tl, document.querySelectorAll('#scene7 [data-count]')[1], 53.0, 1.3);
+if(!REDUCE){
+  tl.fromTo('#scene7 [data-s7]', {opacity:0, y:24}, {opacity:1, y:0, duration:1.2, stagger:.15, ease:'expo.out'}, 52.9);
+  tl.fromTo('#cta', {opacity:0, scale:.92}, {opacity:1, scale:1, duration:1.2, ease:'expo.out'}, 55.6);
+  tl.fromTo('#s7web', {opacity:0}, {opacity:1, duration:1.0, ease:'power1.out'}, 57.2);
+}
+words(tl, '#scene7 .slogan', 54.4, .03);
+sweep(tl, '#s7sweepCta', 56.6);   // light sweep trên nút CTA
+
+/* -- END-CARD (60–64.2s) --
+   Phim chuyên nghiệp không kết thúc trên một khung đầy chữ. Ở 60s cho số
+   liệu, slogan, nút CTA và 5 icon trụ cột lùi đi, chỉ chừa LOGO + địa chỉ
+   web; đồng thời kéo hai thứ đó về giữa khung (opacity không giải phóng
+   chỗ nên phải dịch thủ công) và nhích logo to lên chút để "chốt". */
+if(!REDUCE){
+  tl.to('#scene7 .statRow, #scene7 .slogan, #ctaWrap',
+    {opacity:0, y:-18, filter:'blur(6px)', duration:1.0, ease:'power2.in'}, 60.0);
+  RING.forEach(r => {
+    tl.to(r.el, {opacity:0, scale:.7, duration:.9, ease:'power2.in'}, 60.0);
+  });
+  // Hai số này là toạ độ ƯỚC LƯỢNG theo chiều cao khối (chưa soi bằng mắt):
+  // logo hạ xuống ~tâm khung, còn dòng web phải đi ngược lên KHÁ NHIỀU vì
+  // nó vốn nằm dưới cụm số liệu + slogan + nút CTA đã ẩn nhưng vẫn chiếm chỗ.
+  // Nếu nhìn thấy lệch, chỉnh đúng 2 con số y này.
+  tl.to('#ringWrap', {y:100, scale:1.06, duration:1.4, ease:'expo.out'}, 60.2);
+  tl.to('#s7web',    {y:-300, duration:1.4, ease:'expo.out'}, 60.2);
+}
+
+// VÒNG LẶP LIỀN MẠCH: trước đây timeline có repeatDelay 1s và scene 7 vẫn
+// hiện nguyên khi hết giờ => màn hình đứng im 1 giây rồi CẮT PHỤT về scene 1,
+// cứ 66 giây một lần. Nay cho scene 7 mờ dần ở 64.2s để nó hoà thẳng vào
+// scene 1 của vòng kế (repeatDelay đã bỏ) — không còn điểm nối nhìn thấy.
+sceneOut(tl, scenes[6], 64.2);
+tl.to({}, {duration:0.01}, 65.0);   // chốt tổng thời lượng đúng 65s
+
+/* =====================================================================
+   TIẾT KIỆM PIN — dừng hẳn khi không ai nhìn.
+   Trước đây timeline + vòng requestAnimationFrame của particles chạy mãi
+   mãi, kể cả khi người dùng đã chuyển tab hoặc cuộn banner ra khỏi màn
+   hình => quạt laptop quay vì một cái banner không ai xem.
+   Hai nguồn tín hiệu:
+     1. visibilitychange — người dùng chuyển tab/thu nhỏ cửa sổ.
+     2. postMessage từ trang cha — QBrokerIntroVideo.tsx dùng
+        IntersectionObserver báo xuống khi iframe ra/vào viewport.
+   ===================================================================== */
+let visibleInParent = true;   // chưa nhận tin từ cha thì coi như đang hiện
+function syncRunning(){
+  const run = visibleInParent && !document.hidden;
+  if(run){
+    tl.play();
+    ambient.forEach(t => t.play());
+    startParticles();
+  } else {
+    tl.pause();
+    ambient.forEach(t => t.pause());
+    stopParticles();
+  }
+}
+document.addEventListener('visibilitychange', syncRunning);
+window.addEventListener('message', (e) => {
+  // Chỉ nhận đúng 2 lệnh đã biết; mọi nội dung khác bỏ qua.
+  if(e.data === 'qb-intro:hidden'){ visibleInParent = false; syncRunning(); }
+  else if(e.data === 'qb-intro:visible'){ visibleInParent = true; syncRunning(); }
+});
+
+/* =====================================================================
+   ĐIỀU KHIỂN: chỉ còn nút phát lại (video không có tiếng)
+   ===================================================================== */
+document.getElementById('btnReplay').addEventListener('click', () => tl.restart());
+
+// Phím tắt: Space = tạm dừng/tiếp, R = phát lại, F = toàn màn hình
+window.addEventListener('keydown', (e) => {
+  if(e.code === 'Space'){ e.preventDefault(); tl.paused() ? tl.play() : tl.pause(); }
+  if(e.key.toLowerCase() === 'r'){ tl.restart(); }
+  if(e.key.toLowerCase() === 'f'){
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+});
+</script>
+</body>
+</html>

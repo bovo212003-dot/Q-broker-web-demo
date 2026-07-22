@@ -43,9 +43,8 @@ export type HomeModule = {
   stats: { value: string; label: string }[];
 };
 
-// Ảnh nền dùng cho khung visual mỗi module (Unsplash, kèm tham số tối ưu).
-const img = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=70`;
+// Ảnh nền của mỗi module: file local trong public/home/ (đã tuyển chọn,
+// không hotlink ra ngoài) — dùng chung cho hero "video" và panel chi tiết.
 
 export const HOME_MODULES: HomeModule[] = [
   {
@@ -57,7 +56,7 @@ export const HOME_MODULES: HomeModule[] = [
     desc: "Lộ trình bài bản từ nhập môn tới chuyên sâu: luyện thi chứng chỉ hành nghề, kỹ năng đàm phán, marketing BĐS — đồng hành cùng Automation Land.",
     href: "/realtor/dao-tao",
     cta: "Khám phá khoá học",
-    image: img("1523240795612-9a054b0db644"),
+    image: "/home/dao-tao.jpg",
     bullets: [
       { icon: "BookOpen", text: "Chuyên đề theo chủ đề, học mọi lúc mọi nơi" },
       { icon: "PencilLine", text: "Ngân hàng trắc nghiệm & tự luận sát đề thi" },
@@ -77,7 +76,7 @@ export const HOME_MODULES: HomeModule[] = [
     desc: "Kho nguồn hàng dùng chung giữa môi giới, sàn giao dịch và ngân hàng. Đăng quỹ căn, kết nối đúng người bán — đúng người cần, tỉ lệ chốt cao hơn.",
     href: "/realtor/chia-se-gio-hang",
     cta: "Xem giỏ hàng chia sẻ",
-    image: img("1600880292203-757bb62b4baf"),
+    image: "/home/chia-se-gio-hang.jpg",
     bullets: [
       { icon: "Boxes", text: "Chia sẻ quỹ căn, dự án, thanh lý theo khu vực" },
       { icon: "Percent", text: "Thoả thuận tỉ lệ hoa hồng minh bạch" },
@@ -97,7 +96,7 @@ export const HOME_MODULES: HomeModule[] = [
     desc: "Khách đăng nhu cầu mua/thuê thật; môi giới đấu giá quyền phục vụ (Broker Auction). Đúng nhu cầu, đúng ngân sách — không còn tin rác, không spam.",
     href: "/realtor/can-thue-mua",
     cta: "Xem nhu cầu đang mở",
-    image: img("1560518883-ce09059eeffa"),
+    image: "/home/can-thue-mua.jpg",
     bullets: [
       { icon: "ClipboardList", text: "Đăng nhu cầu mua/thuê chi tiết theo tiêu chí" },
       { icon: "Gavel", text: "Đấu giá quyền môi giới phục vụ khách" },
@@ -117,7 +116,7 @@ export const HOME_MODULES: HomeModule[] = [
     desc: "Trải nghiệm bán hàng kiểu TikTok Live: xem dự án trực tiếp, chat cùng môi giới, và bấm nút búa để tham gia đấu giá ngay trên sóng.",
     href: "/realtor/livestream",
     cta: "Vào phòng live",
-    image: img("1556656793-08538906a9f8"),
+    image: "/home/livestream.jpg",
     bullets: [
       { icon: "Video", text: "Giới thiệu dự án qua video thời gian thực" },
       { icon: "MessagesSquare", text: "Chat, thả tim, hỏi đáp tức thì" },
@@ -137,7 +136,7 @@ export const HOME_MODULES: HomeModule[] = [
     desc: "Sàn tuyển dụng BĐS hai chiều: sàn & chủ đầu tư đăng tin, quản lý ứng viên; môi giới ứng tuyển bằng CV trực tuyến gắn Tier, điểm và chứng chỉ.",
     href: "/realtor/tuyen-dung",
     cta: "Xem tin tuyển dụng",
-    image: img("1521737604893-d14cc237f11d"),
+    image: "/home/tuyen-dung.jpg",
     bullets: [
       { icon: "UserCheck", text: "CV trực tuyến gắn Tier & chứng chỉ Q-Broker" },
       { icon: "Building2", text: "Nhà tuyển dụng đăng tin, lọc ứng viên nhanh" },
