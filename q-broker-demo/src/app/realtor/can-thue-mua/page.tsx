@@ -5,9 +5,12 @@ import { resolveRole } from "@/lib/role";
 
 // =============================================================
 // TRANG CẦN THUÊ - MUA  (/realtor/can-thue-mua)
-// Đăng nhu cầu Mua / Thuê BĐS & Đấu giá quyền môi giới (Broker Auction).
-// Trang thuộc cổng chung (/realtor) nhưng trải nghiệm hiện tại dành cho
-// role KHÁCH HÀNG; giao diện cho Môi giới sẽ xây riêng sau.
+// Bảng tin chờ kết nối giữa khách hàng và môi giới. Giao diện tách
+// theo vai trò:
+//   - Khách hàng: đăng nhu cầu -> tin treo chờ môi giới đăng ký ->
+//     chọn môi giới -> AI ghép nối 1 người phù hợp nhất.
+//   - Môi giới  : bảng tin nhu cầu đang mở, lọc theo khu vực đảm
+//     nhiệm -> "Nhận tư vấn" (xếp hàng đợi) -> trao đổi với khách.
 // =============================================================
 export default function CanThueMuaPage({
   searchParams,

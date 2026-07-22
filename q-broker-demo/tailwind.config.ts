@@ -89,6 +89,10 @@ const config: Config = {
           "0%": { transform: "scale(1) translate(0, 0)" },
           "100%": { transform: "scale(1.12) translate(-2%, -1%)" },
         },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
       },
       animation: {
         "fade-up": "fade-up .5s ease-out both",
@@ -98,6 +102,7 @@ const config: Config = {
         float: "float 4s ease-in-out infinite",
         shimmer: "shimmer 2.2s linear infinite",
         kenburns: "kenburns 18s ease-in-out infinite alternate",
+        "slide-in-right": "slide-in-right .3s ease-out both",
       },
     },
   },
