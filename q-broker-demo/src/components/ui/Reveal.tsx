@@ -13,8 +13,8 @@ type RevealProps = {
   children: ReactNode;
   className?: string;
   delay?: number;
-  /** Hướng trượt vào: lên (mặc định), trái, phải. */
-  from?: "up" | "left" | "right";
+  /** Hướng trượt vào: lên (mặc định), trái, phải, hoặc none (chỉ mờ dần). */
+  from?: "up" | "left" | "right" | "none";
 };
 
 export function Reveal({
@@ -55,7 +55,9 @@ export function Reveal({
   }, []);
 
   const hidden =
-    from === "left"
+    from === "none"
+      ? "opacity-0"
+      : from === "left"
       ? "-translate-x-8 opacity-0"
       : from === "right"
       ? "translate-x-8 opacity-0"

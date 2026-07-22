@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Q-Broker — Video giới thiệu hệ sinh thái BĐS</title>
+
+<!-- Google Fonts: Playfair Display (tiêu đề) + Inter (nội dung) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* =====================================================================
+   Q-BROKER — INTRO VIDEO (60s, 5 scene)
+   Bảng màu: navy #0A1F44 · trắng · vàng đồng #C9A227
+   Sân khấu cố định 1920×1080 (16:9), tự scale vừa màn hình để screen-record.
+   CHỈNH TIMECODE / NỘI DUNG: xem phần <script> ở cuối — mỗi scene có comment.
+   ===================================================================== */
+:root{
+  --navy:#0A1F44;
+  --navy-2:#0d2a5c;      /* navy sáng hơn cho gradient */
+  --navy-deep:#05122b;   /* navy tối cho scene 4 */
+  --gold:#C9A227;
+  --gold-2:#e3c667;      /* vàng sáng highlight */
+  --white:#ffffff;
+  --muted:rgba(255,255,255,.72);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;overflow:hidden;font-family:'Inter',system-ui,sans-serif;color:var(--white)}
+
+/* ---- Khung ngoài: căn giữa sân khấu, viền đen letterbox ---- */
+#viewport{position:fixed;inset:0;display:grid;place-items:center;background:#000}
+
+/* ---- Sân khấu 16:9 cố định, JS sẽ scale cho vừa ---- */
+#stage{
+  position:relative;
+  width:1920px;height:1080px;
+  transform-origin:center center;
+  overflow:hidden;
+  background:radial-gradient(120% 120% at 50% 15%,var(--navy-2) 0%,var(--navy) 45%,var(--navy-deep) 100%);
+}
+
+/* ---- Lớp nền chuyển động chậm (glow + particle) ---- */
+#bgFx{position:absolute;inset:0;pointer-events:none}
+.glow{
+  position:absolute;border-radius:50%;filter:blur(90px);opacity:.45;
+  animation:drift 26s ease-in-out infinite alternate;
+}
+.glow.g1{width:720px;height:720px;left:-180px;top:-160px;background:rgba(201,162,39,.16)}
+.glow.g2{width:820px;height:820px;right:-220px;bottom:-220px;background:rgba(37,99,235,.18);animation-delay:-8s}
+.glow.g3{width:520px;height:520px;left:40%;top:55%;background:rgba(201,162,39,.10);animation-delay:-14s}
+@keyframes drift{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(60px,40px) scale(1.15)}
+}
+#particles{position:absolute;inset:0;width:100%;height:100%}
+
+/* ---- Vignette phủ toàn sân khấu (chất phim) ---- */
+#stage::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 260px 80px rgba(3,10,26,.65);
+}
+
+/* ---- Mỗi scene phủ kín sân khấu, ẩn sẵn (GSAP điều khiển opacity) ---- */
+.scene{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;opacity:0;padding:0 120px;
+}
+
+/* ---- Typography dùng chung ---- */
+.eyebrow{
+  font-size:20px;font-weight:600;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--gold);
+}
+.serif{font-family:'Playfair Display',serif}
+.divider{width:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:28px auto}
+
+/* =================== SCENE 1 — Mở đầu =================== */
+.logoWord{
+  font-family:'Playfair Display',serif;font-weight:800;
+  font-size:132px;letter-spacing:.08em;line-height:1;
+  background:linear-gradient(180deg,#fff 0%,#dbe4f5 60%,#aebfdf 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.logoWord .b{
+  background:linear-gradient(180deg,var(--gold-2),var(--gold));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.s1-tag{margin-top:26px;font-size:26px;font-weight:300;letter-spacing:.34em;text-transform:uppercase;color:var(--muted)}
+.s1-tag .ch{display:inline-block;opacity:0}
+
+/* =================== SCENE 2 — Định vị hệ sinh thái =================== */
+.s2-title{font-size:74px;font-weight:700;line-height:1.12;max-width:1200px}
+.s2-title .accent{color:var(--gold)}
+.graph{position:relative;width:1000px;height:360px;margin-top:36px}
+.graph svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.gline{fill:none;stroke:url(#goldGrad);stroke-width:2.5;stroke-dasharray:1;stroke-dashoffset:1}
+.node{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;
+}
+.node .dot{
+  width:92px;height:92px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(201,162,39,.5);
+  box-shadow:0 10px 40px rgba(0,0,0,.4);backdrop-filter:blur(4px);
+}
+.node .dot svg{width:38px;height:38px;stroke:var(--gold);fill:none;stroke-width:1.6}
+.node .lbl{font-size:19px;font-weight:600;letter-spacing:.04em}
+.hub{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;
+  width:150px;height:150px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 35%,#12336e,#0a1f44);
+  border:2px solid var(--gold);box-shadow:0 0 0 8px rgba(201,162,39,.12),0 18px 60px rgba(0,0,0,.5);
+}
+.hub span{font-family:'Playfair Display',serif;font-weight:800;font-size:40px;color:#fff;letter-spacing:.02em}
+.hub span i{color:var(--gold);font-style:normal}
+.hub-ring{position:absolute;left:50%;top:50%;width:150px;height:150px;border-radius:50%;border:1.5px solid rgba(201,162,39,.45);transform:translate(-50%,-50%);opacity:0}
+
+/* =================== SCENE 3 — Giá trị cho từng nhóm =================== */
+.s3-head{position:absolute;top:150px;left:0;right:0}
+.cards{display:flex;gap:44px;margin-top:40px}
+.card{
+  width:440px;padding:52px 42px;border-radius:22px;text-align:left;opacity:0;
+  background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));
+  border:1px solid rgba(201,162,39,.28);
+  box-shadow:0 30px 70px rgba(0,0,0,.45);backdrop-filter:blur(6px);
+}
+.card .ico{
+  width:84px;height:84px;border-radius:18px;display:grid;place-items:center;margin-bottom:30px;
+  background:linear-gradient(150deg,rgba(201,162,39,.22),rgba(201,162,39,.06));
+  border:1px solid rgba(201,162,39,.4);
+}
+.card .ico svg{width:40px;height:40px;stroke:var(--gold);fill:none;stroke-width:1.6}
+.card h3{font-family:'Playfair Display',serif;font-weight:700;font-size:38px;margin-bottom:14px}
+.card p{font-size:22px;font-weight:300;line-height:1.5;color:var(--muted)}
+.card .num{font-family:'Playfair Display',serif;color:rgba(201,162,39,.5);font-size:26px;font-weight:700;margin-bottom:6px}
+
+/* =================== SCENE 4 — Niềm tin & con số =================== */
+#scene4{background:radial-gradient(120% 120% at 50% 40%,#0a1f44 0%,#05122b 70%,#03081a 100%)}
+.stats{display:flex;gap:110px;align-items:flex-start}
+.stat{opacity:0}
+.stat .val{font-family:'Playfair Display',serif;font-weight:800;font-size:104px;line-height:1;color:#fff}
+.stat .val .u{color:var(--gold)}
+.stat .cap{margin-top:16px;font-size:23px;font-weight:400;letter-spacing:.02em;color:var(--muted)}
+.badge{
+  margin-top:70px;opacity:0;display:inline-flex;align-items:center;gap:14px;
+  padding:16px 34px;border-radius:999px;
+  background:linear-gradient(120deg,rgba(201,162,39,.16),rgba(201,162,39,.05));
+  border:1.5px solid var(--gold);
+}
+.badge svg{width:30px;height:30px;stroke:var(--gold);fill:none;stroke-width:2}
+.badge span{font-size:24px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
+
+/* =================== SCENE 5 — Kết & CTA =================== */
+.s5-tag{margin-top:30px;font-size:30px;font-weight:300;line-height:1.5;color:var(--muted);max-width:900px}
+.cta{
+  margin-top:52px;opacity:0;
+  display:inline-flex;align-items:center;gap:14px;
+  padding:24px 56px;border-radius:999px;cursor:pointer;text-decoration:none;
+  font-size:26px;font-weight:700;letter-spacing:.03em;color:#1a1204;
+  background:linear-gradient(120deg,var(--gold-2),var(--gold));
+  box-shadow:0 18px 50px rgba(201,162,39,.35);
+}
+.cta svg{width:26px;height:26px;stroke:#1a1204;fill:none;stroke-width:2.4}
+.s5-web{margin-top:34px;opacity:0;font-size:20px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase}
+
+/* =================== ĐIỀU KHIỂN (không lọt vào bản record nếu ẩn) =================== */
+#overlay{
+  position:absolute;inset:0;z-index:40;display:grid;place-items:center;
+  background:radial-gradient(120% 120% at 50% 40%,var(--navy-2),var(--navy-deep));
+}
+#overlay .brand{font-family:'Playfair Display',serif;font-weight:800;font-size:64px;letter-spacing:.1em;margin-bottom:8px}
+#overlay .brand i{color:var(--gold);font-style:normal}
+#overlay .sub{color:var(--muted);letter-spacing:.3em;text-transform:uppercase;font-size:16px;margin-bottom:44px}
+.playBtn{
+  width:120px;height:120px;border-radius:50%;border:2px solid var(--gold);cursor:pointer;
+  background:rgba(201,162,39,.12);display:grid;place-items:center;transition:transform .25s,background .25s;
+}
+.playBtn:hover{transform:scale(1.06);background:rgba(201,162,39,.22)}
+.playBtn svg{width:46px;height:46px;margin-left:6px;fill:var(--gold)}
+#overlay .hint{margin-top:26px;color:var(--muted);font-size:15px}
+
+/* nút góc: replay + âm thanh (ẩn khi đang ở overlay) */
+.controls{position:absolute;right:26px;bottom:22px;z-index:30;display:flex;gap:12px}
+.ctrlBtn{
+  width:52px;height:52px;border-radius:50%;cursor:pointer;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  display:grid;place-items:center;transition:background .2s;backdrop-filter:blur(6px);
+}
+.ctrlBtn:hover{background:rgba(255,255,255,.18)}
+.ctrlBtn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8}
+.hidden{display:none!important}
+
+/* Gợi ý screen-record ở góc (chỉ hiện trước khi Play) */
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="stage">
+
+    <!-- ============ NỀN CHUYỂN ĐỘNG ============ -->
+    <div id="bgFx">
+      <div class="glow g1"></div>
+      <div class="glow g2"></div>
+      <div class="glow g3"></div>
+      <canvas id="particles"></canvas>
+    </div>
+
+    <!-- ============ SCENE 1 (0–6s): Mở đầu ============ -->
+    <section class="scene" id="scene1">
+      <div class="logoWord">Q-<span class="b">BROKER</span></div>
+      <div class="divider" id="s1div"></div>
+      <div class="s1-tag" id="s1tag"><!-- JS tách chữ để chạy chữ --></div>
+    </section>
+
+    <!-- ============ SCENE 2 (6–16s): Định vị hệ sinh thái ============ -->
+    <section class="scene" id="scene2">
+      <h1 class="s2-title serif">Hệ sinh thái bất động sản <span class="accent">toàn diện</span></h1>
+
+      <div class="graph" id="graph">
+        <!-- Đường nối vẽ dần (line-draw) -->
+        <svg viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#e3c667"/><stop offset="1" stop-color="#C9A227"/>
+            </linearGradient>
+          </defs>
+          <!-- 3 node -> hub trung tâm (500,180). pathLength=1 để line-draw đúng -->
+          <path class="gline" pathLength="1" d="M150,90 L500,180"></path>
+          <path class="gline" pathLength="1" d="M850,90 L500,180"></path>
+          <path class="gline" pathLength="1" d="M500,330 L500,180"></path>
+        </svg>
+
+        <!-- Hub trung tâm -->
+        <div class="hub-ring" id="hubRing"></div>
+        <div class="hub"><span>Q<i>B</i></span></div>
+
+        <!-- 3 node (vị trí % theo .graph 1000×360) -->
+        <div class="node" style="left:15%;top:25%">
+          <div class="dot"><svg viewBox="0 0 24 24"><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6" stroke-width="1.6"/></svg></div>
+          <div class="lbl">Người mua</div>
+        </div>
+        <div class="node" style="left:85%;top:25%">
+          <div class="dot"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+          <div class="lbl">Nhà đầu tư</div>
+        </div>
+        <div class="node" style="left:50%;top:92%">
+          <div class="dot"><svg viewBox="0 0 24 24"><path d="M3 9l9-6 9 6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div class="lbl">Môi giới</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCENE 3 (16–34s): Giá trị cho từng nhóm ============ -->
+    <section class="scene" id="scene3">
+      <div class="s3-head">
+        <div class="eyebrow" style="margin-bottom:12px">Giá trị riêng cho mỗi người</div>
+        <h2 class="serif" style="font-size:56px;font-weight:600">Một nền tảng — nhiều giá trị</h2>
+      </div>
+
+      <div class="cards">
+        <div class="card" id="card1">
+          <div class="num">01</div>
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          <h3>Người mua</h3>
+          <p>Thông tin minh bạch,<br/>lựa chọn dễ dàng.</p>
+        </div>
+        <div class="card" id="card2">
+          <div class="num">02</div>
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+          <h3>Nhà đầu tư</h3>
+          <p>Dữ liệu chính xác,<br/>quyết định thông minh.</p>
+        </div>
+        <div class="card" id="card3">
+          <div class="num">03</div>
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 7l3-4h12l3 4M8 12h8"/></svg></div>
+          <h3>Môi giới</h3>
+          <p>Công cụ chuyên nghiệp,<br/>kết nối hiệu quả.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCENE 4 (34–46s): Niềm tin & con số ============ -->
+    <section class="scene" id="scene4">
+      <div class="stats">
+        <div class="stat" id="stat1">
+          <div class="val"><span data-count="10000" data-suffix="+">0</span></div>
+          <div class="cap">Bất động sản</div>
+        </div>
+        <div class="stat" id="stat2">
+          <div class="val"><span data-count="500" data-suffix="+">0</span></div>
+          <div class="cap">Môi giới xác thực</div>
+        </div>
+        <div class="stat" id="stat3">
+          <div class="val"><span data-count="99" data-suffix="%">0</span></div>
+          <div class="cap">Khách hàng hài lòng</div>
+        </div>
+      </div>
+      <div class="badge" id="badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>Đã xác thực</span>
+      </div>
+    </section>
+
+    <!-- ============ SCENE 5 (46–60s): Kết & CTA ============ -->
+    <section class="scene" id="scene5">
+      <div class="logoWord" style="font-size:112px">Q-<span class="b">BROKER</span></div>
+      <div class="s5-tag serif" style="font-style:italic">
+        “Bắt đầu hành trình bất động sản của bạn ngay hôm nay.”
+      </div>
+      <a class="cta" id="cta" href="#">
+        Khám phá ngay
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <div class="s5-web" id="s5web">www.q-broker.vn</div>
+    </section>
+
+    <!-- ============ ĐIỀU KHIỂN ============ -->
+    <div class="controls" id="controls">
+      <button class="ctrlBtn" id="btnAudio" title="Bật/tắt nhạc nền">
+        <svg id="icoMuted" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+        <svg id="icoSound" class="hidden" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>
+      </button>
+      <button class="ctrlBtn" id="btnReplay" title="Phát lại từ đầu">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+    </div>
+
+    <!-- Overlay Play (ẩn khi bắt đầu) -->
+    <div id="overlay">
+      <div style="text-align:center">
+        <div class="brand">Q-<i>BROKER</i></div>
+        <div class="sub">Video giới thiệu hệ sinh thái</div>
+        <button class="playBtn" id="btnPlay" aria-label="Phát">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="hint">Bấm để phát · 60 giây · nhấn ⛶ để toàn màn hình khi quay video</div>
+      </div>
+    </div>
+
+    <!-- Nhạc nền tùy chọn: thêm đường dẫn file vào src bên dưới -->
+    <audio id="bgm" loop preload="auto">
+      <source src="" type="audio/mpeg" />
+    </audio>
+
+  </div>
+</div>
+
+<!-- GSAP qua CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* =====================================================================
+   SÂN KHẤU: scale 1920×1080 cho vừa cửa sổ (giữ đúng 16:9 để record)
+   ===================================================================== */
+const STAGE_W = 1920, STAGE_H = 1080;
+const stage = document.getElementById('stage');
+function fitStage(){
+  const s = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
+/* =====================================================================
+   NỀN PARTICLE nhẹ (các hạt vàng/trắng trôi chậm)
+   ===================================================================== */
+const cvs = document.getElementById('particles');
+const ctx = cvs.getContext('2d');
+cvs.width = STAGE_W; cvs.height = STAGE_H;
+const DOTS = Array.from({length: 46}, () => ({
+  x: Math.random()*STAGE_W, y: Math.random()*STAGE_H,
+  r: Math.random()*2.2 + .6,
+  vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25,
+  gold: Math.random() < .5, a: Math.random()*.5 + .15
+}));
+function drawParticles(){
+  ctx.clearRect(0,0,STAGE_W,STAGE_H);
+  for(const d of DOTS){
+    d.x += d.vx; d.y += d.vy;
+    if(d.x<0) d.x=STAGE_W; if(d.x>STAGE_W) d.x=0;
+    if(d.y<0) d.y=STAGE_H; if(d.y>STAGE_H) d.y=0;
+    ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+    ctx.fillStyle = d.gold ? `rgba(201,162,39,${d.a})` : `rgba(255,255,255,${d.a*.7})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* =====================================================================
+   SCENE 1: tách "chạy chữ" cho dòng tagline
+   ===================================================================== */
+const S1_TAG = 'Nền tảng bất động sản của tương lai';
+const s1tag = document.getElementById('s1tag');
+s1tag.innerHTML = [...S1_TAG].map(c =>
+  `<span class="ch">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+
+/* =====================================================================
+   TIMELINE CHÍNH — 60s, 5 scene. paused sẵn; bấm Play để chạy.
+   repeat:-1 => tự động lặp lại. Đổi timecode ở tham số vị trí (giây).
+   ===================================================================== */
+const scenes = ['#scene1','#scene2','#scene3','#scene4','#scene5'].map(s => document.querySelector(s));
+
+// Fade mềm giữa các scene (dissolve)
+function sceneIn(tl, el, at){ tl.to(el, {opacity:1, duration:1.0, ease:'power2.out'}, at); }
+function sceneOut(tl, el, at){ tl.to(el, {opacity:0, duration:1.0, ease:'power2.in'}, at); }
+
+const tl = gsap.timeline({ paused:true, repeat:-1, repeatDelay:1.2 });
+
+/* ---------- SCENE 1 (0–6s): Logo + tagline chạy chữ ---------- */
+sceneIn(tl, scenes[0], 0);
+tl.from('#scene1 .logoWord', {y:26, opacity:0, scale:.94, duration:1.4, ease:'power3.out'}, 0.2);
+tl.to('#s1div', {width:220, duration:1.0, ease:'power2.out'}, 1.2);
+tl.to('#s1tag .ch', {opacity:1, duration:.5, stagger:0.045, ease:'none'}, 1.5);
+sceneOut(tl, scenes[0], 5.2);
+
+/* ---------- SCENE 2 (6–16s): Tiêu đề + đồ họa node line-draw ---------- */
+sceneIn(tl, scenes[1], 6.0);
+tl.from('#scene2 .s2-title', {y:34, opacity:0, duration:1.2, ease:'power3.out'}, 6.2);
+// Hub xuất hiện
+tl.to('.hub', {opacity:1, scale:1, duration:.9, ease:'back.out(1.7)'}, 7.4);
+tl.fromTo('#hubRing', {opacity:.6, scale:1}, {opacity:0, scale:1.9, duration:1.6, ease:'power2.out', repeat:2}, 7.6);
+// Vẽ 3 đường nối dần
+tl.to('.gline', {strokeDashoffset:0, duration:1.2, stagger:0.35, ease:'power2.inOut'}, 7.9);
+// 3 node bật lên
+tl.to('.node', {opacity:1, duration:.7, stagger:0.35, ease:'back.out(1.6)'}, 8.2);
+sceneOut(tl, scenes[1], 15.0);
+
+/* ---------- SCENE 3 (16–34s): 3 card trượt vào lần lượt ---------- */
+sceneIn(tl, scenes[2], 16.0);
+tl.from('#scene3 .s3-head', {y:-24, opacity:0, duration:1.0, ease:'power2.out'}, 16.2);
+tl.fromTo('#card1', {y:80, opacity:0}, {y:0, opacity:1, duration:1.0, ease:'power3.out'}, 16.8);
+tl.fromTo('#card2', {y:80, opacity:0}, {y:0, opacity:1, duration:1.0, ease:'power3.out'}, 18.4);
+tl.fromTo('#card3', {y:80, opacity:0}, {y:0, opacity:1, duration:1.0, ease:'power3.out'}, 20.0);
+sceneOut(tl, scenes[2], 33.0);
+
+/* ---------- SCENE 4 (34–46s): Con số đếm tăng + badge ---------- */
+sceneIn(tl, scenes[3], 34.0);
+tl.to('.stat', {opacity:1, y:0, duration:.8, stagger:0.25, ease:'power2.out'}, 34.4);
+// Counter: đọc data-count, đếm từ 0 lên, định dạng có dấu phẩy + hậu tố
+document.querySelectorAll('#scene4 [data-count]').forEach((el, i) => {
+  const end = +el.dataset.count, suffix = el.dataset.suffix || '';
+  const obj = {v:0};
+  tl.to(obj, {
+    v:end, duration:2.4, ease:'power1.out',
+    onUpdate:() => { el.textContent = Math.round(obj.v).toLocaleString('en-US') + suffix; }
+  }, 34.6 + i*0.25);
+});
+tl.fromTo('#badge', {opacity:0, y:20, scale:.9}, {opacity:1, y:0, scale:1, duration:.9, ease:'back.out(1.6)'}, 38.4);
+sceneOut(tl, scenes[3], 45.0);
+
+/* ---------- SCENE 5 (46–60s): Kết + CTA ---------- */
+sceneIn(tl, scenes[4], 46.0);
+tl.from('#scene5 .logoWord', {y:24, opacity:0, scale:.94, duration:1.3, ease:'power3.out'}, 46.3);
+tl.from('#scene5 .s5-tag', {y:20, opacity:0, duration:1.1, ease:'power2.out'}, 47.4);
+tl.fromTo('#cta', {opacity:0, y:20, scale:.94}, {opacity:1, y:0, scale:1, duration:.9, ease:'back.out(1.6)'}, 48.4);
+tl.to('#cta', {boxShadow:'0 22px 60px rgba(201,162,39,.6)', duration:1.1, yoyo:true, repeat:6, ease:'sine.inOut'}, 49.4);
+tl.fromTo('#s5web', {opacity:0}, {opacity:1, duration:.9}, 49.0);
+// Giữ scene 5 tới 60s
+tl.to(scenes[4], {opacity:1, duration:0.01}, 60.0);
+
+/* =====================================================================
+   ĐIỀU KHIỂN: Play / Replay / Audio
+   ===================================================================== */
+const overlay = document.getElementById('overlay');
+const bgm = document.getElementById('bgm');
+let audioOn = false;
+
+function start(){
+  overlay.classList.add('hidden');
+  tl.restart();
+  if(audioOn){ bgm.currentTime = 0; bgm.play().catch(()=>{}); }
+}
+document.getElementById('btnPlay').addEventListener('click', () => {
+  // Thử bật nhạc ngay từ cú click đầu (nếu đã có file src)
+  if(bgm.querySelector('source').src){ audioOn = true; toggleAudioIcon(); }
+  start();
+});
+document.getElementById('btnReplay').addEventListener('click', start);
+
+// Bật/tắt nhạc nền
+const icoMuted = document.getElementById('icoMuted');
+const icoSound = document.getElementById('icoSound');
+function toggleAudioIcon(){
+  icoMuted.classList.toggle('hidden', audioOn);
+  icoSound.classList.toggle('hidden', !audioOn);
+}
+document.getElementById('btnAudio').addEventListener('click', () => {
+  audioOn = !audioOn;
+  toggleAudioIcon();
+  if(audioOn){ bgm.play().catch(()=>{}); } else { bgm.pause(); }
+});
+
+// Phím tắt: Space = Play/Pause, R = Replay, F = toàn màn hình
+window.addEventListener('keydown', (e) => {
+  if(e.code === 'Space'){ e.preventDefault(); tl.paused() ? tl.play() : tl.pause(); }
+  if(e.key.toLowerCase() === 'r'){ start(); }
+  if(e.key.toLowerCase() === 'f'){
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+});
+</script>
+</body>
+</html>
