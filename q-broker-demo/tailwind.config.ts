@@ -89,6 +89,16 @@ const config: Config = {
           "0%": { transform: "scale(1) translate(0, 0)" },
           "100%": { transform: "scale(1.12) translate(-2%, -1%)" },
         },
+        // Thanh tiến trình cảnh (hero intro): lấp đầy từ trái sang phải.
+        progress: {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
+        },
+        // Màn quét màu chéo khi chuyển cảnh (hero intro).
+        wipe: {
+          "0%": { transform: "translateX(-130%) skewX(-10deg)" },
+          "100%": { transform: "translateX(130%) skewX(-10deg)" },
+        },
       },
       animation: {
         "fade-up": "fade-up .5s ease-out both",
@@ -98,6 +108,8 @@ const config: Config = {
         float: "float 4s ease-in-out infinite",
         shimmer: "shimmer 2.2s linear infinite",
         kenburns: "kenburns 18s ease-in-out infinite alternate",
+        progress: "progress 5s linear forwards",
+        wipe: "wipe .8s cubic-bezier(.7,0,.3,1) forwards",
       },
     },
   },

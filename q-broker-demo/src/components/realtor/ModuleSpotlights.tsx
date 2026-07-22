@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
+import { Parallax } from "@/components/ui/Parallax";
 import { withRole } from "@/lib/role";
 import { HOME_MODULES, type HomeModule, type ModuleTone } from "@/data/homeModules";
 import { RoleId } from "@/types";
@@ -114,7 +115,7 @@ function SpotlightPanel({
 }) {
   const t = TONES[m.tone];
   return (
-    <Reveal>
+    <Reveal from="none">
       <article
         className={
           "group relative overflow-hidden rounded-[1.75rem] border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl " +
@@ -127,89 +128,103 @@ function SpotlightPanel({
         />
 
         <div className="grid items-center gap-8 p-6 pt-8 sm:p-10 sm:pt-11 lg:grid-cols-2 lg:gap-14">
-          {/* Nội dung */}
+          {/* Nội dung — biên đạo hiện dần so-le khi cuộn tới */}
           <div className={reverse ? "lg:order-2" : ""}>
-            <div className="flex items-center gap-4">
-              <span
-                className={
-                  "text-4xl font-black leading-none tracking-tight " + t.text
-                }
-              >
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="h-8 w-px bg-slate-200" />
-              <p
-                className={
-                  "inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] " +
-                  t.text
-                }
-              >
-                <Icon name={m.icon} className="h-4 w-4" />
-                {m.eyebrow}
-              </p>
-            </div>
+            <Reveal from={reverse ? "right" : "left"}>
+              <div className="flex items-center gap-4">
+                <span
+                  className={
+                    "text-5xl font-black leading-none tracking-tighter " + t.text
+                  }
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="h-8 w-px bg-slate-200" />
+                <p
+                  className={
+                    "inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] " +
+                    t.text
+                  }
+                >
+                  <Icon name={m.icon} className="h-4 w-4" />
+                  {m.eyebrow}
+                </p>
+              </div>
+            </Reveal>
 
-            <h3 className="mt-4 text-2xl font-bold tracking-tight text-realtor-ink sm:text-[28px]">
-              {m.title}
-            </h3>
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600">
-              {m.desc}
-            </p>
+            <Reveal delay={90} from={reverse ? "right" : "left"}>
+              <h3 className="mt-4 text-2xl font-bold tracking-tight text-realtor-ink sm:text-[30px]">
+                {m.title}
+              </h3>
+            </Reveal>
+            <Reveal delay={150} from={reverse ? "right" : "left"}>
+              <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600">
+                {m.desc}
+              </p>
+            </Reveal>
 
             <ul className="mt-6 grid gap-3 sm:grid-cols-1">
-              {m.bullets.map((b) => (
-                <li key={b.text} className="flex items-start gap-3">
-                  <span
-                    className={
-                      "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg " +
-                      t.bullet
-                    }
-                  >
-                    <Icon name={b.icon} className="h-4 w-4" />
-                  </span>
-                  <span className="text-sm font-medium text-slate-700">
-                    {b.text}
-                  </span>
-                </li>
+              {m.bullets.map((b, bi) => (
+                <Reveal key={b.text} delay={220 + bi * 80} from="up">
+                  <li className="flex items-start gap-3">
+                    <span
+                      className={
+                        "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg " +
+                        t.bullet
+                      }
+                    >
+                      <Icon name={b.icon} className="h-4 w-4" />
+                    </span>
+                    <span className="text-sm font-medium text-slate-700">
+                      {b.text}
+                    </span>
+                  </li>
+                </Reveal>
               ))}
             </ul>
 
             {/* Chip số liệu + CTA */}
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href={withRole(m.href, roleId)}
-                className={
-                  "inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 " +
-                  t.btn
-                }
-              >
-                {m.cta}
-                <Icon
-                  name="ArrowRight"
-                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-              <div className="flex flex-wrap items-center gap-2">
-                {m.stats.map((s) => (
-                  <span
-                    key={s.label}
-                    className={
-                      "rounded-full px-3 py-1.5 text-xs font-bold shadow-sm " +
-                      t.chip
-                    }
-                  >
-                    {s.value}{" "}
-                    <span className="font-medium opacity-70">{s.label}</span>
-                  </span>
-                ))}
+            <Reveal delay={220 + m.bullets.length * 80 + 60} from="up">
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  href={withRole(m.href, roleId)}
+                  className={
+                    "inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 " +
+                    t.btn
+                  }
+                >
+                  {m.cta}
+                  <Icon
+                    name="ArrowRight"
+                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                  />
+                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  {m.stats.map((s) => (
+                    <span
+                      key={s.label}
+                      className={
+                        "rounded-full px-3 py-1.5 text-xs font-bold shadow-sm " +
+                        t.chip
+                      }
+                    >
+                      {s.value}{" "}
+                      <span className="font-medium opacity-70">{s.label}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            </Reveal>
           </div>
 
-          {/* Visual mock */}
-          <div className={reverse ? "lg:order-1" : ""}>
+          {/* Visual mock — trượt vào từ phía đối diện */}
+          <Reveal
+            from={reverse ? "left" : "right"}
+            delay={120}
+            className={reverse ? "lg:order-1" : ""}
+          >
             <SpotlightVisual module={m} tone={t} />
-          </div>
+          </Reveal>
         </div>
       </article>
     </Reveal>
@@ -249,15 +264,21 @@ function SpotlightVisual({
       </div>
 
       <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] p-6 shadow-2xl ring-1 ring-black/5 sm:p-8">
-        {/* Ảnh nền thật (ken burns nhẹ khi hover) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={m.image}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
+        {/* Ảnh nền thật — trôi parallax theo cuộn + phóng nhẹ khi hover.
+            Lớp cao hơn khung (124%) để dịch không lộ mép. */}
+        <Parallax
+          speed={36}
+          className="absolute inset-x-0 -top-[12%] h-[124%]"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={m.image}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        </Parallax>
         {/* Lớp phủ màu theo tông + hoạ tiết chấm */}
         <div
           className={"absolute inset-0 bg-gradient-to-br " + tone.overlay}
