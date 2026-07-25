@@ -92,7 +92,8 @@ export function CrmView() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      <div className="mx-auto max-w-7xl space-y-4 px-4 py-6 lg:px-8">
+      {/* Màn làm việc kanban -> dùng khung rộng hơn các trang nội dung */}
+      <div className="mx-auto max-w-screen-2xl space-y-5 px-4 py-6 lg:px-8">
         {/* ---------- Hero: ảnh nền + gradient + số liệu kính mờ ---------- */}
         <section className="relative overflow-hidden rounded-2xl text-white shadow-md">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -104,24 +105,24 @@ export function CrmView() {
           <div className="absolute inset-0 bg-gradient-to-r from-realtor-700/95 via-realtor-600/85 to-realtor-500/50" />
           <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
 
-          <div className="relative flex flex-wrap items-center gap-4 px-5 py-6 sm:px-7">
+          <div className="relative flex flex-wrap items-center gap-4 px-6 py-8 sm:px-8">
             <div className="min-w-0 flex-1 animate-fade-up">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide backdrop-blur">
-                <Icon name="BarChart3" className="h-3.5 w-3.5" />
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide backdrop-blur">
+                <Icon name="BarChart3" className="h-4 w-4" />
                 Không gian làm việc của môi giới
               </p>
-              <h1 className="mt-2.5 text-2xl font-bold sm:text-3xl">Khách hàng (CRM)</h1>
-              <p className="mt-1 text-sm text-white/80">
+              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Khách hàng (CRM)</h1>
+              <p className="mt-1.5 text-base text-white/80">
                 Quản lý khách theo phễu bán hàng — không để lọt khách nào.
               </p>
             </div>
 
-            <div className="flex animate-fade-up flex-col items-stretch gap-2.5 sm:items-end">
+            <div className="flex animate-fade-up flex-col items-stretch gap-3 sm:items-end">
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-realtor-600 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-[15px] font-bold text-realtor-600 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <Icon name="UserPlus" className="h-4 w-4" />
+                <Icon name="UserPlus" className="h-[18px] w-[18px]" />
                 Thêm khách
               </button>
               <div className="flex gap-2">
@@ -142,18 +143,18 @@ export function CrmView() {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={
-                  "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors " +
+                  "inline-flex items-center gap-2 rounded-full px-5 py-2 text-[15px] font-semibold transition-colors " +
                   (tab === t.id
                     ? "bg-white text-realtor-600 shadow-sm"
                     : "text-slate-500 hover:text-slate-700")
                 }
               >
-                <Icon name={t.icon} className="h-4 w-4" />
+                <Icon name={t.icon} className="h-[18px] w-[18px]" />
                 {t.label}
                 {t.badge ? (
                   <span
                     className={
-                      "min-w-[18px] rounded-full px-1 text-center text-[11px] font-bold " +
+                      "min-w-[20px] rounded-full px-1 text-center text-xs font-bold " +
                       (tab === t.id ? "bg-amber-100 text-amber-700" : "bg-amber-400 text-white")
                     }
                   >
@@ -165,13 +166,13 @@ export function CrmView() {
           </div>
 
           {tab !== "today" && (
-            <div className="relative w-full min-w-[180px] sm:w-72">
-              <Icon name="Search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="relative w-full min-w-[180px] sm:w-80">
+              <Icon name="Search" className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Tìm tên, BĐS, số điện thoại..."
-                className="w-full rounded-full border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-realtor-500 focus:outline-none focus:ring-2 focus:ring-realtor-500/20"
+                className="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-[15px] text-slate-800 placeholder:text-slate-400 focus:border-realtor-500 focus:outline-none focus:ring-2 focus:ring-realtor-500/20"
               />
             </div>
           )}
@@ -180,8 +181,8 @@ export function CrmView() {
         {/* ---------- Nội dung theo tab ---------- */}
         {tab === "pipeline" && (
           <>
-            <p className="flex items-center gap-1.5 text-[11px] text-slate-400">
-              <Icon name="Move" className="h-3 w-3" />
+            <p className="flex items-center gap-1.5 text-xs text-slate-400">
+              <Icon name="Move" className="h-3.5 w-3.5" />
               Kéo thẻ sang cột khác để chuyển giai đoạn · bấm thẻ để mở hồ sơ
             </p>
             <PipelineBoard customers={filtered} onOpen={setOpenId} onMove={moveStage} />
@@ -221,24 +222,41 @@ function TodayList({
     );
   }
   return (
-    <div className="mx-auto max-w-3xl space-y-2.5">
+    <div className="grid gap-3 lg:grid-cols-2">
       {tasks.map((c, i) => (
         <button
           key={c.id}
           type="button"
           onClick={() => onOpen(c.id)}
           style={{ animationDelay: `${i * 60}ms` }}
-          className="flex w-full animate-fade-up items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md"
+          className="flex animate-fade-up items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md"
         >
-          <Avatar c={c} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={crmAvatar(c)}
+            alt={c.name}
+            className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-amber-100"
+          />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-slate-800">{c.name}</p>
-            <p className="truncate text-xs text-slate-500">{c.nextAction}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-[15px] font-bold text-slate-800">{c.name}</p>
+              <span className={"rounded-full px-2 py-0.5 text-[10px] font-semibold " + STAGE_CHIP[c.stage]}>
+                {STAGE_LABEL[c.stage]}
+              </span>
+            </div>
+            <p className="mt-0.5 truncate text-sm font-medium text-amber-700">
+              {c.nextAction}
+            </p>
+            <p className="mt-0.5 truncate text-xs text-slate-400">
+              {c.property} · {budgetLabel(c)}
+            </p>
           </div>
-          <span className="shrink-0 whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-700">
-            {c.nextDate.replace("Hôm nay, ", "")}
-          </span>
-          <Icon name="ChevronRight" className="h-4 w-4 shrink-0 text-slate-300" />
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="whitespace-nowrap rounded-xl bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-700">
+              {c.nextDate.replace("Hôm nay, ", "")}
+            </span>
+            <Icon name="ChevronRight" className="h-4 w-4 text-slate-300" />
+          </div>
         </button>
       ))}
     </div>
@@ -267,7 +285,7 @@ function PipelineBoard({
 
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-2 lg:mx-0 lg:px-0">
-      <div className="flex min-w-[880px] gap-3 lg:min-w-0">
+      <div className="flex min-w-[960px] gap-4 lg:min-w-0">
         {CRM_STAGES.map((stage) => {
           const items = customers.filter((c) => c.stage === stage.id);
           const value = items
@@ -289,25 +307,25 @@ function PipelineBoard({
                 setOver(null);
               }}
               className={
-                "flex-1 rounded-xl p-2 transition-colors " +
+                "flex-1 rounded-xl p-3 transition-colors " +
                 (isOver
                   ? "bg-realtor-50 ring-2 ring-realtor-300"
                   : "bg-slate-100/70")
               }
             >
-              <div className={"mx-1 mb-1.5 h-0.5 rounded-full " + stage.dot} />
-              <div className="flex items-center justify-between gap-2 px-1 pb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold text-slate-700">{stage.label}</span>
-                  <span className="rounded-full bg-white px-1.5 text-[11px] font-semibold text-slate-500">
+              <div className={"mx-1 mb-2 h-1 rounded-full " + stage.dot} />
+              <div className="flex items-center justify-between gap-2 px-1 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-bold text-slate-700">{stage.label}</span>
+                  <span className="rounded-full bg-white px-2 text-[13px] font-semibold text-slate-500">
                     {items.length}
                   </span>
                 </div>
                 {value > 0 && (
-                  <span className="text-[10px] font-semibold text-slate-400">{fmtTy(value)}</span>
+                  <span className="text-xs font-semibold text-slate-400">{fmtTy(value)}</span>
                 )}
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2.5">
                 {items.map((c, i) => (
                   <PipelineCard key={c.id} c={c} i={i} onOpen={onOpen} />
                 ))}
@@ -354,42 +372,42 @@ function PipelineCard({
       onClick={() => onOpen(c.id)}
       onKeyDown={(e) => e.key === "Enter" && onOpen(c.id)}
       style={{ animationDelay: `${(i % 8) * 40}ms` }}
-      className="group animate-fade-up cursor-grab rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm transition-all hover:border-realtor-300 hover:shadow-md active:cursor-grabbing"
+      className="group animate-fade-up cursor-grab rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all hover:border-realtor-300 hover:shadow-md active:cursor-grabbing"
     >
       {/* Dòng 1: khách + mức độ quan tâm */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={crmAvatar(c, 80)}
           alt={c.name}
-          className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+          className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
         />
-        <p className="min-w-0 flex-1 truncate text-[13px] font-bold text-slate-800">
+        <p className="min-w-0 flex-1 truncate text-[15px] font-bold text-slate-800">
           {c.name}
         </p>
         <span
           title={score.label}
-          className={"h-2 w-2 shrink-0 rounded-full " + SCORE_DOT[c.score]}
+          className={"h-3 w-3 shrink-0 rounded-full " + SCORE_DOT[c.score]}
         />
       </div>
 
       {/* Dòng 2: BĐS quan tâm */}
-      <p className="mt-1 truncate text-[11px] text-slate-500">{c.property}</p>
+      <p className="mt-2 truncate text-[13px] text-slate-500">{c.property}</p>
 
       {/* Dòng 3: giá trị + lịch/việc tiếp theo */}
-      <div className="mt-1 flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-bold text-realtor-ink">
+      <div className="mt-1.5 flex items-center justify-between gap-2">
+        <span className="truncate text-[15px] font-bold text-realtor-ink">
           {budgetLabel(c)}
-          <span className="ml-1 font-medium text-slate-400">
+          <span className="ml-1 text-[13px] font-medium text-slate-400">
             {DEMAND_META[c.demand].label}
           </span>
         </span>
         {c.today ? (
-          <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+          <span className="shrink-0 rounded-md bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">
             {c.nextDate.replace("Hôm nay, ", "")}
           </span>
         ) : (
-          <span className="shrink-0 text-[10px] text-slate-400">{c.nextDate}</span>
+          <span className="shrink-0 text-xs text-slate-400">{c.nextDate}</span>
         )}
       </div>
     </div>
@@ -684,9 +702,9 @@ function CustomerDetail({
 /** Chip số liệu kính mờ trên hero */
 function HeroStat({ value, label }: { value: string; label: string }) {
   return (
-    <span className="flex flex-col items-center rounded-xl bg-white/15 px-3 py-1.5 text-center backdrop-blur">
-      <b className="text-sm leading-tight">{value}</b>
-      <span className="text-[10px] text-white/75">{label}</span>
+    <span className="flex flex-col items-center rounded-xl bg-white/15 px-4 py-2 text-center backdrop-blur">
+      <b className="text-base leading-tight">{value}</b>
+      <span className="text-[11px] text-white/75">{label}</span>
     </span>
   );
 }

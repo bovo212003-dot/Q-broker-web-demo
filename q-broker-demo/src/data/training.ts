@@ -15,9 +15,67 @@ export const TRAINEE = {
   name: "Võ Hoàng Tuấn",
   id: "6777298914879370940",
   avatar:
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=70",
+    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=70",
   tier: "Bạc III",
   point: 18_250,
+};
+
+// ---- Xếp hạng & chuyên cần mỗi ngày (trang chủ Đào tạo) -----
+export const RANK_INFO = {
+  position: 159, // thứ hạng hiện tại trên bảng xếp hạng
+  nextTier: "Vàng I",
+  nextPoint: 20_000, // mốc điểm lên hạng kế tiếp
+  gapPoint: 120, // cần thêm bao nhiêu điểm để vượt hạng liền trên
+  gapRank: 158, // hạng liền trên
+};
+
+/** Bảng xếp hạng học viên (Top 100 — mock 9 người đầu).
+ *  Mini leaderboard trong thẻ dùng 3 người đầu; modal hiển thị đủ. */
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  tier: string;
+  points: number;
+  avatar: string;
+}
+
+export const LEADERBOARD: LeaderboardEntry[] = [
+  { rank: 1, name: "Trần Thảo Vy", tier: "Kim cương", points: 45_210, avatar: img("photo-1573497019940-1c28c88b4f3e") },
+  { rank: 2, name: "Lê Minh Quân", tier: "Bạch kim", points: 41_830, avatar: img("photo-1507003211169-0a1dd7228f2d") },
+  { rank: 3, name: "Phạm Hồng Ngọc", tier: "Bạch kim", points: 39_540, avatar: img("photo-1544005313-94ddf0286df2") },
+  { rank: 4, name: "Đỗ Văn Thành", tier: "Vàng I", points: 35_120, avatar: img("photo-1633332755192-727a05c4013d") },
+  { rank: 5, name: "Vũ Hải Yến", tier: "Vàng II", points: 33_480, avatar: img("photo-1580489944761-15a19d654956") },
+  { rank: 6, name: "Hoàng Văn Khang", tier: "Vàng II", points: 31_950, avatar: img("photo-1472099645785-5658abf4ff4e") },
+  { rank: 7, name: "Đặng Thu Trang", tier: "Vàng III", points: 29_210, avatar: img("photo-1438761681033-6461ffad8d80") },
+  { rank: 8, name: "Bùi Mai Anh", tier: "Vàng III", points: 27_640, avatar: img("photo-1534528741775-53994a69daeb") },
+  { rank: 9, name: "Ngô Đức Mạnh", tier: "Vàng III", points: 25_980, avatar: img("photo-1552374196-c4e7ffc6e126") },
+];
+
+export interface StreakDay {
+  day: number;
+  reward: string;
+  done: boolean;
+  gift?: boolean; // ngày có quà đặc biệt
+}
+
+export const STREAK = {
+  current: 2, // chuỗi ngày hiện tại
+  best: 2, // kỷ lục chuỗi tốt nhất
+  days: [
+    { day: 1, reward: "+10đ", done: true },
+    { day: 2, reward: "+10đ", done: true },
+    { day: 3, reward: "+50đ", done: false, gift: true },
+    { day: 4, reward: "+10đ", done: false },
+    { day: 5, reward: "+10đ", done: false },
+    { day: 6, reward: "+10đ", done: false },
+    { day: 7, reward: "+50đ", done: false, gift: true },
+  ] as StreakDay[],
+  milestones: [
+    { days: 3, reward: "+50đ" },
+    { days: 7, reward: "+150đ" },
+    { days: 15, reward: "+300đ" },
+    { days: 30, reward: "+700đ" },
+  ],
 };
 
 // ---- Dòng thông báo chạy (marquee) --------------------------
@@ -29,23 +87,40 @@ export const ANNOUNCEMENTS: string[] = [
 ];
 
 // ---- Lối tắt nhanh (Quick Actions) --------------------------
+// ---- Banner ảnh trong hero (cuộn ngang 3s) ------------------
+// Chỉ chứa ẢNH — sau này thay bằng ảnh quảng cáo/thông báo của công ty
+// (đặt file vào public/ rồi đổi image thành "/ten-anh.png").
+export interface HeroBannerSlide {
+  id: string;
+  image: string;
+  alt?: string;
+}
+
+export const HERO_BANNERS: HeroBannerSlide[] = [
+  { id: "hb1", image: img("photo-1521791136064-7986c2920216"), alt: "Banner 1" },
+  { id: "hb2", image: img("photo-1450101499163-c8848c66ca85"), alt: "Banner 2" },
+  { id: "hb3", image: img("photo-1554224155-6726b3ff858f"), alt: "Banner 3" },
+  { id: "hb4", image: img("photo-1523240795612-9a054b0db644"), alt: "Banner 4" },
+];
+
 export interface QuickAction {
   label: string;
   icon: string; // lucide-react
   href: string;
   tone: "rose" | "sky" | "pink" | "slate" | "flame" | "amber";
+  desc: string; // mô tả ngắn hiển thị trên tile
 }
 
 export const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Câu sai", icon: "XCircle", href: "/realtor/dao-tao/trac-nghiem", tone: "rose" },
-  { label: "Đánh dấu", icon: "Bookmark", href: "/realtor/dao-tao/trac-nghiem", tone: "sky" },
-  { label: "Bài học", icon: "BookOpen", href: "/realtor/dao-tao/chuyen-de", tone: "pink" },
-  { label: "Phiếu đăng ký", icon: "FileText", href: "/realtor/dao-tao", tone: "slate" },
-  { label: "Gói VIP", icon: "Crown", href: "/realtor/dao-tao", tone: "flame" },
-  { label: "Lịch sử", icon: "History", href: "/realtor/dao-tao/trac-nghiem", tone: "amber" },
-  { label: "Chuyên đề", icon: "Layers", href: "/realtor/dao-tao/chuyen-de", tone: "sky" },
-  { label: "Trắc nghiệm", icon: "ListChecks", href: "/realtor/dao-tao/trac-nghiem", tone: "flame" },
-  { label: "Tự luận", icon: "PenLine", href: "/realtor/dao-tao/tu-luan", tone: "pink" },
+  { label: "Câu sai", icon: "XCircle", href: "/realtor/dao-tao/trac-nghiem", tone: "rose", desc: "Ôn lại các câu đã làm sai" },
+  { label: "Đánh dấu", icon: "Bookmark", href: "/realtor/dao-tao/trac-nghiem", tone: "sky", desc: "Câu hỏi bạn đã lưu lại" },
+  { label: "Bài học", icon: "BookOpen", href: "/realtor/dao-tao/chuyen-de", tone: "pink", desc: "Tiếp tục bài đang học dở" },
+  { label: "Phiếu đăng ký", icon: "FileText", href: "/realtor/dao-tao", tone: "slate", desc: "Đăng ký kỳ thi sát hạch" },
+  { label: "Gói VIP", icon: "Crown", href: "/realtor/dao-tao", tone: "flame", desc: "Mở khoá toàn bộ đề thi" },
+  { label: "Lịch sử", icon: "History", href: "/realtor/dao-tao/trac-nghiem", tone: "amber", desc: "Xem lại các lần luyện đề" },
+  { label: "Chuyên đề", icon: "Layers", href: "/realtor/dao-tao/chuyen-de", tone: "sky", desc: "16 chuyên đề chuẩn theo khung chương trình môi giới BĐS" },
+  { label: "Trắc nghiệm", icon: "ListChecks", href: "/realtor/dao-tao/trac-nghiem", tone: "flame", desc: "Bộ đề tổng hợp — tự tạo đề luyện thi, chấm điểm tức thì" },
+  { label: "Tự luận", icon: "PenLine", href: "/realtor/dao-tao/tu-luan", tone: "pink", desc: "Kho câu hỏi tự luận kèm gợi ý" },
 ];
 
 // ---- Banner khuyến mại / tuyển dụng (carousel) --------------
