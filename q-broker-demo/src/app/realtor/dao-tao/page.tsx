@@ -1,12 +1,13 @@
 import { Icon } from "@/components/ui/Icon";
 import { TrainingHero } from "@/components/training/TrainingHero";
 import { AnnouncementBar } from "@/components/training/AnnouncementBar";
+import { TrainingProgress } from "@/components/training/TrainingProgress";
 import { QuickActions } from "@/components/training/QuickActions";
 import { CourseSection } from "@/components/training/CourseSection";
 import { resolveRole } from "@/lib/role";
 
-// TAB TRANG CHỦ — tổng hợp: thông báo (trên cùng), chào mừng, lối tắt, khoá học.
-// Đọc ?role= (như trang /realtor) để chào đúng tên theo role.
+// TAB TRANG CHỦ — tổng hợp: thông báo (trên cùng), chào mừng, xếp hạng &
+// chuyên cần, lối tắt, khoá học. Đọc ?role= để chào đúng tên theo role.
 export default function DaoTaoHomePage({
   searchParams,
 }: {
@@ -18,7 +19,10 @@ export default function DaoTaoHomePage({
     <div className="space-y-8">
       {/* Dòng thông báo đưa lên trên cùng */}
       <AnnouncementBar />
-      <TrainingHero name={name} />
+      <TrainingHero name={name} roleId={roleId} />
+
+      {/* Xếp hạng & chuyên cần mỗi ngày */}
+      <TrainingProgress />
 
       {/* Lối tắt nhanh */}
       <section>
