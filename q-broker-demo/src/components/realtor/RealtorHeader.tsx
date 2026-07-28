@@ -29,6 +29,7 @@ const NAV = [
   { label: "Dự án", href: "/realtor/du-an" },
   { label: "Chia sẻ giỏ hàng", href: "/realtor/chia-se-gio-hang" },
   { label: "Cần thuê - mua", href: "/realtor/can-thue-mua" },
+  { label: "Thế Chấp", href: "/realtor/the-chap" },
   { label: "Tuyển dụng", href: "/realtor/tuyen-dung" },
   { label: "Live stream", href: "/realtor/livestream" },
   { label: "Tin tức", href: "/realtor/tin-tuc" },
